@@ -1,0 +1,112 @@
+{{#partial "content"}}
+    {{#with user}}
+        <section>
+            <h3>Details for {{name}}</h3>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-bordered">
+                        <tbody>
+                        <tr>
+                            <th scope="row">ID</th>
+                            <td>{{userId}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Name</th>
+                            <td>
+                                {{#adminOrSelf ../sessionUser this}}
+                                    <form class="form-inline d-flex" method="post" action="/users/{{userId}}/update">
+                                        <label class="sr-only" for="name"><b>Full Name</b></label>
+                                        <input type="text" class="form-control flex-fill mr-2" id="name" name="name"
+                                               placeholder="Full name" maxlength="255"
+                                               value="{{name}}" required/>
+                                        <button class="btn btn-sm btn-primary" type="submit">Update</button>
+                                    </form>
+                                {{else}}
+                                    {{name}}
+                                {{/adminOrSelf}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Email</th>
+                            <td>{{email}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">User Type</th>
+                            <td>{{userType}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Authentication Mode</th>
+                            <td>{{authMode}}</td>
+                        </tr>
+                        {{#adminOrSelf ../sessionUser this}}
+                        <tr>
+                            <th scope="row">Password</th>
+                            <td>
+                                <a href="/users/{{userId}}/update/password" class="btn btn-sm btn-info">Change</a>
+                            </td>
+                        </tr>
+                        {{/adminOrSelf}}
+                        <tr>
+                            <td colspan="2">
+                                <span style="font-size: smaller">Created at {{created}} Last updated at: {{updated}}
+                                    .</span>
+                                {{#admin sessionUser}}
+                                <form class="form-inline confirmed-form float-right" method="post"
+                                      action="/users/{{userId}}/delete"
+                                      data-cnf-title="Delete User"
+                                      data-cnf-text="Are you sure that you want to delete the user {{name}}?">
+                                    <button type="submit" class="btn btn-sm btn-danger float-right">Delete
+                                    </button>
+                                </form>
+                                {{/admin}}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="idm-section">
+            <div class="row">
+                <div class="col">
+                    <table class="table table-bordered data-table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Service</th>
+                            <th scope="col">Role</th>
+                            {{#admin ../sessionUser}}
+                                <th scope="col" width="5%"></th>
+                            {{/admin}}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each services}}
+                            <tr>
+                                {{#with service}}
+                                    <td><a href="/services/{{serviceId}}">{{name}}</a></td>
+                                {{/with}}
+                                {{#with role}}
+                                    <td>{{displayName}}</td>
+                                {{/with}}
+                                {{#admin ../sessionUser}}
+                                    <td>
+                                        <form class="form-inline confirmed-form" method="post"
+                                              action="/roles/{{#with role}}{{serviceId}}/{{roleId}}{{/with}}/unmap/{{#with
+                                                      ../user}}{{userId}}{{/with}}"
+                                              data-cnf-title="Unamp user"
+                                              data-cnf-text="Are you sure that you want to unmap user from role?">
+                                            <button class="btn btn-sm btn-outline-danger">Unmap</button>
+                                        </form>
+                                    </td>
+                                {{/admin}}
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    {{/with}}
+{{/partial}}
+
+{{> common/base}}

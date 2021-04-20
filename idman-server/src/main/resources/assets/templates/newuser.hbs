@@ -1,0 +1,44 @@
+{{#partial "content"}}
+    <section class="container-fluid">
+        <div class="row justify-content-md-center">
+            <div class="col-sm-auto">
+                <h2>Create New Service</h2>
+            </div>
+        </div>
+    </section>
+    <div class="row justify-content-md-center">
+        <div class="col-sm-12 col-md-6">
+            <form class="form confirmed-form" action="/users/human" method="post" autocomplete="off"
+                  data-cnf-title="Create New User"
+                  data-cnf-text="Are you sure that you want to create a new user?">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" maxlength="255"
+                           placeholder="abc@abc.com" aria-describedby="emailHelp" required>
+                    <small id="emailHelp" class="form-text text-muted">This wil be used to login the
+                        user</small>
+                </div>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" pattern="[a-zA-Z0-9 ]+" class="form-control" id="name" name="name"
+                           maxlength="255" placeholder="Firstname Lastname" aria-describedby="nameHelp"
+                           required>
+                    <small id="nameHelp" class="form-text text-muted">Full name of the user</small>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password"
+                           pattern="(?=^.{12,255}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$"
+                           class="form-control" id="password" name="password" maxlength="255"
+                           aria-describedby="passwordHelp" required>
+                    <small id="passwordHelp" class="form-text text-muted">Password must be min 12
+                        characters, contain one lowercase, one upper-case one number and one special
+                        character</small>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+{{/partial}}
+
+{{> common/base}}

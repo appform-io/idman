@@ -1,0 +1,219 @@
+{{#partial "content"}}
+    <section>
+        {{#with service}}
+            <h3>Details for {{name}}</h3>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-bordered">
+                        <tbody>
+                        <tr>
+                            <th scope="row">ID</th>
+                            <td>{{serviceId}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Name</th>
+                            <td>{{name}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Description</th>
+                            <td>
+                                {{#admin ../sessionUser}}
+                                <form class="d-flex form-inline" method="post" action="/services/{{serviceId}}/update"
+                                      autocomplete="off">
+                                    <label class="sr-only" for="newServiceDescription">Description</label>
+                                    <input type="text" class="flex-fill form-control mb-2 mr-sm-2"
+                                           id="newServiceDescription"
+                                           name="newServiceDescription"
+                                           placeholder="A meaningful description" value="{{description}}"
+                                           maxlength="255" required>
+
+                                    <button type="submit" class="btn btn-primary mb-2 float-right">Update
+                                    </button>
+                                </form>
+                                {{else}}
+                                    {{description}}
+                                {{/admin}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span style="font-size: smaller">Created at {{created}} Last updated at: {{updated}}
+                                    .</span>
+                                {{#admin ../sessionUser}}
+                                <form class="form-inline confirmed-form float-right" method="post"
+                                      action="/services/{{serviceId}}/delete"
+                                      data-cnf-title="Delete Service"
+                                      data-cnf-text="Are you sure that you want to delete the service {{name}}?">
+                                    <button type="submit" class="btn btn-sm btn-danger float-right">Delete
+                                    </button>
+                                </form>
+                                {{/admin}}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {{/with}}
+    </section>
+
+    <section class="container-fluid">
+        <div class="row">
+            <div class="col-md col-sm-12 border m-1 p-3">
+                <div class="row">
+                    <div class="col">
+                        <h2>Roles</h2>
+                    </div>
+                </div>
+                {{#admin sessionUser}}
+                <div class="row">
+                    <div class="col">
+                        <form class="d-flex form-inline confirmed-form" method="post"
+                              action="/services/{{#with service}}{{serviceId}}{{/with}}/roles"
+                              data-cnf-title="Create Role"
+                              data-cnf-text="Are you sure that you want to create a new role for service {{name}}?"
+                              autocomplete="off">
+
+                            <label class="sr-only" for="newRoleName">Name</label>
+                            <input type="text" class="form-control mb-2 mr-sm-2" id="newRoleName" name="newRoleName"
+                                   placeholder="Role name" pattern="[a-zA-Z0-9\-_ ]+" maxlength="45" required>
+                            <label class="sr-only" for="newRoleDescription">Name</label>
+                            <input type="text" class="flex-fill form-control mb-2 mr-sm-2" id="newRoleDescription"
+                                   name="newRoleDescription"
+                                   placeholder="Role description" pattern="[a-zA-Z0-9\-_,. ]+" maxlength="255" required>
+                            <button type="submit" class="btn btn-primary mb-2">Create Role</button>
+                        </form>
+                    </div>
+                </div>
+                {{/admin}}
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col" width="20%">ID</th>
+                                <th scope="col" width="20%">Name</th>
+                                <th scope="col" width="50%">Description</th>
+                                {{#admin sessionUser}}
+                                <th scope="col" width="10%"></th>
+                                {{/admin}}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each roles}}
+                                <tr>
+                                    <td>{{roleId}}</td>
+                                    <td>{{displayName}}</td>
+                                    <td>
+
+                                        {{#admin sessionUser}}
+                                        <form action="/services/{{serviceId}}/roles/{{roleId}}/update" method="post"
+                                              autocomplete="off">
+                                            <label class="sr-only" for="roleDescription">Description</label>
+                                            <input type="text" id="roleDescription" name="roleDescription"
+                                                   placeholder="Role description"  pattern="[a-zA-Z0-9\-_,. ]+" maxlength="255"
+                                                   value="{{description}}"
+                                                   required/>
+                                            <button type="submit" class="btn btn-sm btn-link btn-role-update">Update</button>
+                                        </form>
+                                        {{else}}
+                                            {{description}}
+                                        {{/admin}}
+                                    </td>
+                                    {{#admin sessionUser}}
+                                    <td>
+                                        <form class="confirmed-form"
+                                              action="/services/{{serviceId}}/roles/{{roleId}}/delete" method="post"
+                                              data-cnf-title="Delete Role"
+                                              data-cnf-text="Are you sure that you want to delete the role {{name}}?">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger btn-role-delete">Delete</button>
+                                        </form>
+                                    </td>
+                                    {{/admin}}
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md col-sm-12 border m-1 p-3">
+                <div class="row">
+                    <div class="col">
+                        <h2>Mapped Users</h2>
+                    </div>
+                </div>
+                {{#admin sessionUser}}
+                <div class="row">
+                    <div class="col">
+                        <form class="d-flex form-inline confirmed-form" method="post"
+                              action="/roles/{{#with service}}{{serviceId}}{{/with}}/map"
+                              data-cnf-title="User Mapping"
+                              data-cnf-text="Are you sure that you want to map user to role?"
+                              autocomplete="off">
+
+                            <label class="sr-only" for="userId">User</label>
+                            <select class="flex-fill form-control mb-2 mr-sm-2" id="userId" name="userId" required>
+                                <option disabled selected value>Select User</option>
+                                {{#each users}}
+                                    <option value="{{userId}}">{{name}}</option>
+                                {{/each}}
+                            </select>
+                            <label class="sr-only" for="roleId">Name</label>
+                            <select class="form-control mb-2 mr-sm-2" id="roleId" name="roleId" required>
+                                <option disabled selected value>Select Role</option>
+                                {{#each roles}}
+                                    <option value="{{roleId}}">{{displayName}}</option>
+                                {{/each}}
+                            </select>
+                            <button type="submit" class="btn btn-primary mb-2">Map</button>
+                        </form>
+                    </div>
+                </div>
+                {{/admin}}
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-bordered data-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Role</th>
+                                {{#admin sessionUser}}
+                                <th scope="col" width="5%"></th>
+                                {{/admin}}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each mappedUsers}}
+                                <tr>
+                                    {{#with user}}
+                                        <td><a href="/users/{{userId}}">{{userId}}</a></td>
+                                        <td>{{name}}</td>
+                                    {{/with}}
+                                    {{#with role}}
+                                        <td>{{displayName}}</td>
+                                    {{/with}}
+                                    {{#admin sessionUser}}
+                                    <td>
+                                        <form class="form-inline confirmed-form" method="post" action="/roles/{{#with role}}{{serviceId}}/{{roleId}}{{/with}}/unmap/{{#with
+                                                user}}{{userId}}{{/with}}"
+                                              data-cnf-title="Unamp user"
+                                              data-cnf-text="Are you sure that you want to unmap user from role?">
+                                            <button class="btn btn-sm btn-outline-danger">Unmap</button>
+                                        </form>
+                                    </td>
+                                    {{/admin}}
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+{{/partial}}
+
+{{> common/base}}

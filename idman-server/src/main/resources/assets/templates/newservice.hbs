@@ -1,0 +1,38 @@
+{{#partial "content"}}
+<section class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class="col-sm-auto">
+            <h2>Create New Service</h2>
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="col-sm-12 col-md-6">
+            <form class="form confirmed-form" method="post" action="/services" autocomplete="off"
+                  data-cnf-title="Create Service"
+                  data-cnf-text="Are you sure that you want to create a new service?">
+                <div class="form-group">
+                    <label for="newServiceName">Name</label>
+                    <input type="text" class="form-control" id="newServiceName" name="newServiceName"
+                           placeholder="Service name" aria-describedby="newServiceNameHelp" maxlength="45"
+                           required>
+                    <small id="newServiceNameHelp" class="form-text text-muted">
+                        Human readable name for new service</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="newServiceDescription">Description</label>
+                    <input type="text" class="flex-fill form-control mb-2 mr-sm-2"
+                           id="newServiceDescription"
+                           name="newServiceDescription" aria-describedby="newServiceDescriptionHelp"
+                           placeholder="A meaningful description" maxlength="255" required>
+                    <small id="newServiceDescriptionHelp" class="form-text text-muted">
+                        A meaningful description</small>
+                </div>
+                <button type="submit" class="btn btn-primary float-right">Create Service</button>
+            </form>
+        </div>
+    </div>
+</section>
+{{/partial}}
+
+{{> common/base}}

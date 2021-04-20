@@ -1,0 +1,38 @@
+version: '2'
+services:
+   mariadb:
+    image: mariadb:10.5
+    restart: always
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: idman_db
+      MYSQL_USER: suser@%
+      MYSQL_PASSWORD: password
+   idman:
+    container_name: idman
+    build: .
+    restart: always
+    ports:
+    - "8080:8080"
+    - "8081:8081"
+    - "5005:5005"
+    volumes:
+    - /var/log/idman
+    environment:
+      LOG_LEVEL: DEBUG
+      DB_CONNECTION_STRING: jdbc:mariadb://mariadb/idman_db?createDatabaseIfNotExist=true
+      DB_USER: root
+      DB_PASSWORD: password
+      AUTH_ENABLED: "false"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      DOMAIN: "ps1infra.net"
+      SERVER_ENDPOINT: localhost:8080
+      SECURE_ENDPOINT: "false"
+      GOOGLE_DOMAIN: projectstepone.org
+      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    depends_on:
+      - mariadb

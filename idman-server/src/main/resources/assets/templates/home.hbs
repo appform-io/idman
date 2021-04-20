@@ -1,0 +1,86 @@
+{{#partial "content"}}
+    <div class="row">
+        <div class="col-sm-12 col-md-6">
+            <section class="idm-section">
+                <div class="row pb-2">
+                    <div class="col-sm-8">
+                        <h3>Services</h3>
+                    </div>
+                    {{#admin sessionUser}}
+                        <div class="col-sm-4">
+                            <a class="btn btn-sm btn-outline-primary float-right" href="/services/new">Create New
+                                Service</a>
+                        </div>
+                    {{/admin}}
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-bordered data-table">
+                            <thead>
+                            <tr>
+                                <th scope="col" width="10%">ID</th>
+                                <th scope="col" width="20%">Name</th>
+                                <th scope="col" width="45%">Description</th>
+                                <th scope="col" width="5%"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each services}}
+                                <tr>
+                                    <td>{{serviceId}}</td>
+                                    <td>{{name}}</td>
+                                    <td>{{description}}</td>
+                                    <td><a href="/services/{{serviceId}}">Details</a></td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <section class="idm-section">
+                <div class="row pb-2">
+                    <div class="col-sm-8">
+                        <h3>Users</h3>
+                    </div>
+                    {{#admin sessionUser}}
+                        <div class="col-sm-4">
+                            <a class="btn btn-sm btn-outline-primary float-right" href="/users/new">Create New User</a>
+                        </div>
+                    {{/admin}}
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-bordered data-table">
+                            <thead>
+                            <tr>
+                                <th scope="col" width="25%">ID</th>
+                                <th scope="col" width="25%">Name</th>
+                                <th scope="col" width="25%">Email</th>
+                                <th scope="col" width="10%">Type</th>
+                                <th scope="col" width="10%">Auth</th>
+                                <th scope="col" width="5%"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each users}}
+                                <tr>
+                                    <td>{{userId}}</td>
+                                    <td>{{name}}</td>
+                                    <td>{{email}}</td>
+                                    <td>{{userType}}</td>
+                                    <td>{{authMode}}</td>
+                                    <td><a href="/users/{{userId}}">Details</a></td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+            </section>
+        </div>
+    </div>
+{{/partial}}
+
+{{> common/base}}
