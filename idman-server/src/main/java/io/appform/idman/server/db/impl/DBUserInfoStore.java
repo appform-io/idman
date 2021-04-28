@@ -8,7 +8,6 @@ import io.appform.idman.server.db.UserInfoStore;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.dropwizard.hibernate.AbstractDAO;
-import lombok.SneakyThrows;
 import lombok.val;
 import lombok.var;
 import org.hibernate.SessionFactory;
@@ -30,7 +29,6 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
     }
 
     @Override
-    @SneakyThrows
     public Optional<StoredUser> create(String userId, String email, String name, UserType userType, AuthMode authMode) {
         var user = get(userId).orElse(null);
         if(null == user) {
@@ -51,7 +49,6 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
     }
 
     @Override
-    @SneakyThrows
     public Optional<StoredUser> get(String userId) {
         val cb = currentSession().getCriteriaBuilder();
         val cr = criteriaQuery();
@@ -68,7 +65,8 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
         val root = cr.from(StoredUser.class);
         return list(cr.select(root).where(cb.equal(root.get("email"), email)))
                 .stream()
-                .findAny();    }
+                .findAny();
+    }
 
     @Override
     public Optional<StoredUser> updateName(String userId, String name) {
