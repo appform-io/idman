@@ -40,7 +40,7 @@ class DBUserInfoStoreTest {
     }
 
     @Test
-    void testUserCRUD() {
+    void testUserCreateUndelete() {
         val createdUser = database.inTransaction(() -> userInfoStore.create("TU1",
                                                                             "test@test.com",
                                                                             "Test",
@@ -85,9 +85,24 @@ class DBUserInfoStoreTest {
 
         user = database.inTransaction(() -> userInfoStore.getByEmail("test@test.com")).orElse(null);
         assertEquals(updatedUser, user);
+    }
 
+    @Test
+    void testUpdate() {
+        val createdUser = database.inTransaction(() -> userInfoStore.create("TU1",
+                                                                            "test@test.com",
+                                                                            "Test",
+                                                                            UserType.HUMAN,
+                                                                            AuthMode.PASSWORD))
+                .orElse(null);
+        assertNotNull(createdUser);
+        assertEquals("TU1", createdUser.getUserId());
+        assertEquals("test@test.com", createdUser.getEmail());
+        assertEquals("Test", createdUser.getName());
+        assertEquals(UserType.HUMAN, createdUser.getUserType());
+        assertFalse(createdUser.isDeleted());
 
-        updatedUser = database.inTransaction(() -> userInfoStore.updateName("TU1", "Test 3")
+        var updatedUser = database.inTransaction(() -> userInfoStore.updateName("TU1", "Test 3")
                 .orElse(null));
         assertNotNull(updatedUser);
         assertEquals("Test 3", updatedUser.getName());
