@@ -71,8 +71,9 @@ public abstract class AuthenticationProvider {
         return sessionStore.get().create(
                 sessionId,
                 user.getUserId(),
-                SessionType.DYNAMIC,
-                new Date(new Date().getTime() + sessionDuration.toMilliseconds()));
+                authInfo.getServiceId(),
+                authInfo.getClientSessionId(),
+                SessionType.DYNAMIC, new Date(new Date().getTime() + sessionDuration.toMilliseconds()));
     }
 
     protected abstract AuthenticatorContext createContext(final AuthInfo authInfo);

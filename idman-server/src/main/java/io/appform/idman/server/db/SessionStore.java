@@ -11,7 +11,12 @@ import java.util.Optional;
  * For session management
  */
 public interface SessionStore {
-    Optional<StoredUserSession> create(String sessionId, String userId, SessionType type, Date expiry);
+    Optional<StoredUserSession> create(
+            String sessionId,
+            String userId,
+            String serviceId,
+            String clientSessionId, SessionType type,
+            Date expiry);
     Optional<StoredUserSession> get(String sessionId);
     List<StoredUserSession> sessionsForUser(String userId);
     boolean delete(String sessionId);

@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.auth.AuthenticationProviderRegistry;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.auth.impl.GoogleAuthInfo;
 import io.appform.idman.server.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -88,7 +87,8 @@ public class OAuth {
                 || !cookieState.getValue().equals(sessionId)) {
             return seeOther(cookieState);
         }
-        val token = authProvider.login(new GoogleAuthInfo(authCode), sessionId).orElse(null);
+        //val token = authProvider.login(new GoogleAuthInfo(authCode, a, clientSessionId), sessionId).orElse(null);
+        val token = "blah";
         if (null == token) {
             log.debug("No token returned by provider login.");
             return seeOther(cookieState);
@@ -96,7 +96,8 @@ public class OAuth {
         //TODO::SUBDOMAIN COOKIE
         return Response.seeOther(URI.create("/"))
                 .cookie(new NewCookie("token",
-                                      Utils.createJWT(token, authConfig.getJwt()),
+                                      Utils.createJWT(null, authConfig.getJwt()),
+//                                      Utils.createJWT(token, authConfig.getJwt()),
                                       "/",
                                       authConfig.getDomain(),
                                       Cookie.DEFAULT_VERSION,

@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  *
@@ -25,14 +27,17 @@ public class DBServiceStore extends AbstractDAO<StoredService> implements Servic
     }
 
     @Override
-    public Optional<StoredService> create(String name, String description) {
+    public Optional<StoredService> create(String name, String description, String callbackPrefix) {
         val id = Utils.readableId(name);
         var service = get(id).orElse(null);
+        val secret = UUID.randomUUID().toString();
         if (null == service) {
-            service = new StoredService(id, name, description);
+            service = new StoredService(id, name, description, callbackPrefix, secret);
         }
         else {
             service.setDescription(description);
+            service.setCallbackPrefix(callbackPrefix);
+            service.setSecret(secret);
             service.setDeleted(false);
         }
         return Optional.of(persist(service));
@@ -49,13 +54,18 @@ public class DBServiceStore extends AbstractDAO<StoredService> implements Servic
     }
 
     @Override
-    public Optional<StoredService> update(String serviceId, String description) {
-        val service = get(serviceId).orElse(null);
-        if (null == service) {
-            return Optional.empty();
-        }
-        service.setDescription(description);
-        return Optional.of(persist(service));
+    public Optional<StoredService> updateDescription(String serviceId, String description) {
+        return updateService(serviceId, service -> service.setDescription(description));
+    }
+
+    @Override
+    public Optional<StoredService> updateCallbackPrefix(String serviceId, String callbackPrefix) {
+        return updateService(serviceId, service -> service.setCallbackPrefix(callbackPrefix));
+    }
+
+    @Override
+    public Optional<StoredService> updateSecret(String serviceId) {
+        return updateService(serviceId, service -> service.setSecret(UUID.randomUUID().toString()));
     }
 
     @Override
@@ -90,6 +100,15 @@ public class DBServiceStore extends AbstractDAO<StoredService> implements Servic
             list(query.where(cb.equal(root.get("deleted"), false)));
         }
         return list(query);
+    }
+
+    private Optional<StoredService> updateService(String serviceId, Consumer<StoredService> handler) {
+        val service = get(serviceId).orElse(null);
+        if (null == service) {
+            return Optional.empty();
+        }
+        handler.accept(service);
+        return Optional.of(persist(service));
     }
 
 }

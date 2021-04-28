@@ -14,10 +14,10 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "services",
-    indexes = {
-        @Index(name = "idx_service", columnList = "service_id")
-    })
-@SQLDelete(sql="UPDATE services SET deleted = '1' WHERE id = ?")
+        indexes = {
+                @Index(name = "idx_service", columnList = "service_id")
+        })
+@SQLDelete(sql = "UPDATE services SET deleted = '1' WHERE id = ?")
 @Data
 @NoArgsConstructor
 public class StoredService {
@@ -34,6 +34,12 @@ public class StoredService {
     @Column
     private String description;
 
+    @Column(name = "callback_prefix")
+    private String callbackPrefix;
+
+    @Column(name = "secret")
+    private String secret;
+
     @Column
     private boolean deleted;
 
@@ -45,9 +51,11 @@ public class StoredService {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredService(String serviceId, String name, String description) {
+    public StoredService(String serviceId, String name, String description, String callbackPrefix, String secret) {
         this.serviceId = serviceId;
         this.name = name;
         this.description = description;
+        this.callbackPrefix = callbackPrefix;
+        this.secret = secret;
     }
 }

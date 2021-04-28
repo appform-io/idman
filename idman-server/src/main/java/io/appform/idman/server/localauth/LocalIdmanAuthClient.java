@@ -1,10 +1,17 @@
-package io.appform.idman.server.db;
+package io.appform.idman.server.localauth;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
+import io.appform.idman.server.db.ServiceStore;
+import io.appform.idman.server.db.ServiceUserRoleStore;
+import io.appform.idman.server.db.SessionStore;
+import io.appform.idman.server.db.UserInfoStore;
 import io.appform.idman.server.db.model.StoredServiceUserRole;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +26,12 @@ import org.jose4j.keys.HmacKey;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 /**
  *
  */
 @Slf4j
-public class LocalIdmanAuthClient implements IdManClient {
+public class LocalIdmanAuthClient extends IdManClient {
 
     private final SessionStore sessionStore;
     private final UserInfoStore userInfoStore;
@@ -34,7 +40,7 @@ public class LocalIdmanAuthClient implements IdManClient {
     private final AuthenticationConfig authConfig;
 
 
-    private final JwtConsumer jwtConsumer;
+    private final LoadingCache<String, JwtConsumer> jwtConsumers;
 
     @Inject
     public LocalIdmanAuthClient(
@@ -49,75 +55,74 @@ public class LocalIdmanAuthClient implements IdManClient {
         this.roleStore = roleStore;
         this.authConfig = authConfig;
 
-        this.jwtConsumer = buildConsumer(this.authConfig);
+        this.jwtConsumers = Caffeine.newBuilder()
+                .build(serviceId -> buildConsumer(authConfig, serviceId));
     }
 
     @Override
     @UnitOfWork
-    public Optional<IdmanUser> validate(String serviceId, String token) {
+    public IdmanUser validateImpl(String token, String serviceId) {
+        log.debug("Auth called");
         val service = serviceStore.get(serviceId).orElse(null);
         if (null == service || service.isDeleted()) {
-            log.warn("Invalid service {} for token {}", serviceId, token);
-            return Optional.empty();
+            log.warn("authentication_failed::invalid_service serviceId:{}", serviceId);
+            return null;
         }
-        log.debug("Auth called");
         final String userId;
         final String sessionId;
-        final String serviceName;
+        final String extServiceId;
         try {
+            val jwtConsumer = jwtConsumers.get(serviceId);
+            Preconditions.checkNotNull(jwtConsumer, "No consumer found for service" + serviceId);
+
             val jwtContext = jwtConsumer.process(token);
 
             val claims = jwtContext.getJwtClaims();
             userId = claims.getSubject();
             sessionId = claims.getJwtId();
-            serviceName = claims.getAudience().get(0);
+            extServiceId = claims.getAudience().get(0);
         }
         catch (MalformedClaimException | InvalidJwtException e) {
             log.error(String.format("exception in claim extraction %s", e.getMessage()), e);
-            return Optional.empty();
+            return null;
         }
         log.debug("authentication_requested userId:{} tokenId:{}", userId, sessionId);
+        if(!extServiceId.equalsIgnoreCase(serviceId)) {
+            log.warn("authentication_failed::service_id_mismatch userId:{} tokenId:{}", userId, sessionId);
+            return null;
+        }
+
         val session = sessionStore.get(sessionId).orElse(null);
         if (session == null || session.isDeleted()) {
             log.warn("authentication_failed::invalid_session userId:{} tokenId:{}", userId, sessionId);
-            return Optional.empty();
+            return null;
         }
         if (!session.getUserId().equals(userId)) {
             log.warn("authentication_failed::user_mismatch userId:{} tokenId:{}", userId, sessionId);
-            return Optional.empty();
+            return null;
         }
         val user = userInfoStore.get(session.getUserId()).orElse(null);
         if (null == user || user.isDeleted()) {
             log.warn("authentication_failed::invalid_user userId:{} tokenId:{}", userId, sessionId);
-            return Optional.empty();
+            return null;
         }
-        val expectedServiceName = authConfig.getJwt().getDomain();
-        if (!serviceName.equals(expectedServiceName)) {
-            log.warn("authentication_failed::invalid_audience audience provided: {} userid: {} expected: {}",
-                     serviceName, userId, expectedServiceName);
-            return Optional.empty();
-        }
-        val role = roleStore.getUserServiceRole(userId, serviceId)
+        val role = roleStore.getUserServiceRole(userId, extServiceId)
                 .map(StoredServiceUserRole::getRoleId)
                 .orElse(null);
         if (Strings.isNullOrEmpty(role)) {
-            log.error("No valid role found for user: {} in service: {}", userId, serviceId);
+            log.error("No valid role found for user: {} in service: {}", userId, extServiceId);
         }
         log.debug("authentication_success userId:{} tokenId:{}", userId, sessionId);
-        return Optional.of(new IdmanUser(sessionId,
-                                         new User(user.getUserId(),
-                                                           user.getName(),
-                                                           user.getUserType(),
-                                                           user.getAuthState().getAuthMode()),
-                                         role));
+        return new IdmanUser(sessionId,
+                             serviceId,
+                             new User(user.getUserId(),
+                                      user.getName(),
+                                      user.getUserType(),
+                                      user.getAuthState().getAuthMode()),
+                             role);
     }
 
-    @Override
-    public Optional<IdmanUser> getUserInfo(String serviceId, String userId) {
-        return Optional.empty();
-    }
-
-    private JwtConsumer buildConsumer(AuthenticationConfig authConfig) {
+    private JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {
         val jwtConfig = authConfig.getJwt();
         final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
         return new JwtConsumerBuilder()
@@ -128,7 +133,7 @@ public class LocalIdmanAuthClient implements IdManClient {
                 .setJwsAlgorithmConstraints(new AlgorithmConstraints(
                         AlgorithmConstraints.ConstraintType.WHITELIST,
                         AlgorithmIdentifiers.HMAC_SHA512))
-                .setExpectedAudience(jwtConfig.getDomain())
+                .setExpectedAudience(serviceId)
                 .build();
     }
 }

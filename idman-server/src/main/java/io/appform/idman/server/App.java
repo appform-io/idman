@@ -85,6 +85,8 @@ public class App extends Application<AppConfig> {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+//        environment.jersey().register(new IdmanLocalAuthDynamicFeature(environment, configuration.getAuthenticationCore(), new LocalIdmanAuthClient()));
     }
 
     public static void main(String[] args) throws Exception {

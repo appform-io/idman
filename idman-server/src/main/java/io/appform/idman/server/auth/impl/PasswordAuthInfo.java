@@ -16,11 +16,10 @@ import lombok.Value;
 public class PasswordAuthInfo extends AuthInfo {
 
     String email;
-
     String password;
 
-    public PasswordAuthInfo(String email, String password) {
-        super(AuthMode.PASSWORD);
+    public PasswordAuthInfo(String email, String password, String serviceId, String clientSessionId) {
+        super(AuthMode.PASSWORD, serviceId, clientSessionId);
         this.email = email;
         this.password = password;
     }

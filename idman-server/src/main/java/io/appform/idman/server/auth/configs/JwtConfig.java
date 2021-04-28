@@ -19,9 +19,6 @@ public class JwtConfig {
     private String issuerId;
 
     @NotEmpty
-    private String domain;
-
-    @NotEmpty
     private String authCachePolicy = "maximumSize=10000, expireAfterAccess=10m";
 
     @VisibleForTesting

@@ -11,7 +11,6 @@ import java.util.Set;
  */
 @Data
 public class IdmanAuthenticationConfig {
-    private boolean enabled;
 
     @NotEmpty
     private String serviceId;
@@ -22,4 +21,8 @@ public class IdmanAuthenticationConfig {
     private Set<String> allowedPaths = Collections.emptySet();
 
     private String cacheSpec = "maximumSize=10000, expireAfterAccess=10m";
+
+    String resourcePrefix;
+
+//    String redirectionEndpoint;
 }

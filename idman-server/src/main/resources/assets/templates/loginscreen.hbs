@@ -13,6 +13,9 @@
                   <input type="password" class="form-control" maxlength="255" id="password" name="password" required>
                   <small id="emailHelp">Enter your password</small>
               </div>
+              <input type="hidden" name="serviceId" value="{{serviceId}}">
+              <input type="hidden" name="redirect" value="{{redirect}}">
+              <input type="hidden" name="clientSessionId" value="{{clientSessionId}}">
               <button class="btn btn-lg btn-success" type="submit">Login</button>
           </form>
       </div>

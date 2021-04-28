@@ -52,7 +52,7 @@ public class Utils {
         claims.setJwtId(session.getSessionId());
         claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject(session.getUserId());
-        claims.setAudience(jwtConfig.getDomain());
+        claims.setAudience(session.getServiceId());
 
         if(null != session.getExpiry()) {
             claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));

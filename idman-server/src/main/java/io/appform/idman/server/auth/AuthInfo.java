@@ -9,9 +9,13 @@ import lombok.Data;
 @Data
 public abstract class AuthInfo {
     private final AuthMode mode;
+    private final String serviceId;
+    private final String clientSessionId;
 
-    protected AuthInfo(AuthMode mode) {
+    protected AuthInfo(AuthMode mode, String serviceId, String clientSessionId) {
         this.mode = mode;
+        this.serviceId = serviceId;
+        this.clientSessionId = clientSessionId;
     }
 
     public abstract <T> T accept(final AuthInfoVisitor<T> visitor);

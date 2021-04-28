@@ -17,8 +17,8 @@ public class GoogleAuthInfo extends AuthInfo {
 
     String authToken;
 
-    public GoogleAuthInfo(String authToken) {
-        super(AuthMode.GOOGLE_AUTH);
+    public GoogleAuthInfo(String authToken, String serviceId, String clientSessionId) {
+        super(AuthMode.GOOGLE_AUTH, serviceId, clientSessionId);
         this.authToken = authToken;
     }
 

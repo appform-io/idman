@@ -1,5 +1,6 @@
 package io.appform.idman.server.resources;
 
+import com.google.common.base.Strings;
 import io.appform.idman.authbundle.security.ServiceUserPrincipal;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
@@ -71,7 +72,8 @@ public class Home {
     @GET
     @UnitOfWork
     public Response home(
-            @Auth final ServiceUserPrincipal principal) {
+            @Auth final ServiceUserPrincipal principal,
+            @QueryParam("redirect") @Size(max = 4096) final String redirect) {
         val idmanUser = principal.getServiceUser();
         val userId = idmanUser.getUser().getId();
         val currentUser = userInfoStore.get().get(userId).orElse(null);
@@ -80,6 +82,9 @@ public class Home {
         }
         if (currentUser.getAuthState().getAuthState().equals(AuthState.EXPIRED)) {
             return redirectToPasswordChangePage(userId);
+        }
+        if(!Strings.isNullOrEmpty(redirect)) {
+            return Response.seeOther(URI.create(redirect)).build();
         }
         return Response.ok(
                 new HomeView(
@@ -95,8 +100,10 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response createService(
             @FormParam("newServiceName") @NotNull @Size(min = 1, max = 45) final String newServiceName,
-            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription) {
-        val service = serviceStore.get().create(newServiceName, newServiceDescription)
+            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription,
+            @FormParam("newServiceCallbackPrefix") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackPrefix) {
+        val service = serviceStore.get()
+                .create(newServiceName, newServiceDescription, newServiceCallbackPrefix)
                 .orElse(null);
         if (null == service) {
             return redirectToHome();
@@ -149,14 +156,43 @@ public class Home {
                 .build();
     }
 
-    @Path("/services/{serviceId}/update")
+    @Path("/services/{serviceId}/update/description")
     @POST
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
-    public Response updateService(
+    public Response updateServiceDescription(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription) {
-        val service = serviceStore.get().update(serviceId, newServiceDescription)
+        val service = serviceStore.get().updateDescription(serviceId, newServiceDescription)
+                .orElse(null);
+        if (null == service) {
+            return redirectToHome();
+        }
+        return redirectToServicePage(service.getServiceId());
+    }
+
+    @Path("/services/{serviceId}/update/callback")
+    @POST
+    @UnitOfWork
+    @RolesAllowed(IdmanRoles.ADMIN)
+    public Response updateServiceCallbackPrefix(
+            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
+            @FormParam("newServiceCallbackPrefix") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackPrefix) {
+        val service = serviceStore.get().updateCallbackPrefix(serviceId, newServiceCallbackPrefix)
+                .orElse(null);
+        if (null == service) {
+            return redirectToHome();
+        }
+        return redirectToServicePage(service.getServiceId());
+    }
+
+    @Path("/services/{serviceId}/update/secret")
+    @POST
+    @UnitOfWork
+    @RolesAllowed(IdmanRoles.ADMIN)
+    public Response updateServiceSecret(
+            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
+        val service = serviceStore.get().updateSecret(serviceId)
                 .orElse(null);
         if (null == service) {
             return redirectToHome();
@@ -396,7 +432,7 @@ public class Home {
         val status = passwordStore.get()
                 .update(userId, oldPassword, newPassword);
         log.info("Password change state for user {} is {}", userId, status);
-        if(!status) {
+        if (!status) {
             return redirectToPasswordChangePage(userId);
         }
         userstore.updateAuthState(userId, userAuthState -> {

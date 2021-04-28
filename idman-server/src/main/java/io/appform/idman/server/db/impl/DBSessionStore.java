@@ -27,9 +27,20 @@ public class DBSessionStore extends AbstractDAO<StoredUserSession> implements Se
 
     @Override
     @SneakyThrows
-    public Optional<StoredUserSession> create(String sessionId, String userId, SessionType type, Date expiry) {
+    public Optional<StoredUserSession> create(
+            String sessionId,
+            String userId,
+            String serviceId,
+            String clientSessionId,
+            SessionType type,
+            Date expiry) {
         try {
-            return Optional.of(persist(new StoredUserSession(sessionId, userId, type, expiry)));
+            return Optional.of(persist(new StoredUserSession(sessionId,
+                                                             userId,
+                                                             serviceId,
+                                                             clientSessionId,
+                                                             type,
+                                                             expiry)));
         }
         catch (ConstraintViolationException e) {
             return get(sessionId);
@@ -73,7 +84,7 @@ public class DBSessionStore extends AbstractDAO<StoredUserSession> implements Se
                 .stream()
                 .findAny()
                 .orElse(null);
-        if(null == session) {
+        if (null == session) {
             return false;
         }
         session.setDeleted(true);

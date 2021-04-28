@@ -17,7 +17,9 @@ import java.util.Date;
         name = "sessions",
         indexes = {
                 @Index(name = "idx_session", columnList = "session_id"),
-                @Index(name = "idx_user", columnList = "user_id")
+                @Index(name = "idx_user", columnList = "user_id"),
+                @Index(name = "idx_service_id", columnList = "service_id"),
+                @Index(name = "idx_service_client_session", columnList = "service_id, client_session_id")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "pk_id_pid", columnNames = {"id", "partition_id"})
@@ -35,6 +37,12 @@ public class StoredUserSession {
 
     @Column(name = "user_id", nullable = false)
     private String userId;
+
+    @Column(name = "service_id", nullable = false)
+    private String serviceId;
+
+    @Column(name = "client_session_id", nullable = false)
+    private String clientSessionId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "session_type", nullable = false)
@@ -57,9 +65,11 @@ public class StoredUserSession {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredUserSession(String sessionId, String userId, SessionType type, Date expiry) {
+    public StoredUserSession(String sessionId, String userId, String serviceId, String clientSessionId, SessionType type, Date expiry) {
         this.sessionId = sessionId;
         this.userId = userId;
+        this.serviceId = serviceId;
+        this.clientSessionId = clientSessionId;
         this.type = type;
         this.expiry = expiry;
         this.partitionId = Utils.weekOfYear();

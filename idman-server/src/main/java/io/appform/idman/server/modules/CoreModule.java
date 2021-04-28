@@ -15,6 +15,7 @@ import io.appform.idman.server.auth.impl.GoogleAuthenticationProvider;
 import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.impl.*;
+import io.appform.idman.server.localauth.LocalIdmanAuthClient;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;

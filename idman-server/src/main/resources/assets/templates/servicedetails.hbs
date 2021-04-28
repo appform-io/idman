@@ -18,7 +18,7 @@
                             <th scope="row">Description</th>
                             <td>
                                 {{#admin ../sessionUser}}
-                                <form class="d-flex form-inline" method="post" action="/services/{{serviceId}}/update"
+                                <form class="d-flex form-inline" method="post" action="/services/{{serviceId}}/update/description"
                                       autocomplete="off">
                                     <label class="sr-only" for="newServiceDescription">Description</label>
                                     <input type="text" class="flex-fill form-control mb-2 mr-sm-2"
@@ -32,6 +32,41 @@
                                 </form>
                                 {{else}}
                                     {{description}}
+                                {{/admin}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Callback prefix</th>
+                            <td>
+                                {{#admin ../sessionUser}}
+                                <form class="d-flex form-inline" method="post" action="/services/{{serviceId}}/update/callback"
+                                      autocomplete="off">
+                                    <label class="sr-only" for="newServiceCallbackPrefix">Description</label>
+                                    <input type="text" class="flex-fill form-control mb-2 mr-sm-2"
+                                           id="newServiceCallbackPrefix" name="newServiceCallbackPrefix"
+                                           placeholder="Prefix for callback URL. Example: https://mydomain.com" value="{{callbackPrefix}}"
+                                           maxlength="255" required>
+
+                                    <button type="submit" class="btn btn-primary mb-2 float-right">Update
+                                    </button>
+                                </form>
+                                {{else}}
+                                    {{callbackPrefix}}
+                                {{/admin}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Secret</th>
+                            <td class="d-flex">
+                                {{#admin ../sessionUser}}
+                                    <span class="flex-fill fs-6 text">{{secret}}</span>
+                                <form class="confirmed-form form-inline" method="post" action="/services/{{serviceId}}/update/secret"
+                                      data-cnf-title="Regenerate Secret"
+                                      data-cnf-text="Regenerating this will mean the older token will not work anymore. This is irreversible. Proceed?">
+                                    <button type="submit" class="btn btn-danger btn-sm mb-2 float-right">Regenerate</button>
+                                </form>
+                                {{else}}
+                                    Only admins can see a secret.
                                 {{/admin}}
                             </td>
                         </tr>
@@ -105,7 +140,6 @@
                                     <td>{{roleId}}</td>
                                     <td>{{displayName}}</td>
                                     <td>
-
                                         {{#admin sessionUser}}
                                         <form action="/services/{{serviceId}}/roles/{{roleId}}/update" method="post"
                                               autocomplete="off">

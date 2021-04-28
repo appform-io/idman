@@ -13,6 +13,7 @@
         <module>idman-server</module>
         <module>idman-auth-bundle</module>
         <module>idman-client</module>
+        <module>idman-auth-client-http</module>
     </modules>
 
     <properties>

@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.util.Optional;
 
@@ -20,28 +19,17 @@ import java.util.Optional;
 public class IdmanAuthenticator implements Authenticator<String, ServiceUserPrincipal> {
 
     private final IdmanAuthenticationConfig config;
-//    private final DefaultHandler defaultHandler;
-    private final Provider<IdManClient> idManClient;
+    private final IdManClient idManClient;
 
     @Inject
-    public IdmanAuthenticator(
-            IdmanAuthenticationConfig config,
-//            DefaultHandler defaultHandler,
-            Provider<IdManClient> idManClient) {
+    public IdmanAuthenticator(IdmanAuthenticationConfig config, IdManClient idManClient) {
         this.config = config;
-//        this.defaultHandler = defaultHandler;
         this.idManClient = idManClient;
     }
 
     @Override
     public Optional<ServiceUserPrincipal> authenticate(String token) {
-        if (!config.isEnabled()) {
-            log.debug("Authentication is disabled");
-//            return defaultHandler.defaultUser();
-            return Optional.empty();
-        }
-        log.debug("Auth called");
-        val serviceSessionUser = idManClient.get().validate(config.getServiceId(), token).orElse(null);
+        val serviceSessionUser = idManClient.validate(token, config.getServiceId()).orElse(null);
         if (serviceSessionUser == null) {
             log.warn("authentication_failed::invalid_session token:{}", token);
             return Optional.empty();
