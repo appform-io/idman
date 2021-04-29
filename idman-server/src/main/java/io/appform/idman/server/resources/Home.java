@@ -303,12 +303,7 @@ public class Home {
         if (null == user) {
             return redirectToHome();
         }
-        val status = passwordStore.get()
-                .set(userId, password);
-        if (!status) {
-            log.error("Could not set password for: {}", email);
-            userInfoStore.get().deleteUser(email);
-        }
+        passwordStore.get().set(userId, password);
         return redirectToUserPage(userId);
     }
 
@@ -460,8 +455,7 @@ public class Home {
         if (!newPassword.equals(newPasswordConf)) {
             log.warn("New passwords do not match for: {}", userId);
         }
-        val status = passwordStore.get().set(userId, newPassword);
-        log.info("Password change status for user {} is {}", userId, status);
+        passwordStore.get().set(userId, newPassword);
         userStore.updateAuthState(userId, userAuthState -> {
             userAuthState.setAuthState(AuthState.EXPIRED);
             userAuthState.setFailedAuthCount(0);

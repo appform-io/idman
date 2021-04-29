@@ -4,7 +4,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import io.appform.idman.server.db.PasswordStore;
 import io.appform.idman.server.db.model.StoredPassword;
 import io.dropwizard.hibernate.AbstractDAO;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
@@ -25,8 +24,7 @@ public class DBPasswordStore extends AbstractDAO<StoredPassword> implements Pass
     }
 
     @Override
-    @SneakyThrows
-    public boolean set(String userId, String password) {
+    public void set(String userId, String password) {
         val hashedPassword = hash(password);
         var pwd = passwordForUser(userId);
         if (null != pwd) {
@@ -36,7 +34,7 @@ public class DBPasswordStore extends AbstractDAO<StoredPassword> implements Pass
         else {
             pwd = new StoredPassword(userId, hashedPassword);
         }
-        return persist(pwd) != null;
+        persist(pwd);
     }
 
     @Override
@@ -62,7 +60,6 @@ public class DBPasswordStore extends AbstractDAO<StoredPassword> implements Pass
     }
 
     @Override
-    @SneakyThrows
     public boolean match(String userId, String password) {
         var pwd = passwordForUser(userId);
         if (null != pwd && !pwd.isDeleted()) {
@@ -94,7 +91,11 @@ public class DBPasswordStore extends AbstractDAO<StoredPassword> implements Pass
         if (null != pwd) {
             val updated = handler.apply(pwd);
             if (null != updated) {
-                return persist(updated) != null;
+                persist(updated);
+                return true;
+            }
+            else {
+                log.error("No valid password object returned. No thing will happen.");
             }
         }
         else {
