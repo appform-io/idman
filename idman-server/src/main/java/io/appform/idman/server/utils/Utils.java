@@ -32,8 +32,8 @@ public class Utils {
     public static String readableId(String value) {
         return value
                 .trim()
-                .replaceAll("[^a-zA-Z0-9 ]", "")
                 .replaceAll("\\p{Blank}", "_")
+                .replaceAll("[^a-zA-Z0-9_]", "")
                 .toUpperCase();
     }
 

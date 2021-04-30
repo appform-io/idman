@@ -29,13 +29,8 @@ public class DBRoleStore extends AbstractDAO<StoredRole> implements RoleStore {
         val roleId = Utils.readableId(serviceId + "_" + displayName);
         var role = get(serviceId, roleId).orElse(null);
         if (null != role) {
-            if (!role.isDeleted()) {
-                return Optional.of(role);
-            }
-            else {
-                role.setDescription(description);
-                role.setDeleted(false);
-            }
+            role.setDescription(description);
+            role.setDeleted(false);
         }
         else {
             role = new StoredRole(roleId, serviceId, displayName, description);
