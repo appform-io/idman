@@ -26,6 +26,7 @@ import org.jose4j.keys.HmacKey;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 /**
  *
@@ -93,12 +94,16 @@ public class LocalIdmanAuthClient extends IdManClient {
         }
 
         val session = sessionStore.get(sessionId).orElse(null);
-        if (session == null || session.isDeleted()) {
+        if (session == null) {
             log.warn("authentication_failed::invalid_session userId:{} tokenId:{}", userId, sessionId);
             return null;
         }
         if (!session.getUserId().equals(userId)) {
             log.warn("authentication_failed::user_mismatch userId:{} tokenId:{}", userId, sessionId);
+            return null;
+        }
+        if(session.getExpiry() != null && session.getExpiry().before(new Date())) {
+            log.warn("authentication_failed::session_expired userId:{} tokenId:{}", userId, sessionId);
             return null;
         }
         val user = userInfoStore.get(session.getUserId()).orElse(null);

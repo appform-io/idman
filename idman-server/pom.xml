@@ -15,14 +15,20 @@
 
     <properties>
         <guice.version>5.3.0</guice.version>
+        <guicey-server-pages.version>5.3.0-1</guicey-server-pages.version>
 <!--        <dropwizard.swagger.version>1.3.7-1</dropwizard.swagger.version>-->
 <!--        <dropwizard.riemann.version>1.3.12-1</dropwizard.riemann.version>-->
         <mariadb.driver.version>2.2.0</mariadb.driver.version>
         <function-metrics.version>1.0.6</function-metrics.version>
         <handlebars.version>4.1.2</handlebars.version>
+        <handlebars-guava-cache.version>4.0.6</handlebars-guava-cache.version>
         <jose4j.version>0.7.0</jose4j.version>
         <bcrypt.version>0.9.0</bcrypt.version>
+        <dropwizard-metrics-influxdb.version>1.3.2</dropwizard-metrics-influxdb.version>
 
+        <h2.version>1.4.200</h2.version>
+        <awaitility.version>4.0.3</awaitility.version>
+        <wiremock-jre8.version>2.26.3</wiremock-jre8.version>
     </properties>
 
     <dependencies>
@@ -65,7 +71,7 @@
         <dependency>
             <groupId>ru.vyarus.guicey</groupId>
             <artifactId>guicey-server-pages</artifactId>
-            <version>5.3.0-1</version>
+            <version>${guicey-server-pages.version}</version>
         </dependency>
 
 <!--
@@ -113,7 +119,7 @@
         <dependency>
             <groupId>com.izettle</groupId>
             <artifactId>dropwizard-metrics-influxdb</artifactId>
-            <version>1.3.2</version>
+            <version>${dropwizard-metrics-influxdb.version}</version>
         </dependency>
 
         <dependency>
@@ -134,7 +140,7 @@
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars-guava-cache</artifactId>
-            <version>4.0.6</version>
+            <version>${handlebars-guava-cache.version}</version>
         </dependency>
 
         <dependency>
@@ -156,7 +162,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.26.3</version>
+            <version>${wiremock-jre8.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -180,7 +186,14 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>${h2.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.awaitility/awaitility -->
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
 

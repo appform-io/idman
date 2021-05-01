@@ -8,9 +8,9 @@ import io.dropwizard.hibernate.AbstractDAO;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
 
 import javax.inject.Inject;
-import javax.validation.ConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,17 +43,18 @@ public class DBSessionStore extends AbstractDAO<StoredUserSession> implements Se
                                                              expiry)));
         }
         catch (ConstraintViolationException e) {
-            return get(sessionId);
+            throw new IllegalArgumentException("Session exists");
         }
     }
 
     @Override
-    @SneakyThrows
     public Optional<StoredUserSession> get(String sessionId) {
         val cb = currentSession().getCriteriaBuilder();
         val cr = criteriaQuery();
         val root = cr.from(StoredUserSession.class);
-        return list(cr.select(root).where(cb.equal(root.get("sessionId"), sessionId)))
+        return list(cr.select(root).where(
+                cb.and(cb.equal(root.get("sessionId"), sessionId),
+                       cb.equal(root.get(FieldNames.DELETED), false))))
                 .stream()
                 .findAny();
     }
@@ -69,10 +70,9 @@ public class DBSessionStore extends AbstractDAO<StoredUserSession> implements Se
                                             cb.equal(root.get(FieldNames.USER_ID), userId),
                                             cb.equal(root.get("deleted"), false),
                                             cb.or(
-                                                    cb.isNotNull(root.get("expiry")),
-                                                    cb.greaterThan(root.get("expiry").as(Date.class),
-                                                                   cb.literal(new Date()))
-                                                 ))).orderBy(cb.desc(root.get("updated"))));
+                                                    cb.isNull(root.get("expiry")),
+                                                    cb.greaterThan(root.get("expiry"), new Date()))))
+                            .orderBy(cb.desc(root.get("updated"))));
     }
 
     @Override
