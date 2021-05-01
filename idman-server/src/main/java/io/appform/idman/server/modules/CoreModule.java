@@ -38,7 +38,7 @@ public class CoreModule extends AbstractModule {
     protected void configure() {
         bind(ServiceStore.class).to(DBServiceStore.class);
         bind(RoleStore.class).to(DBRoleStore.class);
-        bind(ServiceUserRoleStore.class).to(DBServiceUserRoleStore.class);
+        bind(UserRoleStore.class).to(DBUserRoleStore.class);
         bind(PasswordStore.class).to(DBPasswordStore.class);
         bind(SessionStore.class).to(DBSessionStore.class);
         bind(UserInfoStore.class).to(DBUserInfoStore.class);
@@ -85,7 +85,7 @@ public class CoreModule extends AbstractModule {
             SessionStore sessionStore,
             UserInfoStore userInfoStore,
             ServiceStore serviceStore,
-            ServiceUserRoleStore roleStore,
+            UserRoleStore roleStore,
             AuthenticationConfig authConfig) {
 /*
         ExampleAuthenticator exampleAuthenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
@@ -98,7 +98,7 @@ public class CoreModule extends AbstractModule {
                                 SessionStore.class,
                                 UserInfoStore.class,
                                 ServiceStore.class,
-                                ServiceUserRoleStore.class,
+                                UserRoleStore.class,
                                 AuthenticationConfig.class
                         },
                         new Object[] {

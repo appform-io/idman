@@ -8,7 +8,7 @@ import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.db.model.StoredService;
-import io.appform.idman.server.db.model.StoredServiceUserRole;
+import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.HomeView;
@@ -53,7 +53,7 @@ public class Home {
     private final Provider<RoleStore> roleStore;
     private final Provider<UserInfoStore> userInfoStore;
     private final Provider<PasswordStore> passwordStore;
-    private final Provider<ServiceUserRoleStore> userRoleStore;
+    private final Provider<UserRoleStore> userRoleStore;
 
     @Inject
     public Home(
@@ -61,7 +61,7 @@ public class Home {
             Provider<RoleStore> roleStore,
             Provider<UserInfoStore> userInfoStore,
             Provider<PasswordStore> passwordStore,
-            Provider<ServiceUserRoleStore> userRoleStore) {
+            Provider<UserRoleStore> userRoleStore) {
         this.serviceStore = serviceStore;
         this.roleStore = roleStore;
         this.userInfoStore = userInfoStore;
@@ -83,7 +83,7 @@ public class Home {
         if (currentUser.getAuthState().getAuthState().equals(AuthState.EXPIRED)) {
             return redirectToPasswordChangePage(userId);
         }
-        if(!Strings.isNullOrEmpty(redirect)) {
+        if (!Strings.isNullOrEmpty(redirect)) {
             return Response.seeOther(URI.create(redirect)).build();
         }
         return Response.ok(
@@ -320,13 +320,13 @@ public class Home {
         val mappings = userRoleStore.get().getUserRoles(userId);
         val services = serviceStore.get()
                 .get(mappings.stream()
-                             .map(StoredServiceUserRole::getServiceId)
+                             .map(StoredUserRole::getServiceId)
                              .collect(Collectors.toSet()))
                 .stream()
                 .collect(Collectors.toMap(StoredService::getServiceId, Function.identity()));
         val roles = roleStore.get()
                 .get(mappings.stream()
-                             .map(StoredServiceUserRole::getRoleId)
+                             .map(StoredUserRole::getRoleId)
                              .collect(Collectors.toSet()))
                 .stream()
                 .collect(Collectors.toMap(StoredRole::getRoleId, Function.identity()));
@@ -468,6 +468,7 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response mapUserToRole(
+            @Auth final ServiceUserPrincipal sessionUser,
             @HeaderParam("Referer") final URI referer,
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
@@ -480,9 +481,9 @@ public class Home {
                 || user == null || user.isDeleted()) {
             return redirectToHome();
         }
-        val status = userRoleStore.get()
-                .mapUserToRole(userId, serviceId, roleId, "WEB");
-        log.info("Status for mapping user {} to role: {}/{}: {}", userId, serviceId, roleId, status);
+        userRoleStore.get()
+                .mapUserToRole(userId, serviceId, roleId, sessionUser.getServiceUser().getUser().getId());
+        log.info("Mapping user {} to role: {}/{} completed", userId, serviceId, roleId);
         if (null == referer || referer.toString().isEmpty()) {
             return redirectToUserPage(userId);
         }
@@ -506,8 +507,7 @@ public class Home {
                 || user == null || user.isDeleted()) {
             return redirectToHome();
         }
-        val status = userRoleStore.get()
-                .unmapUserFromRole(userId, serviceId, roleId);
+        val status = userRoleStore.get().unmapUserFromRole(userId, serviceId);
         log.info("Status for unmapping user {} from role: {}/{}: {}", userId, serviceId, roleId, status);
         if (null == referer || referer.toString().isEmpty()) {
             return redirectToUserPage(userId);

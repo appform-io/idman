@@ -22,7 +22,7 @@ import java.util.Date;
         })
 @Data
 @NoArgsConstructor
-public class StoredServiceUserRole {
+public class StoredUserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -33,7 +33,7 @@ public class StoredServiceUserRole {
     @Column(name = "service_id", nullable = false)
     private String serviceId;
 
-    @Column(name = "role_id", unique = true, nullable = false)
+    @Column(name = "role_id", nullable = false)
     private String roleId;
 
     @Column(name = "assigned_by")
@@ -50,7 +50,7 @@ public class StoredServiceUserRole {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredServiceUserRole(String userId, String serviceId, String roleId, String assignedBy) {
+    public StoredUserRole(String userId, String serviceId, String roleId, String assignedBy) {
         this.userId = userId;
         this.serviceId = serviceId;
         this.roleId = roleId;

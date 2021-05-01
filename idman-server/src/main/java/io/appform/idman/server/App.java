@@ -32,7 +32,7 @@ public class App extends Application<AppConfig> {
                                              StoredService.class,
                                              StoredRole.class,
                                              StoredRole.class,
-                                             StoredServiceUserRole.class,
+                                             StoredUserRole.class,
                                              StoredUser.class,
                                              StoredUserAuthState.class,
                                              StoredUserSession.class) {

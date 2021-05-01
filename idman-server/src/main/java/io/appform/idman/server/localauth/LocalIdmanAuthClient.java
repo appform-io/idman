@@ -9,10 +9,10 @@ import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.db.ServiceUserRoleStore;
+import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
-import io.appform.idman.server.db.model.StoredServiceUserRole;
+import io.appform.idman.server.db.model.StoredUserRole;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -36,7 +36,7 @@ public class LocalIdmanAuthClient extends IdManClient {
     private final SessionStore sessionStore;
     private final UserInfoStore userInfoStore;
     private final ServiceStore serviceStore;
-    private final ServiceUserRoleStore roleStore;
+    private final UserRoleStore roleStore;
     private final AuthenticationConfig authConfig;
 
 
@@ -47,7 +47,7 @@ public class LocalIdmanAuthClient extends IdManClient {
             SessionStore sessionStore,
             UserInfoStore userInfoStore,
             ServiceStore serviceStore,
-            ServiceUserRoleStore roleStore,
+            UserRoleStore roleStore,
             AuthenticationConfig authConfig) {
         this.sessionStore = sessionStore;
         this.userInfoStore = userInfoStore;
@@ -107,7 +107,7 @@ public class LocalIdmanAuthClient extends IdManClient {
             return null;
         }
         val role = roleStore.getUserServiceRole(userId, extServiceId)
-                .map(StoredServiceUserRole::getRoleId)
+                .map(StoredUserRole::getRoleId)
                 .orElse(null);
         if (Strings.isNullOrEmpty(role)) {
             log.error("No valid role found for user: {} in service: {}", userId, extServiceId);
