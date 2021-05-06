@@ -10,7 +10,8 @@ import lombok.Data;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(name = "GOOGLE_AUTH", value = GoogleAuthenticationProviderConfig.class)
+        @JsonSubTypes.Type(name = "GOOGLE_AUTH", value = GoogleAuthenticationProviderConfig.class),
+        @JsonSubTypes.Type(name = "CREDENTIAL", value = CredentialAuthenticationProviderConfig.class)
 })
 @Data
 public abstract class AuthenticationProviderConfig {
@@ -21,5 +22,5 @@ public abstract class AuthenticationProviderConfig {
         this.type = type;
     }
 
-    abstract public <T> T accept(AuthenticationProviderConfigVisitor<T> visitor);
+    public abstract <T> T accept(AuthenticationProviderConfigVisitor<T> visitor);
 }

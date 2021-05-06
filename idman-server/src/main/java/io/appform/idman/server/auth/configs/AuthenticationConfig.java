@@ -25,7 +25,7 @@ public class AuthenticationConfig {
 
     @NotNull
     @Valid
-    private GoogleAuthenticationProviderConfig provider = new GoogleAuthenticationProviderConfig();
+    private AuthenticationProviderConfig provider = new CredentialAuthenticationProviderConfig();
 
     private String domain;
 

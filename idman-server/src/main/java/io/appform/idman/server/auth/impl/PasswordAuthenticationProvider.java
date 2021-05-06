@@ -69,7 +69,7 @@ public class PasswordAuthenticationProvider extends AuthenticationProvider {
 
             @Override
             public PasswordAuthInfo visit(GoogleAuthInfo googleAuthInfo) {
-                throw new IllegalStateException("Google auth info passed to password authticator");
+                throw new IllegalArgumentException("Google auth info passed to password authenticator");
             }
         });
     }

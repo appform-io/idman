@@ -112,6 +112,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Google*.*</exclude>
+                        <exclude>**/*Gauth*.*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

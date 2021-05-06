@@ -1,10 +1,7 @@
 package io.appform.idman.server.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.auth.configs.AuthenticationProviderConfigVisitor;
-import io.appform.idman.server.auth.configs.CredentialAuthenticationProviderConfig;
-import io.appform.idman.server.auth.configs.GoogleAuthenticationProviderConfig;
+import io.appform.idman.server.auth.configs.*;
 import io.appform.idman.server.auth.impl.GoogleAuthenticationProvider;
 import io.appform.idman.server.db.PasswordStore;
 import io.appform.idman.server.db.SessionStore;
@@ -35,6 +32,10 @@ public class AuthenticationProviderFactory implements AuthenticationProviderConf
         this.userStore = userStore;
         this.sessionStore = sessionStore;
         this.passwordStore = passwordStore;
+    }
+
+    public AuthenticationProvider create(AuthenticationProviderConfig providerConfig) {
+        return providerConfig.accept(this);
     }
 
     @Override

@@ -10,7 +10,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AppConfig;
 import io.appform.idman.server.auth.AuthenticationProvider;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.auth.configs.GoogleAuthenticationProviderConfig;
+import io.appform.idman.server.auth.configs.AuthenticationProviderConfig;
 import io.appform.idman.server.auth.impl.GoogleAuthenticationProvider;
 import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.*;
@@ -59,7 +59,7 @@ public class CoreModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public GoogleAuthenticationProviderConfig gauthConfig(AuthenticationConfig authenticationConfig) {
+    public AuthenticationProviderConfig gauthConfig(AuthenticationConfig authenticationConfig) {
         return authenticationConfig.getProvider();
     }
 

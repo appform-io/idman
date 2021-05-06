@@ -17,6 +17,8 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AuthenticatorContextVisitorAdapter;
 import io.appform.idman.server.auth.*;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
+import io.appform.idman.server.auth.configs.AuthenticationProviderConfigVisitor;
+import io.appform.idman.server.auth.configs.CredentialAuthenticationProviderConfig;
 import io.appform.idman.server.auth.configs.GoogleAuthenticationProviderConfig;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
@@ -100,7 +102,20 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
                 .setRedirectUri(this.redirectionUrl)
 //                .setRedirectUri("http://localhost:8080/auth/google")
                 .build();
-        val googleAuthConfig = authConfig.getProvider();
+        val googleAuthConfig = authConfig.getProvider()
+                .accept(new AuthenticationProviderConfigVisitor<GoogleAuthenticationProviderConfig>() {
+                    @Override
+                    public GoogleAuthenticationProviderConfig visit(
+                            CredentialAuthenticationProviderConfig credentialAuthenticationProviderConfig) {
+                        throw new IllegalArgumentException("No config found for google auth");
+                    }
+
+                    @Override
+                    public GoogleAuthenticationProviderConfig visit(
+                            GoogleAuthenticationProviderConfig googleAuthenticationConfig) {
+                        return googleAuthenticationConfig;
+                    }
+                });
         return !Strings.isNullOrEmpty(googleAuthConfig.getLoginDomain())
                ? (url + "&hd=" + googleAuthConfig.getLoginDomain())
                : url;
