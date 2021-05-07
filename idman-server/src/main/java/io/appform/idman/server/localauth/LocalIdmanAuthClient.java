@@ -13,19 +13,15 @@ import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
 import io.appform.idman.server.db.model.StoredUserRole;
+import io.appform.idman.server.utils.Utils;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.jose4j.jwa.AlgorithmConstraints;
-import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
-import org.jose4j.jwt.consumer.JwtConsumerBuilder;
-import org.jose4j.keys.HmacKey;
 
 import javax.inject.Inject;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -56,8 +52,7 @@ public class LocalIdmanAuthClient extends IdManClient {
         this.roleStore = roleStore;
         this.authConfig = authConfig;
 
-        this.jwtConsumers = Caffeine.newBuilder()
-                .build(serviceId -> buildConsumer(authConfig, serviceId));
+        this.jwtConsumers = Caffeine.newBuilder().build(serviceId -> Utils.buildConsumer(authConfig, serviceId));
     }
 
     @Override
@@ -127,18 +122,4 @@ public class LocalIdmanAuthClient extends IdManClient {
                              role);
     }
 
-    private JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {
-        val jwtConfig = authConfig.getJwt();
-        final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
-        return new JwtConsumerBuilder()
-                .setRequireIssuedAt()
-                .setRequireSubject()
-                .setExpectedIssuer(jwtConfig.getIssuerId())
-                .setVerificationKey(new HmacKey(secretKey))
-                .setJwsAlgorithmConstraints(new AlgorithmConstraints(
-                        AlgorithmConstraints.ConstraintType.WHITELIST,
-                        AlgorithmIdentifiers.HMAC_SHA512))
-                .setExpectedAudience(serviceId)
-                .build();
-    }
 }

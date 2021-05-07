@@ -65,7 +65,13 @@ public class StoredUserSession {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredUserSession(String sessionId, String userId, String serviceId, String clientSessionId, SessionType type, Date expiry) {
+    public StoredUserSession(
+            String sessionId,
+            String userId,
+            String serviceId,
+            String clientSessionId,
+            SessionType type,
+            Date expiry) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.serviceId = serviceId;

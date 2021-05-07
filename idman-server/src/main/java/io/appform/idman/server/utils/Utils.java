@@ -8,10 +8,14 @@ import io.appform.idman.server.db.model.StoredUserSession;
 import io.dropwizard.util.Duration;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import lombok.val;
+import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 
 import java.nio.charset.StandardCharsets;
@@ -33,7 +37,8 @@ public class Utils {
         return value
                 .trim()
                 .replaceAll("\\p{Blank}", "_")
-                .replaceAll("[^a-zA-Z0-9_]", "")
+                .replaceAll("[\\p{Punct}&&[^_]]", "")
+                .replaceAll("_{2,}", "_")
                 .toUpperCase();
     }
 
@@ -77,5 +82,20 @@ public class Utils {
                 + "://"
                 + authenticationConfig.getServer()
                 + "/oauth/callback/" + authMode.name();
+    }
+
+    public static JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {
+        val jwtConfig = authConfig.getJwt();
+        final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
+        return new JwtConsumerBuilder()
+                .setRequireIssuedAt()
+                .setRequireSubject()
+                .setExpectedIssuer(jwtConfig.getIssuerId())
+                .setVerificationKey(new HmacKey(secretKey))
+                .setJwsAlgorithmConstraints(new AlgorithmConstraints(
+                        AlgorithmConstraints.ConstraintType.WHITELIST,
+                        AlgorithmIdentifiers.HMAC_SHA512))
+                .setExpectedAudience(serviceId)
+                .build();
     }
 }

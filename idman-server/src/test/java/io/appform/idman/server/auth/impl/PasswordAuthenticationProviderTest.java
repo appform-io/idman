@@ -5,7 +5,6 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.AuthenticationProviderFactory;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.PasswordStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
@@ -16,9 +15,9 @@ import io.appform.idman.server.db.model.StoredPassword;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.utils.TestingUtils;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import io.dropwizard.util.Duration;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,17 +59,7 @@ class PasswordAuthenticationProviderTest {
         Objects.requireNonNull(user);
         database.inTransaction(() -> passwordStore.set(user.getUserId(), "TESTPASSWORD"));
 
-        authenticationConfig = new AuthenticationConfig();
-        authenticationConfig.setDomain("testd");
-        authenticationConfig.setMode(AuthMode.PASSWORD);
-        authenticationConfig.setServer("localhost");
-        authenticationConfig.setSessionDuration(Duration.days(7));
-
-        val jwtConfig = new JwtConfig();
-        jwtConfig.setIssuerId("testissuer");
-        jwtConfig.setPrivateKey(
-                "bYdNUUyCqx8IuGNqhFYS27WizZrfupAmJS8I4mfj2Cjox9Nc04Oews9tJEiDTrJfopzKdjygi8SgXeopSe/rPYqEKfrAUw/Dn6wMVhE56S7/5DKAvYusA2fQRqxOrOosO1lERnArw15tkAf/z5QUUUXnKZZTiczNEebjs2OG5s94PGxtQzxtYsZ1q2oXoq4lKPTosPpwkRxeh8LQCweDGR80xgoM1+yDAoYIeg==");
-        authenticationConfig.setJwt(jwtConfig);
+        authenticationConfig = TestingUtils.passwordauthConfig();
     }
 
     @Test
