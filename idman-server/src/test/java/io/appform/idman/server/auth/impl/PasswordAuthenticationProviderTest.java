@@ -5,6 +5,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.AuthenticationProviderFactory;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
+import io.appform.idman.server.db.AuthState;
 import io.appform.idman.server.db.PasswordStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,7 +66,11 @@ class PasswordAuthenticationProviderTest {
 
     @Test
     void testPasswordAuth() {
-        val af = new AuthenticationProviderFactory(authenticationConfig, new ObjectMapper(), () -> userInfoStore, () -> sessionStore, () -> passwordStore);
+        val af = new AuthenticationProviderFactory(authenticationConfig,
+                                                   new ObjectMapper(),
+                                                   () -> userInfoStore,
+                                                   () -> sessionStore,
+                                                   () -> passwordStore);
 
         val authProvider = af.create(authenticationConfig.getProvider());
         val user = userInfoStore.get("UI").orElse(null);
@@ -83,7 +89,8 @@ class PasswordAuthenticationProviderTest {
             try {
                 authProvider.redirectionURL("xx");
                 fail("Should have thrown unsupported operation exception");
-            } catch (UnsupportedOperationException e) {
+            }
+            catch (UnsupportedOperationException e) {
                 assertEquals("This is not yet implemented", e.getMessage());
             }
         }
@@ -91,10 +98,93 @@ class PasswordAuthenticationProviderTest {
             try {
                 authProvider.login(new GoogleAuthInfo("XX", "xx", "xx"), "S1");
                 fail("Expected illegal argument exception");
-            } catch (IllegalArgumentException e) {
+            }
+            catch (IllegalArgumentException e) {
                 assertEquals("Google auth info passed to password authenticator", e.getMessage());
             }
 
+        }
+    }
+
+    @Test
+    void testAccountLock() {
+        val af = new AuthenticationProviderFactory(authenticationConfig,
+                                                   new ObjectMapper(),
+                                                   () -> userInfoStore,
+                                                   () -> sessionStore,
+                                                   () -> passwordStore);
+
+        val authProvider = af.create(authenticationConfig.getProvider());
+        val user = userInfoStore.get("UI").orElse(null);
+        {
+            assertNotNull(user);
+            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
+                    .orElse(null);
+            assertNotNull(resp);
+        }
+        IntStream.rangeClosed(1, 3)
+                .forEach(i -> {
+                    val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD1", "S1", "CS1"), "S1")
+                            .orElse(null);
+                    assertNull(resp);
+                });
+        val lockedUser = userInfoStore.getByEmail("u@u.t").orElse(null);
+        assertNotNull(lockedUser);
+        assertEquals(AuthState.LOCKED, lockedUser.getAuthState().getAuthState());
+
+        //Test with correct password
+        {
+            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
+                    .orElse(null);
+            assertNull(resp);
+        }
+        //Unlock
+        userInfoStore.updateAuthState("UI", authState -> {
+            authState.setAuthState(AuthState.ACTIVE);
+            authState.setFailedAuthCount(0);
+        });
+        {
+            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+                    .orElse(null);
+            assertNotNull(resp);
+        }
+    }
+
+    @Test
+    void testDeletedUser() {
+        val af = new AuthenticationProviderFactory(authenticationConfig,
+                                                   new ObjectMapper(),
+                                                   () -> userInfoStore,
+                                                   () -> sessionStore,
+                                                   () -> passwordStore);
+
+        val authProvider = af.create(authenticationConfig.getProvider());
+        {
+            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+                    .orElse(null);
+            assertNotNull(resp);
+        }
+        assertTrue(userInfoStore.deleteUser("UI"));
+        {
+            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+                    .orElse(null);
+            assertNull(resp);
+        }
+    }
+
+    @Test
+    void testInvalidUser() {
+        val af = new AuthenticationProviderFactory(authenticationConfig,
+                                                   new ObjectMapper(),
+                                                   () -> userInfoStore,
+                                                   () -> sessionStore,
+                                                   () -> passwordStore);
+
+        val authProvider = af.create(authenticationConfig.getProvider());
+        {
+            val resp = authProvider.login(new PasswordAuthInfo("u1@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+                    .orElse(null);
+            assertNull(resp);
         }
     }
 }

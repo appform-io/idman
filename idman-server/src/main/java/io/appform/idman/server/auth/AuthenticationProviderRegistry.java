@@ -19,11 +19,6 @@ public class AuthenticationProviderRegistry {
         this.registry = registry;
     }
 
-    public AuthenticationProviderRegistry register(AuthenticationProvider provider) {
-        registry.put(provider.getAuthMode(), provider);
-        return this;
-    }
-
     public Optional<AuthenticationProvider> provider(AuthMode mode) {
         return Optional.ofNullable(registry.get(mode));
     }

@@ -34,11 +34,9 @@ import java.util.UUID;
 @Template
 @Produces(MediaType.TEXT_HTML)
 public class Auth {
-    private static final String STATE_COOKIE_NAME = "oauth-state";
 
     private final AuthenticationConfig authenticationConfig;
     private final Provider<AuthenticationProviderRegistry> authenticators;
-    private final Provider<SessionStore> sessionStore;
     private final Provider<ServiceStore> serviceStore;
 
     @Inject
@@ -49,7 +47,6 @@ public class Auth {
             Provider<ServiceStore> serviceStore) {
         this.authenticationConfig = authenticationConfig;
         this.authenticators = authenticators;
-        this.sessionStore = sessionStore;
         this.serviceStore = serviceStore;
     }
 
