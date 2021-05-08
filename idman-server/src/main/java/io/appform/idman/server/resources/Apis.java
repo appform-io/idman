@@ -22,12 +22,12 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class Apis {
 
-    private final Provider<ServiceStore> serivceStore;
+    private final Provider<ServiceStore> serviceStore;
     private final Provider<LocalIdmanAuthClient> client;
 
     @Inject
     public Apis(Provider<ServiceStore> serviceStore, Provider<LocalIdmanAuthClient> client) {
-        this.serivceStore = serviceStore;
+        this.serviceStore = serviceStore;
         this.client = client;
     }
 
@@ -44,7 +44,7 @@ public class Apis {
                 || Strings.isNullOrEmpty(token)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        val service = serivceStore.get().get(serviceId).orElse(null);
+        val service = serviceStore.get().get(serviceId).orElse(null);
         if (null == service) {
             log.error("Invalid service id provided for token validation: {}", serviceId);
             return Response.status(Response.Status.BAD_REQUEST).build();
