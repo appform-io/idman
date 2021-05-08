@@ -116,6 +116,7 @@
                     <excludes>
                         <exclude>**/*Google*.*</exclude>
                         <exclude>**/*Gauth*.*</exclude>
+                        <exclude>**/modules/*.*</exclude>
                     </excludes>
                 </configuration>
             </plugin>

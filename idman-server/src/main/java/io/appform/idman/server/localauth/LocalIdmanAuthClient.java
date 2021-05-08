@@ -9,9 +9,9 @@ import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
+import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.utils.Utils;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -22,7 +22,6 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 
 import javax.inject.Inject;
-import java.util.Date;
 
 /**
  *
@@ -79,26 +78,13 @@ public class LocalIdmanAuthClient extends IdManClient {
             extServiceId = claims.getAudience().get(0);
         }
         catch (MalformedClaimException | InvalidJwtException e) {
-            log.error(String.format("exception in claim extraction %s", e.getMessage()), e);
-            return null;
-        }
-        log.debug("authentication_requested userId:{} tokenId:{}", userId, sessionId);
-        if(!extServiceId.equalsIgnoreCase(serviceId)) {
-            log.warn("authentication_failed::service_id_mismatch userId:{} tokenId:{}", userId, sessionId);
+            log.error("exception in claim extraction {}. Token: {}", e.getMessage(), token);
             return null;
         }
 
         val session = sessionStore.get(sessionId).orElse(null);
         if (session == null) {
             log.warn("authentication_failed::invalid_session userId:{} tokenId:{}", userId, sessionId);
-            return null;
-        }
-        if (!session.getUserId().equals(userId)) {
-            log.warn("authentication_failed::user_mismatch userId:{} tokenId:{}", userId, sessionId);
-            return null;
-        }
-        if(session.getExpiry() != null && session.getExpiry().before(new Date())) {
-            log.warn("authentication_failed::session_expired userId:{} tokenId:{}", userId, sessionId);
             return null;
         }
         val user = userInfoStore.get(session.getUserId()).orElse(null);

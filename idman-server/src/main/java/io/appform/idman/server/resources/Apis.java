@@ -26,8 +26,8 @@ public class Apis {
     private final Provider<LocalIdmanAuthClient> client;
 
     @Inject
-    public Apis(Provider<ServiceStore> serivceStore, Provider<LocalIdmanAuthClient> client) {
-        this.serivceStore = serivceStore;
+    public Apis(Provider<ServiceStore> serviceStore, Provider<LocalIdmanAuthClient> client) {
+        this.serivceStore = serviceStore;
         this.client = client;
     }
 

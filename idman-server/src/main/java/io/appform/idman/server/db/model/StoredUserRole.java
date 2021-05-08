@@ -17,7 +17,7 @@ import java.util.Date;
             @UniqueConstraint(name = "uk_service_user", columnNames = {"user_id", "service_id"})
         },
         indexes = {
-            @Index(name = "idx_service", columnList = "service_id"),
+            @Index(name = "idx_service_for_role", columnList = "service_id"),
             @Index(name = "idx_service_user", columnList = "service_id, user_id"),
         })
 @Data
