@@ -1,14 +1,14 @@
 package io.appform.idman.server.resources;
 
-import com.google.common.base.Strings;
-import io.appform.idman.server.localauth.LocalIdmanAuthClient;
 import io.appform.idman.server.db.ServiceStore;
+import io.appform.idman.server.localauth.LocalIdmanAuthClient;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -36,14 +36,9 @@ public class Apis {
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response validateToken(
-            @HeaderParam(HttpHeaders.AUTHORIZATION) final String authorization,
-            @PathParam("serviceId") final String serviceId,
-            @FormParam("token") final String token) {
-        if (Strings.isNullOrEmpty(authorization)
-                || Strings.isNullOrEmpty(serviceId)
-                || Strings.isNullOrEmpty(token)) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
+            @HeaderParam(HttpHeaders.AUTHORIZATION) @NotEmpty final String authorization,
+            @PathParam("serviceId") @NotEmpty final String serviceId,
+            @FormParam("token") @NotEmpty final String token) {
         val service = serviceStore.get().get(serviceId).orElse(null);
         if (null == service) {
             log.error("Invalid service id provided for token validation: {}", serviceId);
