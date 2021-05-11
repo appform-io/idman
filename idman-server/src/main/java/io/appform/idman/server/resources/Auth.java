@@ -6,7 +6,6 @@ import io.appform.idman.server.auth.AuthenticationProviderRegistry;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.impl.PasswordAuthInfo;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.LoginScreenView;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -43,7 +42,6 @@ public class Auth {
     public Auth(
             AuthenticationConfig authenticationConfig,
             Provider<AuthenticationProviderRegistry> authenticators,
-            Provider<SessionStore> sessionStore,
             Provider<ServiceStore> serviceStore) {
         this.authenticationConfig = authenticationConfig;
         this.authenticators = authenticators;

@@ -11,9 +11,10 @@
     <modules>
         <module>idman-model</module>
         <module>idman-server</module>
-        <module>idman-auth-bundle</module>
         <module>idman-client</module>
+        <module>idman-auth-components</module>
         <module>idman-auth-client-http</module>
+        <module>idman-auth-bundle</module>
     </modules>
 
     <properties>

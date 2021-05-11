@@ -1,15 +1,15 @@
 package io.appform.idman.server.resources;
 
 import com.google.common.base.Strings;
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
+import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.db.model.StoredService;
-import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.db.model.StoredUser;
+import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.HomeView;
 import io.appform.idman.server.views.PasswordChangeView;

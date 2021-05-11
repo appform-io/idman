@@ -1,8 +1,8 @@
-package io.appform.idman.authbundle.resource;
+package io.appform.idman.authcomponents.resource;
 
 import com.google.common.base.Strings;
-import io.appform.idman.authbundle.IdmanAuthenticationConfig;
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
+import io.appform.idman.client.IdmanClientConfig;
+import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -28,10 +28,10 @@ public class IdmanAuthHandler {
     private static final String IDMAN_TOKEN_COOKIE_NAME = "idman-token";
 
     private final IdManClient idManClient;
-    private final IdmanAuthenticationConfig config;
+    private final IdmanClientConfig config;
 
     @Inject
-    public IdmanAuthHandler(IdManClient idManClient, IdmanAuthenticationConfig config) {
+    public IdmanAuthHandler(IdManClient idManClient, IdmanClientConfig config) {
         this.idManClient = idManClient;
         this.config = config;
     }

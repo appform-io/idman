@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import io.appform.idman.authbundle.IdmanAuthenticationConfig;
+import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AppConfig;
@@ -64,7 +64,7 @@ public class CoreModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public IdmanAuthenticationConfig idmanAuthenticationConfig(AppConfig appConfig) {
+    public IdmanClientConfig idmanAuthenticationConfig(AppConfig appConfig) {
         return appConfig.getIdmanAuthConfig();
     }
 

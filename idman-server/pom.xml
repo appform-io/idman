@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>io.appform.idman</groupId>
-            <artifactId>idman-auth-bundle</artifactId>
+            <artifactId>idman-auth-components</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

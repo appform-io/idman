@@ -1,6 +1,5 @@
 package io.appform.idman.server.utils;
 
-import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.dropwizard.util.Duration;
@@ -15,7 +14,6 @@ public class TestingUtils {
     public static AuthenticationConfig passwordauthConfig() {
         val authenticationConfig = new AuthenticationConfig();
         authenticationConfig.setDomain("testd");
-        authenticationConfig.setMode(AuthMode.PASSWORD);
         authenticationConfig.setServer("localhost");
         authenticationConfig.setSessionDuration(Duration.days(7));
 

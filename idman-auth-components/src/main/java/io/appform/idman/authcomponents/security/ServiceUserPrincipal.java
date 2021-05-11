@@ -1,4 +1,4 @@
-package io.appform.idman.authbundle.security;
+package io.appform.idman.authcomponents.security;
 
 import io.appform.idman.model.IdmanUser;
 import lombok.Value;

@@ -1,7 +1,6 @@
-package io.appform.idman.authbundle.impl;
+package io.appform.idman.authcomponents.security;
 
-import io.appform.idman.authbundle.IdmanAuthenticationConfig;
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
+import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.client.IdManClient;
 import io.dropwizard.auth.Authenticator;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +17,11 @@ import java.util.Optional;
 @Singleton
 public class IdmanAuthenticator implements Authenticator<String, ServiceUserPrincipal> {
 
-    private final IdmanAuthenticationConfig config;
+    private final IdmanClientConfig config;
     private final IdManClient idManClient;
 
     @Inject
-    public IdmanAuthenticator(IdmanAuthenticationConfig config, IdManClient idManClient) {
+    public IdmanAuthenticator(IdmanClientConfig config, IdManClient idManClient) {
         this.config = config;
         this.idManClient = idManClient;
     }

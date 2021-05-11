@@ -1,4 +1,4 @@
-package io.appform.idman.authbundle;
+package io.appform.idman.client;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.util.Set;
  *
  */
 @Data
-public class IdmanAuthenticationConfig {
+public class IdmanClientConfig {
 
     @NotEmpty
     private String serviceId;

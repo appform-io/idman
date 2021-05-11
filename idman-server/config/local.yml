@@ -61,12 +61,6 @@ authenticationCore:
     issuerId: projectstepone
     privateKey: ${JWT_PRIVATE_KEY}
 
-  provider:
-    type: GOOGLE_AUTH
-    clientId: ${GOOGLE_CLIENT_ID}
-    clientSecret: ${GOOGLE_CLIENT_SECRET}
-    loginDomain: projectstepone
-
 idmanAuthConfig:
   serviceId: IDMAN
   authEndpoint: http://idman.test:8080

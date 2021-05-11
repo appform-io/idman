@@ -1,5 +1,6 @@
-package io.appform.idman.authbundle;
+package io.appform.idman.authcomponents.security;
 
+import io.appform.idman.client.IdmanClientConfig;
 import io.dropwizard.auth.UnauthorizedHandler;
 
 import javax.ws.rs.core.Response;
@@ -9,9 +10,9 @@ import java.net.URI;
  *
  */
 public class RedirectUnauthorizedHandler implements UnauthorizedHandler {
-    private final IdmanAuthenticationConfig authenticationConfig;
+    private final IdmanClientConfig authenticationConfig;
 
-    public RedirectUnauthorizedHandler(IdmanAuthenticationConfig authenticationConfig) {
+    public RedirectUnauthorizedHandler(IdmanClientConfig authenticationConfig) {
         this.authenticationConfig = authenticationConfig;
     }
 

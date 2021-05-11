@@ -62,7 +62,7 @@ public class App extends Application<AppConfig> {
         bootstrap.addBundle(handlebarsBundle);*/
         bootstrap.addBundle(
                 GuiceBundle.<AppConfig>builder()
-                        .enableAutoConfig("io.appform.idman.server.resources", "io.appform.idman.authbundle")
+                        .enableAutoConfig("io.appform.idman.server.resources", "io.appform.idman.authcomponents")
                         .modules(new CoreModule(hibernate))
                         .bundles(ServerPagesBundle.builder()
                                          .addViewRenderers(new HandlebarsViewRenderer())
@@ -86,7 +86,6 @@ public class App extends Application<AppConfig> {
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-//        environment.jersey().register(new IdmanLocalAuthDynamicFeature(environment, configuration.getAuthenticationCore(), new LocalIdmanAuthClient()));
     }
 
     public static void main(String[] args) throws Exception {

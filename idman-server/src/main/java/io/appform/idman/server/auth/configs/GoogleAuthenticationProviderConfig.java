@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
+import java.net.Proxy;
 
 /**
  *
@@ -21,6 +22,12 @@ public class GoogleAuthenticationProviderConfig extends AuthenticationProviderCo
     private String clientSecret;
 
     private String loginDomain;
+
+    private Proxy.Type proxyType;
+
+    private String proxyHost;
+
+    private int proxyPort;
 
     public GoogleAuthenticationProviderConfig() {
         super(AuthMode.GOOGLE_AUTH);

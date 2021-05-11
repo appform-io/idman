@@ -1,11 +1,13 @@
-package io.appform.idman.authbundle;
+package io.appform.idman.authcomponents;
 
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
-import io.appform.idman.authbundle.filters.UserAuthorizationFilter;
-import io.appform.idman.authbundle.impl.IdmanAuthenticator;
-import io.appform.idman.authbundle.impl.IdmanRoleAuthorizer;
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
+import io.appform.idman.authcomponents.filters.IdmanAuthFilter;
+import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
+import io.appform.idman.authcomponents.security.IdmanAuthenticator;
+import io.appform.idman.authcomponents.security.IdmanRoleAuthorizer;
+import io.appform.idman.authcomponents.security.RedirectUnauthorizedHandler;
 import io.appform.idman.client.IdManClient;
+import io.appform.idman.client.IdmanClientConfig;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.CachingAuthorizer;
@@ -25,9 +27,9 @@ public class IdmanDynamicFeature extends AuthDynamicFeature {
     @Inject
     public IdmanDynamicFeature(
             Environment environment,
-            IdmanAuthenticationConfig authConfig,
+            IdmanClientConfig authConfig,
             IdManClient idManClient) {
-        super(new UserAuthorizationFilter.Builder(authConfig)
+        super(new IdmanAuthFilter.Builder(authConfig)
                 .setAuthenticator(new IdmanAuthenticator(authConfig, idManClient))
                 .setAuthorizer(new CachingAuthorizer<>(environment.metrics(),
                                                        new IdmanRoleAuthorizer(),

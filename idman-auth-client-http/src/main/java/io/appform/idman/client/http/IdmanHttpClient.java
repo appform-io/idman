@@ -50,13 +50,7 @@ public class IdmanHttpClient extends IdManClient {
                 .setConnectTimeout(clientConfig.getConnectionTimeoutMs())
                 .build();
 
-        val url = String.format("%s://%s:%d/apis/auth/check/v1/%s",
-                                clientConfig.isInsecure()
-                                ? "http"
-                                : "https",
-                                clientConfig.getHost(),
-                                clientConfig.getPort(),
-                                clientConfig.getServiceId());
+        val url = String.format("%s/apis/auth/check/v1/%s", clientConfig.getAuthEndpoint(), clientConfig.getServiceId());
         log.info("Validation URL: {}", url);
         HttpPost post = new HttpPost(url);
         post.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + clientConfig.getAuthSecret());

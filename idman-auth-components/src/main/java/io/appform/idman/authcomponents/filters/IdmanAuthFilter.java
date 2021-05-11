@@ -1,9 +1,9 @@
-package io.appform.idman.authbundle.filters;
+package io.appform.idman.authcomponents.filters;
 
 
 import com.google.common.base.Strings;
-import io.appform.idman.authbundle.IdmanAuthenticationConfig;
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
+import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
+import io.appform.idman.client.IdmanClientConfig;
 import io.dropwizard.auth.AuthFilter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -23,12 +23,12 @@ import java.util.Optional;
  */
 @Priority(Priorities.AUTHENTICATION)
 @Slf4j
-public class UserAuthorizationFilter extends AuthFilter<String, ServiceUserPrincipal> {
+public class IdmanAuthFilter extends AuthFilter<String, ServiceUserPrincipal> {
 
-    private final IdmanAuthenticationConfig config;
+    private final IdmanClientConfig config;
 
 
-    public UserAuthorizationFilter(IdmanAuthenticationConfig config) {
+    public IdmanAuthFilter(IdmanClientConfig config) {
         this.config = config;
     }
 
@@ -83,15 +83,15 @@ public class UserAuthorizationFilter extends AuthFilter<String, ServiceUserPrinc
         return Optional.empty();
     }
 
-    public static class Builder extends AuthFilter.AuthFilterBuilder<String, ServiceUserPrincipal, UserAuthorizationFilter> {
-        private final IdmanAuthenticationConfig authenticationConfig;
+    public static class Builder extends AuthFilter.AuthFilterBuilder<String, ServiceUserPrincipal, IdmanAuthFilter> {
+        private final IdmanClientConfig authenticationConfig;
 
-        public Builder(IdmanAuthenticationConfig authenticationConfig) {
+        public Builder(IdmanClientConfig authenticationConfig) {
             this.authenticationConfig = authenticationConfig;
         }
 
-        protected UserAuthorizationFilter newInstance() {
-            return new UserAuthorizationFilter(authenticationConfig);
+        protected IdmanAuthFilter newInstance() {
+            return new IdmanAuthFilter(authenticationConfig);
         }
     }
 }

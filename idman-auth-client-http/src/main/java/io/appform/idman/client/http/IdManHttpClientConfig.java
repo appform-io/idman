@@ -1,6 +1,9 @@
 package io.appform.idman.client.http;
 
+import io.appform.idman.client.IdmanClientConfig;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -10,13 +13,9 @@ import javax.validation.constraints.NotEmpty;
  *
  */
 @Data
-public class IdManHttpClientConfig {
-    @NotEmpty
-    private String host;
-
-    @Min(0)
-    @Max(65535)
-    private int port;
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class IdManHttpClientConfig extends IdmanClientConfig {
 
     @Min(0)
     @Max(30_000)
@@ -29,11 +28,6 @@ public class IdManHttpClientConfig {
     @Min(5)
     @Max(128)
     private int maxClientConnections = 5;
-
-    private boolean insecure;
-
-    @NotEmpty
-    private String serviceId;
 
     @NotEmpty
     private String authSecret;

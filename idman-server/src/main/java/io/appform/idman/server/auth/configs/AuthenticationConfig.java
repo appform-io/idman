@@ -1,13 +1,11 @@
 package io.appform.idman.server.auth.configs;
 
-import io.appform.idman.model.AuthMode;
 import io.dropwizard.util.Duration;
 import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.net.Proxy;
 
 /**
  *
@@ -21,10 +19,6 @@ public class AuthenticationConfig {
 
     @NotNull
     @Valid
-    private AuthMode mode;
-
-    @NotNull
-    @Valid
     private AuthenticationProviderConfig provider = new CredentialAuthenticationProviderConfig();
 
     private String domain;
@@ -35,12 +29,6 @@ public class AuthenticationConfig {
 
     @NotNull
     private boolean secureEndpoint;
-
-    private Proxy.Type proxyType;
-
-    private String proxyHost;
-
-    private int proxyPort;
 
     @NotNull
     private Duration sessionDuration = Duration.days(30);

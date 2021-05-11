@@ -61,25 +61,25 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
         this.userInfoStore = userInfoStore;
         final NetHttpTransport.Builder transportBuilder = new NetHttpTransport.Builder();
         Proxy proxy = Proxy.NO_PROXY;
-        if (authConfig.getProxyType() != null) {
-            switch (authConfig.getProxyType()) {
+        if (googleAuthConfig.getProxyType() != null) {
+            switch (googleAuthConfig.getProxyType()) {
                 case DIRECT:
                     break;
                 case HTTP: {
-                    Preconditions.checkArgument(!Strings.isNullOrEmpty(authConfig.getProxyHost()));
+                    Preconditions.checkArgument(!Strings.isNullOrEmpty(googleAuthConfig.getProxyHost()));
                     proxy = new Proxy(Proxy.Type.HTTP,
-                                      new InetSocketAddress(authConfig.getProxyHost(),
-                                                            authConfig.getProxyPort()));
+                                      new InetSocketAddress(googleAuthConfig.getProxyHost(),
+                                                            googleAuthConfig.getProxyPort()));
                     break;
                 }
                 case SOCKS:
-                    Preconditions.checkArgument(!Strings.isNullOrEmpty(authConfig.getProxyHost()));
+                    Preconditions.checkArgument(!Strings.isNullOrEmpty(googleAuthConfig.getProxyHost()));
                     proxy = new Proxy(Proxy.Type.HTTP,
-                                      new InetSocketAddress(authConfig.getProxyHost(),
-                                                            authConfig.getProxyPort()));
+                                      new InetSocketAddress(googleAuthConfig.getProxyHost(),
+                                                            googleAuthConfig.getProxyPort()));
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected value: " + authConfig.getProxyType());
+                    throw new IllegalStateException("Unexpected value: " + googleAuthConfig.getProxyType());
             }
         }
         this.transport = transportBuilder.setProxy(proxy)

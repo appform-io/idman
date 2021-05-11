@@ -9,28 +9,27 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <jose4j.version>0.7.0</jose4j.version>
-    </properties>
-
-    <artifactId>idman-auth-bundle</artifactId>
+    <artifactId>idman-auth-components</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.appform.idman</groupId>
-            <artifactId>idman-auth-components</artifactId>
+            <artifactId>idman-client</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.appform.idman</groupId>
-            <artifactId>idman-auth-client-http</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
             <version>${dropwizard.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-auth</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+
     </dependencies>
+
 </project>

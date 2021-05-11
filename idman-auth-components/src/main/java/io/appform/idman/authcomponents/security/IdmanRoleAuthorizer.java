@@ -1,6 +1,5 @@
-package io.appform.idman.authbundle.impl;
+package io.appform.idman.authcomponents.security;
 
-import io.appform.idman.authbundle.security.ServiceUserPrincipal;
 import io.dropwizard.auth.Authorizer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
