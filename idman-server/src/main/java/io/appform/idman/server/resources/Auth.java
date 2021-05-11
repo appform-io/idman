@@ -55,14 +55,16 @@ public class Auth {
     public Response loginScreen(
             @PathParam("serviceId") @NotEmpty @Size(max = 255) final String serviceId,
             @QueryParam("redirect") @NotEmpty @Size(max = 4096) final String redirect,
-            @QueryParam("clientSessionId") @NotEmpty @Size(max = 255) final String clientSessionId) {
-        return Response.ok(new LoginScreenView(serviceId, clientSessionId, redirect)).build();
+            @QueryParam("clientSessionId") @NotEmpty @Size(max = 255) final String clientSessionId,
+            @QueryParam("error") @Size(max = 255) final String error) {
+        return Response.ok(new LoginScreenView(error, serviceId, clientSessionId, redirect)).build();
     }
 
     @Path("/login/password")
     @POST
     @UnitOfWork
     public Response passwordLogin(
+            @HeaderParam("Referer") final URI referer,
             @FormParam("email") @NotEmpty @Size(max = 255) final String email,
             @FormParam("password") @NotEmpty @Size(max = 255) final String password,
             @FormParam("redirect") @NotEmpty @Size(max = 4096) final String redirect,
@@ -72,8 +74,7 @@ public class Auth {
                       ? null
                       : serviceStore.get().get(serviceId).orElse(null);
         if(null == service || service.isDeleted()) {
-            //TODO::SHOW ERROR PAGE
-            return Response.seeOther(URI.create("/")).build();
+            return Response.seeOther(errorUri(referer, "Invalid service")).build();
         }
         val authenticationProvider = authenticators.get()
                 .provider(AuthMode.PASSWORD)
@@ -84,15 +85,8 @@ public class Auth {
                 UUID.randomUUID().toString())
                 .orElse(null);
         if (session == null) {
-            return Response.seeOther(URI.create("/")).build();
+            return Response.seeOther(errorUri(referer, "Invalid credentials")).build();
         }
-/*
-        val redirectUrl = !Strings.isNullOrEmpty(redirect)
-                                  && !Strings.isNullOrEmpty(service.getCallbackPrefix())
-                                  && (serviceId.equals("IDMAN") || redirect.startsWith(service.getCallbackPrefix()))
-                          ? redirect
-                          : "/";
-*/
         val token = Utils.createJWT(session, authenticationConfig.getJwt());
         val uri = UriBuilder.fromUri(service.getCallbackPrefix())
                 .queryParam("clientSessionId", session.getClientSessionId())
@@ -101,4 +95,9 @@ public class Auth {
         return Response.seeOther(uri).build();
     }
 
+    private URI errorUri(URI referrer, String error) {
+        val builder = UriBuilder.fromUri(referrer);
+        builder.replaceQueryParam("error", error);
+        return builder.build();
+    }
 }

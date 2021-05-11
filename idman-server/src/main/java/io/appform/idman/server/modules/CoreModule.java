@@ -11,7 +11,6 @@ import io.appform.idman.server.AppConfig;
 import io.appform.idman.server.auth.AuthenticationProvider;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.AuthenticationProviderConfig;
-import io.appform.idman.server.auth.impl.GoogleAuthenticationProvider;
 import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.impl.*;
@@ -72,11 +71,8 @@ public class CoreModule extends AbstractModule {
     @Provides
     @Singleton
     public Map<AuthMode, AuthenticationProvider> registry(
-            PasswordAuthenticationProvider credentialAuthenticationProvider,
-            GoogleAuthenticationProvider googleAuthenticationProvider) {
-        return ImmutableMap.of(
-                AuthMode.PASSWORD, credentialAuthenticationProvider,
-                AuthMode.GOOGLE_AUTH, googleAuthenticationProvider);
+            PasswordAuthenticationProvider credentialAuthenticationProvider) {
+        return ImmutableMap.of(AuthMode.PASSWORD, credentialAuthenticationProvider);
     }
 
     @Provides
@@ -87,10 +83,6 @@ public class CoreModule extends AbstractModule {
             ServiceStore serviceStore,
             UserRoleStore roleStore,
             AuthenticationConfig authConfig) {
-/*
-        ExampleAuthenticator exampleAuthenticator = new UnitOfWorkAwareProxyFactory(hibernateBundle)
-                .create(ExampleAuthenticator.class, SessionDao.class, dao);
-*/
 
         return new UnitOfWorkAwareProxyFactory(hibernate)
                 .create(LocalIdmanAuthClient.class,

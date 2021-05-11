@@ -76,4 +76,5 @@ idmanAuthConfig:
     - /css
     - /apis/idman
     - /apis/auth
+    - ui/auth/login
   resourcePrefix: "/apis"

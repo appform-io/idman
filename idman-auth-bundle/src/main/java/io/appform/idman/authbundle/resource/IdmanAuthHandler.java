@@ -37,20 +37,24 @@ public class IdmanAuthHandler {
     }
 
     @GET
-    public Response startAuth(@HeaderParam("Referer") final String referrer) {
-        val callbackPath = (!Strings.isNullOrEmpty(config.getResourcePrefix())
-                            ? config.getResourcePrefix()
-                            : "")
-                + "/idman/auth/callback";
+    public Response startAuth(@HeaderParam("Referer") final String referrer,
+                              @CookieParam(IDMAN_LOCAL_REDIRECT) final Cookie localRedirect,
+                              @QueryParam("error") final String error) {
+        val callbackPath = prexifedPath("/idman/auth/callback");
         val clientAuthSessionId = UUID.randomUUID().toString();
-        val idmanUri = UriBuilder.fromUri(config.getAuthEndpoint() + "/auth/login/" + config.getServiceId())
+        val uriBuilder = UriBuilder.fromUri(config.getAuthEndpoint() + "/auth/login/" + config.getServiceId())
                 .queryParam("redirect", callbackPath)
-                .queryParam("clientSessionId", clientAuthSessionId)
-                .build();
+                .queryParam("clientSessionId", clientAuthSessionId);
+        if(!Strings.isNullOrEmpty(error)) {
+            uriBuilder.queryParam("error", Strings.isNullOrEmpty(error) ? "" : error);
+        }
+        val idmanUri = uriBuilder.build();
+        val finalRedirect = null != localRedirect ? localRedirect.getValue() : referrer;
+        log.debug("Final Redirect: {}", finalRedirect);
         return Response.seeOther(idmanUri)
                 .cookie(new NewCookie(
                         IDMAN_LOCAL_REDIRECT,
-                        referrer,
+                        finalRedirect,
                         callbackPath,
                         null,
                         Cookie.DEFAULT_VERSION,
@@ -81,16 +85,17 @@ public class IdmanAuthHandler {
             @QueryParam("clientSessionId") final String clientSessionId,
             @QueryParam("code") final String token) {
         if (!cookieState.getValue().equals(clientSessionId)) {
-            return Response.seeOther(URI.create("/idman/auth")).build();
+            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
         }
         val sessionUser = idManClient.validate(token, config.getServiceId()).orElse(null);
         if (null == sessionUser) {
             log.error("Token validation failed. Token: {}", token);
-            return Response.seeOther(URI.create("/idman/auth")).build();
+            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
         }
         val localRedirectPath = Strings.isNullOrEmpty(localRedirect.getValue())
                                 ? "/"
                                 : localRedirect.getValue();
+        log.debug("Redirecting to: {}. Local redirect: {}", localRedirectPath, localRedirect.getValue());
         return Response.seeOther(URI.create(localRedirectPath))
                 .cookie(new NewCookie(IDMAN_TOKEN_COOKIE_NAME,
                                       token,
@@ -130,5 +135,11 @@ public class IdmanAuthHandler {
                                       true))
                 .build();
 
+    }
+
+    private String prexifedPath(String path) {
+        return (!Strings.isNullOrEmpty(config.getResourcePrefix())
+                ? config.getResourcePrefix()
+                : "") + path;
     }
 }

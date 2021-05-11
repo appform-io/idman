@@ -159,7 +159,6 @@ class ApisTest {
         val service = new StoredService("S1", "Test Service", "", "blah.com", "SECRET_TOKEN");
         doReturn(Optional.of(service)).when(serviceStore).get("S1");
 
-        val idmanUser = new IdmanUser("S1", service.getServiceId(), new User("U1", "TU", UserType.HUMAN, AuthMode.PASSWORD), "R");
         doReturn(Optional.empty())
                 .when(client)
                 .validate(anyString(), anyString());

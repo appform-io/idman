@@ -3,7 +3,6 @@ package io.appform.idman.server.views;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-import ru.vyarus.guicey.gsp.views.template.TemplateView;
 
 /**
  *
@@ -11,13 +10,14 @@ import ru.vyarus.guicey.gsp.views.template.TemplateView;
 @Value
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class LoginScreenView extends TemplateView {
+public class LoginScreenView extends BaseView {
+
     String serviceId;
     String clientSessionId;
     String redirect;
 
-    public LoginScreenView(String serviceId, String clientSessionId, String redirect) {
-        super("templates/loginscreen.hbs");
+    public LoginScreenView(String error, String serviceId, String clientSessionId, String redirect) {
+        super("templates/loginscreen.hbs", error);
         this.serviceId = serviceId;
         this.clientSessionId = clientSessionId;
         this.redirect = redirect;

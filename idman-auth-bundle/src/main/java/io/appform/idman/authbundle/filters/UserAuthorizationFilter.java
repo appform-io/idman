@@ -14,6 +14,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Optional;
 
@@ -40,22 +41,14 @@ public class UserAuthorizationFilter extends AuthFilter<String, ServiceUserPrinc
         }
         val jwt = getTokenFromCookieOrHeader(requestContext).orElse(null);
         if (!this.authenticate(requestContext, jwt, "FORM")) {
-/*            val uriBuilder = UriBuilder.fromUri(URI.create(config.getAuthEndpoint() + "/auth/login/" + config.getServiceId()));
-            val serviceId = config.getServiceId();
-            val referer = requestContext.getHeaders().getFirst("Referer");
-            log.info("Referer: {}", referer);
-            if(config.isServerMode()) {
-                uriBuilder.queryParam("redirect",
-                                      requestURI.replaceAll("^/apis", "")
-                                        .replaceAll("^/ui", ""));
+            val params = uriInfo.getQueryParameters(true);
+            val uriBuilder = UriBuilder.fromUri(URI.create(
+                    (!Strings.isNullOrEmpty(config.getResourcePrefix())
+                     ? config.getResourcePrefix() : "") + "/idman/auth"));
+            if(params.containsKey("error")) {
+                uriBuilder.queryParam("error", params.getFirst("error"));
             }
-            else {
-                uriBuilder.queryParam("redirect", config.getRedirectionEndpoint() + requestURI);
-            }
-            val uri = uriBuilder.build();*/
-            throw new WebApplicationException(Response.seeOther(
-                    URI.create((!Strings.isNullOrEmpty(config.getResourcePrefix()) ? config.getResourcePrefix() : "")
-                                       + "/idman/auth")).build());
+            throw new WebApplicationException(Response.seeOther(uriBuilder.build()).build());
         }
         log.debug("Auth successful");
     }

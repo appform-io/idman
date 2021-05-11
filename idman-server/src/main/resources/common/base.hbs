@@ -45,6 +45,13 @@
     </nav>
 </header>
 <main role="main" class="container-fluid">
+{{#if error}}
+    <section>
+        <div class="alert alert-danger" role="alert">
+            <b>Error:</b> {{error}}
+        </div>
+    </section>
+{{/if}}
 {{#block "content"}}
 
 {{/block}}
