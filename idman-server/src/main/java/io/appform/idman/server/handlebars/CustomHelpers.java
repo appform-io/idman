@@ -24,13 +24,13 @@ public class CustomHelpers {
     }
 
     public CharSequence admin(final IdmanUser user, final Options options) throws IOException {
-        return null != user && user.getRole().equals(IdmanRoles.ADMIN)
+        return null != user && null != user.getRole() && user.getRole().equals(IdmanRoles.ADMIN)
                 ? options.fn()
                : options.inverse();
     }
 
     public CharSequence adminOrSelf(final IdmanUser idmanUser, final StoredUser user, final Options options) throws IOException {
-        return ((null != idmanUser && idmanUser.getRole().equals(IdmanRoles.ADMIN))
+        return ((null != idmanUser && null != idmanUser.getRole() && idmanUser.getRole().equals(IdmanRoles.ADMIN))
                 || (null != user && null != idmanUser && user.getUserId().equals(idmanUser.getUser().getId())))
                 ? options.fn()
                : options.inverse();

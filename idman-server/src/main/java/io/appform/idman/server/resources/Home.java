@@ -11,10 +11,7 @@ import io.appform.idman.server.db.model.StoredService;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.utils.Utils;
-import io.appform.idman.server.views.HomeView;
-import io.appform.idman.server.views.PasswordChangeView;
-import io.appform.idman.server.views.ServiceDetailsView;
-import io.appform.idman.server.views.UserDetailsView;
+import io.appform.idman.server.views.*;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
@@ -285,7 +282,7 @@ public class Home {
     @GET
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response newUser() {
-        return Response.ok(new TemplateView("templates/newuser.hbs")).build();
+        return Response.ok(new NewUserView("/users/human")).build();
     }
 
     @Path("/users/human")
