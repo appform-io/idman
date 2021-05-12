@@ -15,7 +15,11 @@ import java.util.function.Consumer;
  */
 public interface UserInfoStore {
 
-    Optional<StoredUser> create(String userId, String email, String name, UserType userType, AuthMode authMode);
+    default Optional<StoredUser> create(String userId, String email, String name, UserType userType, AuthMode authMode) {
+        return create(userId, email, name, userType, authMode, true);
+    }
+
+    Optional<StoredUser> create(String userId, String email, String name, UserType userType, AuthMode authMode, boolean expire);
     Optional<StoredUser> get(String userId);
     Optional<StoredUser> getByEmail(String email);
     Optional<StoredUser> updateName(String userId, String name);

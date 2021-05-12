@@ -27,5 +27,6 @@ services:
       JWT_ISSUER_ID: idmanlocal
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+      PRESLEEP: 10
     depends_on:
       - mariadb

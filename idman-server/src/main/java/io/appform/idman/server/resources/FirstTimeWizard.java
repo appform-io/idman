@@ -89,7 +89,7 @@ public class FirstTimeWizard {
                 .orElse(null);
         Objects.requireNonNull(userRole);
         val user = userStore.get()
-                .create(UUID.randomUUID().toString(), email, name, UserType.HUMAN, AuthMode.PASSWORD)
+                .create(UUID.randomUUID().toString(), email, name, UserType.HUMAN, AuthMode.PASSWORD, false)
                 .orElse(null);
         Objects.requireNonNull(user);
         passwordStore.get()

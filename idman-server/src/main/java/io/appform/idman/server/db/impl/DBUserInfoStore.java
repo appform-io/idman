@@ -29,11 +29,18 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
     }
 
     @Override
-    public Optional<StoredUser> create(String userId, String email, String name, UserType userType, AuthMode authMode) {
+    public Optional<StoredUser> create(
+            String userId,
+            String email,
+            String name,
+            UserType userType,
+            AuthMode authMode,
+            boolean expire) {
         var user = get(userId).orElse(null);
-        if(null == user) {
+        val state = expire ? AuthState.EXPIRED : AuthState.ACTIVE;
+        if (null == user) {
             user = new StoredUser(userId, email, name, userType);
-            user.setAuthState(new StoredUserAuthState(authMode, AuthState.EXPIRED, 0, user));
+            user.setAuthState(new StoredUserAuthState(authMode, state, 0, user));
         }
         else {
             user.setName(name);
@@ -42,7 +49,7 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
 
             val authState = user.getAuthState();
             authState.setAuthMode(authMode);
-            authState.setAuthState(AuthState.EXPIRED);
+            authState.setAuthState(state);
             authState.setFailedAuthCount(0);
         }
         return Optional.of(persist(user));
@@ -76,7 +83,7 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
     @Override
     public Optional<StoredUser> updateAuthState(
             String userId, Consumer<StoredUserAuthState> handler) {
-        return updateUser(userId, user-> handler.accept(user.getAuthState()));
+        return updateUser(userId, user -> handler.accept(user.getAuthState()));
     }
 
 
@@ -93,7 +100,7 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
         val cb = currentSession().getCriteriaBuilder();
         val root = cr.from(StoredUser.class);
         val query = cr.select(root).orderBy(cb.asc(root.get(FieldNames.USER_ID)));
-        if(!includeDeleted) {
+        if (!includeDeleted) {
             return list(query.where(cb.equal(root.get(FieldNames.DELETED), false)));
         }
         return list(query);
@@ -110,7 +117,7 @@ public class DBUserInfoStore extends AbstractDAO<StoredUser> implements UserInfo
 
     private Optional<StoredUser> updateUser(String userId, Consumer<StoredUser> consumer) {
         var user = get(userId).orElse(null);
-        if(null == user) {
+        if (null == user) {
             return Optional.empty();
         }
         consumer.accept(user);
