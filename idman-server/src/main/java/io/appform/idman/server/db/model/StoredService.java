@@ -34,8 +34,8 @@ public class StoredService {
     @Column
     private String description;
 
-    @Column(name = "callback_prefix")
-    private String callbackPrefix;
+    @Column(name = "callback_url")
+    private String callbackUrl;
 
     @Column(name = "secret")
     private String secret;
@@ -51,11 +51,11 @@ public class StoredService {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredService(String serviceId, String name, String description, String callbackPrefix, String secret) {
+    public StoredService(String serviceId, String name, String description, String callbackUrl, String secret) {
         this.serviceId = serviceId;
         this.name = name;
         this.description = description;
-        this.callbackPrefix = callbackPrefix;
+        this.callbackUrl = callbackUrl;
         this.secret = secret;
     }
 }

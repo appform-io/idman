@@ -86,7 +86,7 @@ public class Auth {
             return Response.seeOther(errorUri(referer, "Invalid credentials")).build();
         }
         val token = Utils.createJWT(session, authenticationConfig.getJwt());
-        val uri = UriBuilder.fromUri(service.getCallbackPrefix())
+        val uri = UriBuilder.fromUri(service.getCallbackUrl())
                 .queryParam("clientSessionId", session.getClientSessionId())
                 .queryParam("code", token)
                 .build();

@@ -27,16 +27,16 @@ public class DBServiceStore extends AbstractDAO<StoredService> implements Servic
     }
 
     @Override
-    public Optional<StoredService> create(String name, String description, String callbackPrefix) {
+    public Optional<StoredService> create(String name, String description, String callbackUrl) {
         val id = Utils.readableId(name);
         var service = get(id).orElse(null);
         val secret = UUID.randomUUID().toString();
         if (null == service) {
-            service = new StoredService(id, name, description, callbackPrefix, secret);
+            service = new StoredService(id, name, description, callbackUrl, secret);
         }
         else {
             service.setDescription(description);
-            service.setCallbackPrefix(callbackPrefix);
+            service.setCallbackUrl(callbackUrl);
             service.setSecret(secret);
             service.setDeleted(false);
         }
@@ -59,8 +59,8 @@ public class DBServiceStore extends AbstractDAO<StoredService> implements Servic
     }
 
     @Override
-    public Optional<StoredService> updateCallbackPrefix(String serviceId, String callbackPrefix) {
-        return updateService(serviceId, service -> service.setCallbackPrefix(callbackPrefix));
+    public Optional<StoredService> updateCallbackUrl(String serviceId, String callbackUrl) {
+        return updateService(serviceId, service -> service.setCallbackUrl(callbackUrl));
     }
 
     @Override

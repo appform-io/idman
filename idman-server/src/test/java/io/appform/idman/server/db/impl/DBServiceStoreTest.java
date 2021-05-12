@@ -43,7 +43,7 @@ class DBServiceStoreTest {
         assertEquals("TESTS", serviceId);
         assertEquals("TestS", service.getName());
         assertEquals("Test service", service.getDescription());
-        assertEquals("https://idman.test", service.getCallbackPrefix());
+        assertEquals("https://idman.test", service.getCallbackUrl());
         assertFalse(Strings.isNullOrEmpty(service.getSecret()));
         assertFalse(service.isDeleted());
 
@@ -72,7 +72,7 @@ class DBServiceStoreTest {
 
         assertNotNull(service);
         assertEquals("Test service", service.getDescription());
-        assertEquals("https://idman.test", service.getCallbackPrefix());
+        assertEquals("https://idman.test", service.getCallbackUrl());
         assertFalse(Strings.isNullOrEmpty(service.getSecret()));
 
         val serviceId = service.getServiceId();
@@ -89,11 +89,11 @@ class DBServiceStoreTest {
 
         {
             val fetchedService
-                    = database.inTransaction(() -> serviceStore.updateCallbackPrefix(serviceId, "localhost"))
+                    = database.inTransaction(() -> serviceStore.updateCallbackUrl(serviceId, "localhost"))
                     .orElse(null);
             assertNotNull(fetchedService);
-            assertEquals("localhost", service.getCallbackPrefix());
-            assertFalse(database.inTransaction(() -> serviceStore.updateCallbackPrefix("XX", "XX"))
+            assertEquals("localhost", service.getCallbackUrl());
+            assertFalse(database.inTransaction(() -> serviceStore.updateCallbackUrl("XX", "XX"))
                                 .isPresent());
         }
         {

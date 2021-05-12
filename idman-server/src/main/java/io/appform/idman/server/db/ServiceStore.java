@@ -10,10 +10,10 @@ import java.util.Optional;
  *
  */
 public interface ServiceStore {
-    Optional<StoredService> create(String name, String description, String callbackPrefix);
+    Optional<StoredService> create(String name, String description, String callbackUrl);
     Optional<StoredService> get(String serviceId);
     Optional<StoredService> updateDescription(String serviceId, String description);
-    Optional<StoredService> updateCallbackPrefix(String serviceId, String callbackPrefix);
+    Optional<StoredService> updateCallbackUrl(String serviceId, String callbackUrl);
     Optional<StoredService> updateSecret(String serviceId);
     boolean delete(String serviceId);
 

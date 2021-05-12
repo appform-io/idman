@@ -100,7 +100,6 @@ class ApisTest {
     @Test
     @SneakyThrows
     void testMalformedToken() {
-        //String serviceId, String name, String description, String callbackPrefix, String secret
         val service = new StoredService("S1", "Test Service", "", "blah.com", "SECRET_TOKEN");
         doReturn(Optional.of(service)).when(serviceStore).get("S1");
         val form = new Form();

@@ -101,9 +101,9 @@ public class Home {
     public Response createService(
             @FormParam("newServiceName") @NotNull @Size(min = 1, max = 45) final String newServiceName,
             @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription,
-            @FormParam("newServiceCallbackPrefix") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackPrefix) {
+            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
         val service = serviceStore.get()
-                .create(newServiceName, newServiceDescription, newServiceCallbackPrefix)
+                .create(newServiceName, newServiceDescription, newServiceCallbackUrl)
                 .orElse(null);
         if (null == service) {
             return redirectToHome();
@@ -175,10 +175,10 @@ public class Home {
     @POST
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
-    public Response updateServiceCallbackPrefix(
+    public Response updateServiceCallbackUrl(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @FormParam("newServiceCallbackPrefix") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackPrefix) {
-        val service = serviceStore.get().updateCallbackPrefix(serviceId, newServiceCallbackPrefix)
+            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
+        val service = serviceStore.get().updateCallbackUrl(serviceId, newServiceCallbackUrl)
                 .orElse(null);
         if (null == service) {
             return redirectToHome();
