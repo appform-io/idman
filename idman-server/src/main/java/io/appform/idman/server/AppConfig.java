@@ -1,6 +1,5 @@
 package io.appform.idman.server;
 
-import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
@@ -25,5 +24,4 @@ public class AppConfig extends Configuration {
     private DataSourceFactory db = new DataSourceFactory();
 
     private AuthenticationConfig authenticationCore;
-    private IdmanClientConfig idmanAuthConfig;
 }

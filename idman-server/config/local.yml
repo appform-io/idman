@@ -52,23 +52,9 @@ db:
   minIdleTime: 1m
 
 authenticationCore:
-  domain: idman.test
-  server: idman.test:8080
-  secureEndpoint: false
+  server: http://idman.test:8080
   sessionDuration: 15d
 
   jwt:
-    issuerId: projectstepone
+    issuerId: testorg
     privateKey: ${JWT_PRIVATE_KEY}
-
-idmanAuthConfig:
-  serviceId: IDMAN
-  authEndpoint: http://idman.test:8080
-  allowedPaths:
-    - /auth/login
-    - /js
-    - /css
-    - /apis/idman
-    - /apis/auth
-    - ui/auth/login
-  resourcePrefix: "/apis"

@@ -1,11 +1,12 @@
 package io.appform.idman.server.modules;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.client.IdManClient;
+import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AppConfig;
 import io.appform.idman.server.auth.AuthenticationProvider;
@@ -17,6 +18,7 @@ import io.appform.idman.server.db.impl.*;
 import io.appform.idman.server.localauth.LocalIdmanAuthClient;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import lombok.val;
 import org.hibernate.SessionFactory;
 
 import java.util.Map;
@@ -65,7 +67,18 @@ public class CoreModule extends AbstractModule {
     @Provides
     @Singleton
     public IdmanClientConfig idmanAuthenticationConfig(AppConfig appConfig) {
-        return appConfig.getIdmanAuthConfig();
+        val idmanConf = new IdmanClientConfig();
+        idmanConf.setServiceId("IDMAN");
+        idmanConf.setAllowedPaths(ImmutableSet.of(
+                "/auth/login",
+                "/js",
+                "/css",
+                "/apis/idman",
+                "/apis/auth",
+                "ui/auth/login"));
+        idmanConf.setResourcePrefix("/apis");
+        idmanConf.setAuthEndpoint(appConfig.getAuthenticationCore().getServer());
+        return idmanConf;
     }
 
     @Provides
@@ -86,14 +99,14 @@ public class CoreModule extends AbstractModule {
 
         return new UnitOfWorkAwareProxyFactory(hibernate)
                 .create(LocalIdmanAuthClient.class,
-                        new Class[] {
+                        new Class[]{
                                 SessionStore.class,
                                 UserInfoStore.class,
                                 ServiceStore.class,
                                 UserRoleStore.class,
                                 AuthenticationConfig.class
                         },
-                        new Object[] {
+                        new Object[]{
                                 sessionStore,
                                 userInfoStore,
                                 serviceStore,

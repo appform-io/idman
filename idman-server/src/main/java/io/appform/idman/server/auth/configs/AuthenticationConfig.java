@@ -2,6 +2,7 @@ package io.appform.idman.server.auth.configs;
 
 import io.dropwizard.util.Duration;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -25,10 +26,8 @@ public class AuthenticationConfig {
 
     @NotNull
     @NotEmpty
+    @URL
     private String server;
-
-    @NotNull
-    private boolean secureEndpoint;
 
     @NotNull
     private Duration sessionDuration = Duration.days(30);

@@ -78,10 +78,7 @@ public class Utils {
     }
 
     public static String redirectionUrl(AuthMode authMode, AuthenticationConfig authenticationConfig) {
-        return  (authenticationConfig.isSecureEndpoint() ? "https" : "http")
-                + "://"
-                + authenticationConfig.getServer()
-                + "/oauth/callback/" + authMode.name();
+        return  authenticationConfig.getServer() + "/oauth/callback/" + authMode.name();
     }
 
     public static JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {

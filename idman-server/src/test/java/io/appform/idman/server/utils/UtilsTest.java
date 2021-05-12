@@ -163,11 +163,8 @@ class UtilsTest {
     @Test
     void redirectionUrl() {
         val config = new AuthenticationConfig();
-        config.setServer("myservice.test");
+        config.setServer("http://myservice.test");
         assertEquals("http://myservice.test/oauth/callback/GOOGLE_AUTH",
-                     Utils.redirectionUrl(AuthMode.GOOGLE_AUTH, config));
-        config.setSecureEndpoint(true);
-        assertEquals("https://myservice.test/oauth/callback/GOOGLE_AUTH",
                      Utils.redirectionUrl(AuthMode.GOOGLE_AUTH, config));
     }
 }

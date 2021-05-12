@@ -14,7 +14,7 @@ public class TestingUtils {
     public static AuthenticationConfig passwordauthConfig() {
         val authenticationConfig = new AuthenticationConfig();
         authenticationConfig.setDomain("testd");
-        authenticationConfig.setServer("localhost");
+        authenticationConfig.setServer("http://localhost:8080");
         authenticationConfig.setSessionDuration(Duration.days(7));
 
         val jwtConfig = new JwtConfig();

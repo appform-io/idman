@@ -1,16 +1,16 @@
 server:
   rootPath: '/apis/*'
   applicationConnectors:
-  - type: http
-    port: 8080
+    - type: http
+      port: 8080
   adminConnectors:
-  - type: http
-    port: 8081
+    - type: http
+      port: 8081
   applicationContextPath: /
   requestLog:
     appenders:
-    - type: console
-      timeZone: IST
+      - type: console
+        timeZone: IST
 
 logging:
   level: INFO
@@ -19,7 +19,7 @@ logging:
     org.hibernate: ERROR
     QueuedSender: WARN
     com.codahale.metrics.collectd: ERROR
-    io.appform.idman: ${LOG_LEVEL}
+    io.appform.idman: DEBUG
   appenders:
     - type: console
       threshold: TRACE
@@ -34,9 +34,6 @@ db:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.MySQLDialect
-    hibernate.show_sql: true
-    hibernate.format_sql: true
-    hibernate.use_sql_comments: true
   maxWaitForConnection: 1s
   validationQuery: "/* MyApplication Health Check */ SELECT 1"
   minSize: 8
@@ -52,24 +49,9 @@ db:
   minIdleTime: 1m
 
 authenticationCore:
-  enabled: ${AUTH_ENABLED}
-  domain: ${DOMAIN}
-  server: ${SERVER_ENDPOINT}
-  secureEndpoint: ${SECURE_ENDPOINT}
+  server: ${SERVER_URL}
   sessionDuration: 15d
 
   jwt:
-    issuerId: idman
+    issuerId: ${JWT_ISSUER_ID}
     privateKey: ${JWT_PRIVATE_KEY}
-    serviceName: projectstepone
-
-  provider:
-    type: GOOGLE_AUTH
-    clientId: ${GOOGLE_CLIENT_ID}
-    clientSecret: ${GOOGLE_CLIENT_SECRET}
-    loginDomain: ${GOOGLE_DOMAIN}
-
-idmanAuthConfig:
-  enabled: ${AUTH_ENABLED}
-  serviceName: idman
-  authEndpoint: ${SERVER_ENDPOINT}
