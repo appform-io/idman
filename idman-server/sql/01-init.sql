@@ -26,6 +26,7 @@ CREATE TABLE `passwords` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `needs_change` tinyint(1) DEFAULT 0,
   `failed_count` int(11) DEFAULT 0,
   `deleted` tinyint(1) DEFAULT 0,
   `created` datetime(3) DEFAULT current_timestamp(3),
@@ -69,6 +70,8 @@ CREATE TABLE `services` (
   `service_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `name` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `description` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `callback_url` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `secret` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `deleted` tinyint(1) DEFAULT 0,
   `created` datetime(3) DEFAULT current_timestamp(3),
   `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
@@ -88,6 +91,8 @@ CREATE TABLE `sessions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `session_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `user_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `service_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `client_session_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `session_type` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `expiry` datetime(3) DEFAULT NULL,
   `partition_id` int(10) NOT NULL,
@@ -96,7 +101,9 @@ CREATE TABLE `sessions` (
   `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
   PRIMARY KEY (`id`,`partition_id`),
   UNIQUE KEY `uk_session_id` (`session_id`,`partition_id`),
-  KEY `idx_user` (`user_id`)
+  KEY `idx_user` (`user_id`),
+  KEY `idx_service_id` (`service_id`),
+  KEY `idx_service_client_session` (`service_id`,`client_session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
  PARTITION BY RANGE (`partition_id`)
 (PARTITION `p0` VALUES LESS THAN (1) ENGINE = InnoDB,
@@ -207,6 +214,8 @@ CREATE TABLE `user_sessions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `session_id` varchar(45) NOT NULL,
   `user_id` varchar(45) NOT NULL,
+  `service_id` varchar(255) NOT NULL,
+  `client_session_id` varchar(255) NOT NULL,
   `session_type` varchar(45) NOT NULL,
   `expiry` datetime(3) DEFAULT NULL,
   `partition_id` int(10) NOT NULL,
@@ -215,7 +224,9 @@ CREATE TABLE `user_sessions` (
   `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
   PRIMARY KEY (`id`,`partition_id`),
   UNIQUE KEY `uk_session_id` (`session_id`,`partition_id`),
-  KEY `idx_user` (`user_id`)
+  KEY `idx_user` (`user_id`),
+  KEY `idx_service_id` (`service_id`),
+  KEY `idx_service_client_session` (`service_id`,`client_session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
  PARTITION BY RANGE (`partition_id`)
 (PARTITION `p0` VALUES LESS THAN (1) ENGINE = InnoDB,
@@ -308,4 +319,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-20 12:45:10
+-- Dump completed on 2021-05-12 13:35:36
