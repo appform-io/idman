@@ -27,6 +27,9 @@
         <mockito.version>1.10.19</mockito.version>
         <guava.version>30.0-jre</guava.version>
         <caffeine.version>2.6.2</caffeine.version>
+        <metrics-core.version>4.1.5</metrics-core.version>
+        <jboss-logging.version>3.4.1.Final</jboss-logging.version>
+        <junit-jupiter.version>5.4.0</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -39,12 +42,12 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>4.1.5</version>
+                <version>${metrics-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
-                <version>3.4.1.Final</version>
+                <version>${jboss-logging.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -72,7 +75,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.4.0</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
