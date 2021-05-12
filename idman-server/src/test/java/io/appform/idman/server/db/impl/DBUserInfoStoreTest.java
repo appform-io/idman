@@ -170,4 +170,27 @@ class DBUserInfoStoreTest {
                 .collect(Collectors.toSet())
                 .containsAll(deletedUsers));
     }
+
+    @Test
+    void testPasswordActive() {
+        val createdUser = database.inTransaction(() -> userInfoStore.create("TU1",
+                                                                            "test@test.com",
+                                                                            "Test",
+                                                                            UserType.HUMAN,
+                                                                            AuthMode.PASSWORD,
+                                                                            false))
+                .orElse(null);
+        assertNotNull(createdUser);
+        assertEquals("TU1", createdUser.getUserId());
+        assertEquals("test@test.com", createdUser.getEmail());
+        assertEquals("Test", createdUser.getName());
+        assertEquals(UserType.HUMAN, createdUser.getUserType());
+        assertFalse(createdUser.isDeleted());
+
+        val authState = createdUser.getAuthState();
+        assertEquals(AuthMode.PASSWORD, authState.getAuthMode());
+        assertEquals(AuthState.ACTIVE, authState.getAuthState());
+        assertEquals(0, authState.getFailedAuthCount());
+        assertEquals(createdUser, authState.getUser());
+    }
 }
