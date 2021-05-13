@@ -133,8 +133,8 @@ public class MyResource {
 # Other stuff, http port etc as usual
 idman:
   serviceId: CAMPAIGN_MANAGER
-  authEndpoint: "https://3cdbfa593877.ngrok.io"
-  authSecret: "2ae6006f-c0b1-4c2d-a522-6a68d8f5c8d9"
+  authEndpoint: "<NGROK ENDPOINT FROM SETUP SECTION>"
+  authSecret: "<SECRET KEY FROM ABOVE>"
 ```
 That's it .. time to rock n' roll. Point your brwoser to your service. It will redirect to IDMan endpoint for credentials. Once credentials are entered, it will redirect back to your service and to the page you intended to go to originally.
 
