@@ -29,13 +29,13 @@
                         A meaningful description</small>
                 </div>
                 <div class="form-group">
-                    <label for="newServiceCallbackUrl">Callback Prefix</label>
+                    <label for="newServiceCallbackUrl">Callback URL</label>
                     <input type="url" class="flex-fill form-control mb-2 mr-sm-2"
                            id="newServiceCallbackUrl"
                            name="newServiceCallbackUrl" aria-describedby="newServiceCallbackUrlHelp"
-                           placeholder="Prefix for callback url" maxlength="255" required>
+                           placeholder="https://myservice.mydomain.com/idman/auth/callback" maxlength="255" required>
                     <small id="newServiceCallbackUrlHelp" class="form-text text-muted">
-                        Prefix for callback. Must start with https://. Example: <i>https://mydomain.com</i></small>
+                        The URL at which IDMan will redirect post successful authentication.</small>
                 </div>
                 <button type="submit" class="btn btn-primary float-right">Create Service</button>
             </form>

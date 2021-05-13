@@ -76,7 +76,7 @@ public class IdmanAuthFilter extends AuthFilter<String, ServiceUserPrincipal> {
     }
 
     private Optional<String> getTokenFromCookie(final ContainerRequestContext requestContext) {
-        val idmanCookie = requestContext.getCookies().get("idman-token");
+        val idmanCookie = requestContext.getCookies().get("idman-token-" + config.getServiceId().toLowerCase());
         if (null != idmanCookie) {
             return Optional.of(idmanCookie.getValue());
         }

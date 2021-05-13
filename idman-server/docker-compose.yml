@@ -23,8 +23,8 @@ services:
       DB_CONNECTION_STRING: jdbc:mariadb://mariadb/idman_db?createDatabaseIfNotExist=true
       DB_USER: root
       DB_PASSWORD: password
-      SERVER_URL: http://localhost:8080
-      JWT_ISSUER_ID: idmanlocal
+      SERVER_ENDPOINT: ${SERVER_ENDPOINT}
+      JWT_ISSUER_ID: testorg
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
       PRESLEEP: 10

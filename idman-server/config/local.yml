@@ -52,7 +52,7 @@ db:
   minIdleTime: 1m
 
 authenticationCore:
-  server: http://idman.test:8080
+  server: ${SERVER_ENDPOINT}
   sessionDuration: 15d
 
   jwt:

@@ -85,6 +85,8 @@ public class IdmanAuthHandler {
             @QueryParam("clientSessionId") final String clientSessionId,
             @QueryParam("code") final String token) {
         if (!cookieState.getValue().equals(clientSessionId)) {
+            log.error("State cookie mismatch. Expected: {} Received callback for: {}",
+                      cookieState.getValue(), clientSessionId);
             return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
         }
         val sessionUser = idManClient.validate(token, config.getServiceId()).orElse(null);
@@ -97,7 +99,7 @@ public class IdmanAuthHandler {
                                 : localRedirect.getValue();
         log.debug("Redirecting to: {}. Local redirect: {}", localRedirectPath, localRedirect.getValue());
         return Response.seeOther(URI.create(localRedirectPath))
-                .cookie(new NewCookie(IDMAN_TOKEN_COOKIE_NAME,
+                .cookie(new NewCookie(cookieName(),
                                       token,
                                       "/",
                                       null,
@@ -123,7 +125,7 @@ public class IdmanAuthHandler {
 //        log.info("Session {} deletion status for user {}: {}",
 //                 sessionId, principal.getServiceUser().getUser().getId(), status);
         return Response.seeOther(URI.create("/"))
-                .cookie(new NewCookie(IDMAN_TOKEN_COOKIE_NAME,
+                .cookie(new NewCookie(cookieName(),
                                       "",
                                       "/",
                                       null,
@@ -141,5 +143,9 @@ public class IdmanAuthHandler {
         return (!Strings.isNullOrEmpty(config.getResourcePrefix())
                 ? config.getResourcePrefix()
                 : "") + path;
+    }
+
+    private String cookieName() {
+        return IDMAN_TOKEN_COOKIE_NAME + "-" + config.getServiceId().toLowerCase();
     }
 }
