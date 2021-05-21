@@ -1,0 +1,60 @@
+server:
+  rootPath: '/apis/*'
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+  applicationContextPath: /
+  requestLog:
+    appenders:
+      - type: console
+        timeZone: IST
+
+logging:
+  level: INFO
+  loggers:
+    deprecation: ERROR
+    org.hibernate: ERROR
+    QueuedSender: WARN
+    com.codahale.metrics.collectd: ERROR
+    io.appform.idman: DEBUG
+  appenders:
+    - type: console
+      threshold: TRACE
+      timeZone: IST
+      logFormat: "%(%-5level) [%date] %X{TRACE-ID} [%thread] [%logger{0}]: %message%n"
+
+db:
+  driverClass: org.mariadb.jdbc.Driver
+  user: root
+  password: password
+  url: jdbc:mariadb://localhost/idman_db
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.MySQLDialect
+  #    hibernate.show_sql: true
+  #    hibernate.format_sql: true
+  #    hibernate.use_sql_comments: true
+  maxWaitForConnection: 1s
+  validationQuery: "/* MyApplication Health Check */ SELECT 1"
+  minSize: 8
+  maxSize: 8
+  initialSize: 8
+  logAbandonedConnections: true
+  logValidationErrors: true
+  checkConnectionWhileIdle: true
+  checkConnectionOnConnect: true
+  validationQueryTimeout: 1s
+  removeAbandoned: true
+  evictionInterval: 30s
+  minIdleTime: 1m
+
+authenticationCore:
+  server: http://localhost:8080
+  sessionDuration: 15d
+
+  jwt:
+    issuerId: testorg
+    privateKey: bYdNUUyCqx8IuGNqhFYS27WizZrfupAmJS8I4mfj2Cjox9Nc04Oews9tJEiDTrJfopzKdjygi8SgXeopSe/rPYqEKfrAUw/Dn6wMVhE56S7/5DKAvYusA2fQRqxOrOosO1lERnArw15tkAf/z5QUUUXnKZZTiczNEebjs2OG5s94PGxtQzxtYsZ1q2oXoq4lKPTosPpwkRxeh8LQCweDGR80xgoM1+yDAoYIeg==

@@ -19,6 +19,7 @@ import io.appform.idman.model.UserType;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.views.NewUserView;
 import io.dropwizard.hibernate.UnitOfWork;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.vyarus.guicey.gsp.views.template.Template;
@@ -29,6 +30,7 @@ import javax.inject.Provider;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.net.URL;
 import java.util.Objects;
@@ -78,6 +80,7 @@ public class FirstTimeWizard {
     @POST
     @Path("/setup")
     @UnitOfWork
+    @SneakyThrows
     public Response setup(
             @HeaderParam("Referer") final URL referer,
             @FormParam("email") final String email,
@@ -86,12 +89,10 @@ public class FirstTimeWizard {
         if (null != serviceStore.get().get("IDMAN").orElse(null)) {
             return Response.seeOther(URI.create("/")).build();
         }
+        val redirectUri = UriBuilder.fromUri(referer.toURI()).replacePath("/apis/idman/auth/callback").build();
         val service = serviceStore.get().create("IDMan",
                                                 "Identity management service",
-                                                referer.getProtocol()
-                                                        + "://" + referer.getHost()
-                                                        + ":" + referer.getPort()
-                                                        + "/apis/idman/auth/callback")
+                                                redirectUri.toASCIIString())
                 .orElse(null);
         Objects.requireNonNull(service);
         val adminRole = roleStore.get()

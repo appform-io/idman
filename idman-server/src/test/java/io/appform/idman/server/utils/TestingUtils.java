@@ -14,11 +14,14 @@
 
 package io.appform.idman.server.utils;
 
+import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.dropwizard.util.Duration;
 import lombok.experimental.UtilityClass;
 import lombok.val;
+
+import java.util.Collections;
 
 /**
  *
@@ -37,5 +40,14 @@ public class TestingUtils {
                 "bYdNUUyCqx8IuGNqhFYS27WizZrfupAmJS8I4mfj2Cjox9Nc04Oews9tJEiDTrJfopzKdjygi8SgXeopSe/rPYqEKfrAUw/Dn6wMVhE56S7/5DKAvYusA2fQRqxOrOosO1lERnArw15tkAf/z5QUUUXnKZZTiczNEebjs2OG5s94PGxtQzxtYsZ1q2oXoq4lKPTosPpwkRxeh8LQCweDGR80xgoM1+yDAoYIeg==");
         authenticationConfig.setJwt(jwtConfig);
         return authenticationConfig;
+    }
+
+    public static IdmanClientConfig clientConfig() {
+        val clientConfig = new IdmanClientConfig();
+        clientConfig.setAuthEndpoint("http://localhost:8080");
+        clientConfig.setResourcePrefix("/apis");
+        clientConfig.setServiceId("testservice");
+        clientConfig.setAllowedPaths(Collections.emptySet());
+        return clientConfig;
     }
 }

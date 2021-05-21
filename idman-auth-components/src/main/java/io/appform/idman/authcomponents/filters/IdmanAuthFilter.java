@@ -39,6 +39,7 @@ import java.util.Optional;
 @Slf4j
 public class IdmanAuthFilter extends AuthFilter<String, ServiceUserPrincipal> {
 
+    private static final String ERROR_PARAM = "error";
     private final IdmanClientConfig config;
 
 
@@ -57,10 +58,11 @@ public class IdmanAuthFilter extends AuthFilter<String, ServiceUserPrincipal> {
         if (!this.authenticate(requestContext, jwt, "FORM")) {
             val params = uriInfo.getQueryParameters(true);
             val uriBuilder = UriBuilder.fromUri(URI.create(
+                    config.getAuthEndpoint() +
                     (!Strings.isNullOrEmpty(config.getResourcePrefix())
                      ? config.getResourcePrefix() : "") + "/idman/auth"));
-            if(params.containsKey("error")) {
-                uriBuilder.queryParam("error", params.getFirst("error"));
+            if(params.containsKey(ERROR_PARAM)) {
+                uriBuilder.queryParam(ERROR_PARAM, params.getFirst(ERROR_PARAM));
             }
             throw new WebApplicationException(Response.seeOther(uriBuilder.build()).build());
         }

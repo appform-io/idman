@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Path("/ui")
 @Template
-@Produces(MediaType.TEXT_HTML)
+@Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
 @PermitAll
 public class Home {
 
