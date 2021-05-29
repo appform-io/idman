@@ -22,6 +22,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
+import io.appform.idman.server.Engine;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
@@ -83,7 +84,8 @@ class HomeTest2 {
                                   () -> roleStore,
                                   () -> userInfoStore,
                                   () -> passwordStore,
-                                  () -> userRoleStore))
+                                  () -> userRoleStore,
+                                  new Engine(null, null, null, null, null)))
             .build();
 
     @BeforeEach
