@@ -10,11 +10,11 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>idman-model</module>
-        <module>idman-server</module>
         <module>idman-client</module>
         <module>idman-auth-components</module>
         <module>idman-auth-client-http</module>
         <module>idman-auth-bundle</module>
+        <module>idman-server</module>
     </modules>
 
     <properties>
@@ -29,9 +29,7 @@
         <metrics-core.version>4.1.5</metrics-core.version>
         <jboss-logging.version>3.4.1.Final</jboss-logging.version>
         <junit-jupiter.version>5.4.0</junit-jupiter.version>
-        <sonar.projectKey>appform-io_idman</sonar.projectKey>
-        <sonar.organization>appform-io</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.version>3.9.0.2155</sonar.version>
     </properties>
 
     <dependencyManagement>
@@ -163,4 +161,36 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+                <sonar.organization>appform-io</sonar.organization>
+                <sonar.projectKey>appform-io_idman</sonar.projectKey>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+                <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+            </properties>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${sonar.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sonar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
