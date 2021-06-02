@@ -123,8 +123,8 @@ public class IdmanAuthHandler {
                                       null,
                                       false,
                                       true),
-                        new NewCookie(cookieState, null, 0, null, false, true),
-                        new NewCookie(localRedirect, null, 0, null, false, true))
+                        expireCookie(cookieState),
+                        expireCookie(localRedirect))
                 .build();
     }
 
@@ -163,4 +163,10 @@ public class IdmanAuthHandler {
     private String cookieName() {
         return IDMAN_TOKEN_COOKIE_NAME + "-" + config.getServiceId().toLowerCase();
     }
+
+
+    private NewCookie expireCookie(Cookie cookie) {
+        return new NewCookie(cookie, null, 0, null, false, true);
+    }
+
 }

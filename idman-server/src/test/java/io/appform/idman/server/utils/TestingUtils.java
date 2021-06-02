@@ -15,8 +15,14 @@
 package io.appform.idman.server.utils;
 
 import io.appform.idman.client.IdmanClientConfig;
+import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
+import io.appform.idman.server.db.AuthState;
+import io.appform.idman.server.db.model.StoredService;
+import io.appform.idman.server.db.model.StoredUser;
+import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.dropwizard.util.Duration;
 import lombok.experimental.UtilityClass;
 import lombok.val;
@@ -49,5 +55,22 @@ public class TestingUtils {
         clientConfig.setServiceId("testservice");
         clientConfig.setAllowedPaths(Collections.emptySet());
         return clientConfig;
+    }
+
+    public static StoredUser adminUser() {
+        val storedUser = new StoredUser(Utils.hashedId("admin@a.com"), "admin@a.com", "Admin", UserType.HUMAN);
+        storedUser.setAuthState(new StoredUserAuthState(AuthMode.PASSWORD, AuthState.ACTIVE, 0, storedUser));
+        return storedUser;
+    }
+
+    public static StoredUser normalUser() {
+        val storedUser = new StoredUser(Utils.hashedId("test@a.com"), "test@a.com", "Test", UserType.HUMAN);
+        storedUser.setAuthState(new StoredUserAuthState(AuthMode.PASSWORD, AuthState.ACTIVE, 0, storedUser));
+        return storedUser;
+    }
+
+    public static StoredService testService() {
+        //String serviceId, String name, String description, String callbackUrl, String secret
+        return new StoredService("S", "S", "S", "s.com", "S_S");
     }
 }
