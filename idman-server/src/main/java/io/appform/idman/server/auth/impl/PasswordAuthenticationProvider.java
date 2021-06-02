@@ -34,9 +34,8 @@ import java.util.Optional;
  * Provides password based auth
  */
 @Slf4j
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class PasswordAuthenticationProvider extends AuthenticationProvider {
-
 
     private final Provider<UserInfoStore> userStore;
     private final Provider<PasswordStore> passwordStore;

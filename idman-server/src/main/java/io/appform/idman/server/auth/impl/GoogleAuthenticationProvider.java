@@ -55,7 +55,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Singleton
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class GoogleAuthenticationProvider extends AuthenticationProvider {
 
     private final HttpTransport transport;

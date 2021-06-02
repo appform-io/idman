@@ -39,6 +39,7 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -57,6 +58,7 @@ import static org.mockito.Mockito.*;
  *
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
+@Disabled
 class HomeTest2 {
     private static final User ADMIN_USER = new User("TA1", "TA", UserType.HUMAN, AuthMode.PASSWORD);
     private static final User NORMAL_USER = new User("TU1", "TU", UserType.HUMAN, AuthMode.PASSWORD);
