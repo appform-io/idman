@@ -48,7 +48,6 @@ public class LocalIdmanAuthClient extends IdManClient {
     private final UserInfoStore userInfoStore;
     private final ServiceStore serviceStore;
     private final UserRoleStore roleStore;
-    private final AuthenticationConfig authConfig;
 
 
     private final LoadingCache<String, JwtConsumer> jwtConsumers;
@@ -64,7 +63,6 @@ public class LocalIdmanAuthClient extends IdManClient {
         this.userInfoStore = userInfoStore;
         this.serviceStore = serviceStore;
         this.roleStore = roleStore;
-        this.authConfig = authConfig;
 
         this.jwtConsumers = Caffeine.newBuilder().build(serviceId -> Utils.buildConsumer(authConfig, serviceId));
     }

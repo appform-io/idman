@@ -38,6 +38,7 @@ import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.utils.Utils;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -54,6 +55,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Singleton
+@EqualsAndHashCode(callSuper = true)
 public class GoogleAuthenticationProvider extends AuthenticationProvider {
 
     private final HttpTransport transport;
@@ -197,21 +199,5 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
                 return googleAuthenticatorContext;
             }
         });
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
     }
 }

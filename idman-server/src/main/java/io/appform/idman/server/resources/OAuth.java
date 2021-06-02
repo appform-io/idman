@@ -102,7 +102,7 @@ public class OAuth {
             return seeOther(cookieState);
         }
         //val token = authProvider.login(new GoogleAuthInfo(authCode, a, clientSessionId), sessionId).orElse(null);
-        val token = "blah";
+//        val token = "blah";
 /*        if (null == token) {
             log.debug("No token returned by provider login.");
             return seeOther(cookieState);
