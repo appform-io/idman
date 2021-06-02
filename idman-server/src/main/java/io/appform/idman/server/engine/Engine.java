@@ -12,7 +12,7 @@
  * under the License.
  */
 
-package io.appform.idman.server;
+package io.appform.idman.server.engine;
 
 import com.google.common.base.Strings;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
@@ -24,6 +24,7 @@ import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.db.model.StoredService;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserRole;
+import io.appform.idman.server.engine.results.*;
 import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.HomeView;
 import io.appform.idman.server.views.PasswordChangeView;
@@ -39,7 +40,6 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Objects;
 import java.util.function.Function;
@@ -71,41 +71,43 @@ public class Engine {
         this.userRoleStore = userRoleStore;
     }
 
-    public Response renderHome(final ServiceUserPrincipal principal, final String redirect) {
+    public EngineEvalResult renderHome(final ServiceUserPrincipal principal, final String redirect) {
         val idmanUser = principal.getServiceUser();
         val userId = idmanUser.getUser().getId();
         val currentUser = userInfoStore.get().get(userId).orElse(null);
         if (null == currentUser || currentUser.isDeleted()) {
-            return Response.seeOther(URI.create("/auth/login")).build();
+            return new InvalidUser();
         }
         if (currentUser.getAuthState().getAuthState().equals(AuthState.EXPIRED)) {
-            return redirectToPasswordChangePage(userId);
+            return new CredentialsExpired(userId);
         }
         if (!Strings.isNullOrEmpty(redirect)) {
-            return Response.seeOther(URI.create(redirect)).build();
+            return new RedirectToParam(redirect);
         }
-        return Response.ok(
+        return new ViewOpSuccess(
                 new HomeView(
                         serviceStore.get().list(false),
                         userInfoStore.get().list(false),
-                        principal.getServiceUser()))
-                .build();
+                        principal.getServiceUser()));
     }
 
-    public Response createService(String newServiceName, String newServiceDescription, String newServiceCallbackUrl) {
+    public EngineEvalResult createService(
+            String newServiceName,
+            String newServiceDescription,
+            String newServiceCallbackUrl) {
         val service = serviceStore.get()
                 .create(newServiceName, newServiceDescription, newServiceCallbackUrl)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
-        return redirectToServicePage(service.getServiceId());
+        return new ServiceOpSuccess(service.getServiceId());
     }
 
-    public Response renderServiceDetails(final ServiceUserPrincipal principal, final String serviceId) {
+    public EngineEvalResult renderServiceDetails(final ServiceUserPrincipal principal, final String serviceId) {
         val service = serviceStore.get().get(serviceId).orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
         val serviceRoleMappings = userRoleStore.get().getServiceRoleMappings(serviceId);
         val roles = roleStore.get().list(serviceId, false);
@@ -116,7 +118,7 @@ public class Engine {
                 .stream()
                 .collect(Collectors.toMap(StoredUser::getUserId, Function.identity()));
 
-        return Response.ok(
+        return new ViewOpSuccess(
                 new ServiceDetailsView(
                         service,
                         roles,
@@ -132,109 +134,106 @@ public class Engine {
                                 })
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList()),
-                        principal.getServiceUser()))
-                .build();
+                        principal.getServiceUser()));
     }
 
-    public Response updateServiceDescription(final String serviceId, final String newServiceDescription) {
+    public EngineEvalResult updateServiceDescription(final String serviceId, final String newServiceDescription) {
         val service = serviceStore.get().updateDescription(serviceId, newServiceDescription)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
-        return redirectToServicePage(service.getServiceId());
+        return new ServiceOpSuccess(service.getServiceId());
     }
 
-    public Response updateServiceCallbackUrl(String serviceId, String newServiceCallbackUrl) {
+    public EngineEvalResult updateServiceCallbackUrl(String serviceId, String newServiceCallbackUrl) {
         val service = serviceStore.get().updateCallbackUrl(serviceId, newServiceCallbackUrl)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
-        return redirectToServicePage(service.getServiceId());
+        return new ServiceOpSuccess(service.getServiceId());
     }
 
-    public Response regenerateServiceSecret(String serviceId) {
+    public EngineEvalResult regenerateServiceSecret(String serviceId) {
         val service = serviceStore.get().updateSecret(serviceId)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
-        return redirectToServicePage(service.getServiceId());
+        return new ServiceOpSuccess(service.getServiceId());
     }
 
-    public Response deleteService(@PathParam("serviceId") @NotEmpty @Size(max = 45) String serviceId) {
+    public EngineEvalResult deleteService(@PathParam("serviceId") @NotEmpty @Size(max = 45) String serviceId) {
         val status = serviceStore.get().delete(serviceId);
-        log.info("Service {} deletion status: {}", serviceId, status);
-        return redirectToHome();
+        if (!status) {
+            log.warn("Unable to delete service: {}", serviceId);
+            return new GeneralOpFailure();
+        }
+        return new GeneralOpSuccess();
     }
 
-    public Response createRole(String serviceId, String newRoleName, String newRoleDescription) {
+    public EngineEvalResult createRole(String serviceId, String newRoleName, String newRoleDescription) {
         val service = serviceStore.get().get(serviceId)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
         val role = roleStore.get().create(serviceId, newRoleName, newRoleDescription)
                 .orElse(null);
-        if (role != null) {
-            log.debug("Role {} created for service: {}", role.getId(), serviceId);
-        }
-        else {
+        if (role == null) {
             log.error("Error creating role {} for service {}", newRoleName, serviceId);
+            return new RoleOpFailure(serviceId, null);
         }
-        return redirectToServicePage(serviceId);
+        log.debug("Role {} created for service: {}", role.getRoleId(), serviceId);
+        return new RoleOpSuccess(serviceId, role.getRoleId());
     }
 
-    public Response updateRole(final String serviceId, final String roleId, final String roleDescription) {
+    public EngineEvalResult updateRole(final String serviceId, final String roleId, final String roleDescription) {
         val service = serviceStore.get().get(serviceId)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
         val role = roleStore.get().update(serviceId, roleId, roleDescription)
                 .orElse(null);
-        if (role != null) {
-            log.debug("Role {} updated for service: {}", roleId, serviceId);
-        }
-        else {
+        if (role == null) {
             log.error("Error updating role {} for service {}", roleId, serviceId);
+            return new RoleOpFailure(serviceId, roleId);
         }
-        return redirectToServicePage(serviceId);
+        return new RoleOpSuccess(serviceId, roleId);
     }
 
-    public Response deleteRole(final String serviceId, final String roleId) {
+    public EngineEvalResult deleteRole(final String serviceId, final String roleId) {
         val service = serviceStore.get().get(serviceId)
                 .orElse(null);
         if (null == service) {
-            return redirectToHome();
+            return new InvalidService();
         }
         val status = roleStore.get().delete(serviceId, roleId);
-        if (status) {
-            log.debug("Role {} deleted for service: {}", roleId, serviceId);
-        }
-        else {
+        if (!status) {
             log.error("Error deleting role {} for service {}", roleId, serviceId);
+            return new RoleOpFailure(serviceId, roleId);
         }
-        return redirectToServicePage(serviceId);
+        return new RoleOpSuccess(serviceId, roleId);
     }
 
-    public Response createHumanUser(final String email, final String name, final String password) {
+    public EngineEvalResult createHumanUser(final String email, final String name, final String password) {
         val userId = Utils.hashedId(email);
         val user = userInfoStore.get()
                 .create(userId, email, name, UserType.HUMAN, AuthMode.PASSWORD)
                 .orElse(null);
         if (null == user) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
         passwordStore.get().set(userId, password);
-        return redirectToUserPage(userId);
+        return new UserOpSuccess(userId);
     }
 
-    public Response userDetails(final ServiceUserPrincipal principal, final String userId) {
+    public EngineEvalResult userDetails(final ServiceUserPrincipal principal, final String userId) {
         val user = userInfoStore.get().get(userId).orElse(null);
         if (null == user) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
         val mappings = userRoleStore.get().getUserRoles(userId);
         val services = serviceStore.get()
@@ -249,7 +248,7 @@ public class Engine {
                              .collect(Collectors.toSet()))
                 .stream()
                 .collect(Collectors.toMap(StoredRole::getRoleId, Function.identity()));
-        return Response.ok(
+        return new ViewOpSuccess(
                 new UserDetailsView(
                         user,
                         mappings.stream()
@@ -263,104 +262,107 @@ public class Engine {
                                 })
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList()),
-                        principal.getServiceUser()))
-                .build();
+                        principal.getServiceUser()));
     }
 
-    public Response updateUser(final ServiceUserPrincipal sessionUser, final String userId, final String name) {
-        val userstore = userInfoStore.get();
-        var user = userstore.get(userId).orElse(null);
+    public EngineEvalResult updateUser(final ServiceUserPrincipal sessionUser, final String userId, final String name) {
+        val userStore = userInfoStore.get();
+        var user = userStore.get(userId).orElse(null);
         if (null == user) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
         val sessionUserId = sessionUser.getServiceUser().getUser().getId();
         if (!sessionUserId.equals(userId)
                 && !sessionUser.getServiceUser().getRole().equals(IdmanRoles.ADMIN)) {
             log.warn("Non admin user {} tried to change name for {}", sessionUserId, userId);
-            return redirectToUserPage(userId);
+            return new UserOpFailure(userId);
         }
-        user = userstore.updateName(userId, name).orElse(null);
+        user = userStore.updateName(userId, name).orElse(null);
         if (null == user) {
             log.warn("Name not updated for: {}", userId);
-            return redirectToHome();
+            return new UserOpFailure(userId);
         }
-        return redirectToUserPage(userId);
+        return new UserOpSuccess(userId);
     }
 
-    public Response deleteUser(final String userId) {
-        val userstore = userInfoStore.get();
-        var user = userstore.get(userId).orElse(null);
+    public EngineEvalResult deleteUser(final String userId) {
+        val userStore = userInfoStore.get();
+        var user = userStore.get(userId).orElse(null);
         if (null == user) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
-        val status = userstore.deleteUser(userId);
+        val status = userStore.deleteUser(userId);
         log.info("Deletion status for: {} is: {}", userId, status);
-        return redirectToHome();
+        return new GeneralOpSuccess();
     }
 
-    public Response renderPasswordChangePage(final ServiceUserPrincipal principal, final String userId) {
+    public EngineEvalResult renderPasswordChangePage(final ServiceUserPrincipal principal, final String userId) {
         val user = userInfoStore.get().get(userId).orElse(null);
         val idmanUser = principal.getServiceUser();
-        if ((null == user
-                || !idmanUser.getUser().getId().equals(userId))
+        if (null == user
+                || (!idmanUser.getUser().getId().equals(userId))
                 && !idmanUser.getRole().equals(IdmanRoles.ADMIN)) {
-            return redirectToUserPage(userId);
+            return new UserOpFailure(userId);
         }
         val skipOld = !idmanUser.getUser().getId().equals(userId);
-        return Response.ok(new PasswordChangeView(user, skipOld, principal.getServiceUser())).build();
+        return new ViewOpSuccess(new PasswordChangeView(user, skipOld, principal.getServiceUser()));
     }
 
 
-    public Response changePassword(
+    public EngineEvalResult changePassword(
             final ServiceUserPrincipal sessionUser,
             final String userId,
             final String oldPassword,
             final String newPassword,
             final String newPasswordConf) {
-        val userstore = userInfoStore.get();
-        var user = userstore.get(userId).orElse(null);
+        val userStore = userInfoStore.get();
+        var user = userStore.get(userId).orElse(null);
         if (null == user || !sessionUser.getServiceUser().getUser().getId().equals(userId)) {
-            return redirectToHome();
+            return new CredentialsExpired(userId);
         }
-        if (!newPassword.equals(newPasswordConf)) {
+        if (!newPassword.equals(newPasswordConf) || newPassword.equals(oldPassword)) {
             log.warn("New passwords do not match for: {}", userId);
+            return new CredentialsExpired(userId);
         }
         val status = passwordStore.get()
                 .update(userId, oldPassword, newPassword);
-        log.info("Password change state for user {} is {}", userId, status);
         if (!status) {
-            return redirectToPasswordChangePage(userId);
+            log.info("Password change failed for user {} is {}", userId, status);
+            return new CredentialsExpired(userId);
         }
-        userstore.updateAuthState(userId, userAuthState -> {
+        userStore.updateAuthState(userId, userAuthState -> {
             userAuthState.setFailedAuthCount(0);
             userAuthState.setAuthState(AuthState.ACTIVE);
         });
-        return redirectToUserPage(userId);
+        return new UserOpSuccess(userId);
     }
 
-    public Response changePasswordForced(
-            final ServiceUserPrincipal sessionUser,
+    public EngineEvalResult changePasswordForced(
+            final ServiceUserPrincipal principal,
             final String userId,
             final String newPassword,
             final String newPasswordConf) {
         val userStore = userInfoStore.get();
         var user = userStore.get(userId).orElse(null);
+        val sessionUser = principal.getServiceUser();
         if (null == user
-                || sessionUser.getServiceUser().getUser().getId().equals(userId)) {
-            return redirectToUserPage(userId);
+                || sessionUser.getUser().getId().equals(userId)
+                || !sessionUser.getRole().equals(IdmanRoles.ADMIN)) {
+            return new UserOpFailure(userId);
         }
         if (!newPassword.equals(newPasswordConf)) {
             log.warn("New passwords do not match for: {}", userId);
+            return new UserOpFailure(userId);
         }
         passwordStore.get().set(userId, newPassword);
         userStore.updateAuthState(userId, userAuthState -> {
             userAuthState.setAuthState(AuthState.EXPIRED);
             userAuthState.setFailedAuthCount(0);
         });
-        return redirectToUserPage(userId);
+        return new UserOpSuccess(userId);
     }
 
-    public Response mapUserToRole(
+    public EngineEvalResult mapUserToRole(
             final ServiceUserPrincipal sessionUser,
             final URI referer,
             final String serviceId,
@@ -372,18 +374,18 @@ public class Engine {
         if (service == null || service.isDeleted()
                 || role == null || role.isDeleted()
                 || user == null || user.isDeleted()) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
         userRoleStore.get()
                 .mapUserToRole(userId, serviceId, roleId, sessionUser.getServiceUser().getUser().getId());
         log.info("Mapping user {} to role: {}/{} completed", userId, serviceId, roleId);
         if (null == referer || referer.toString().isEmpty()) {
-            return redirectToUserPage(userId);
+            return new UserOpSuccess(userId);
         }
-        return Response.seeOther(URI.create(referer.getPath())).build();
+        return new RedirectToParam(referer.getPath());
     }
 
-    public Response unmapUserFromRole(
+    public EngineEvalResult unmapUserFromRole(
             final URI referer, final String serviceId, final String roleId, final String userId) {
         val service = serviceStore.get().get(serviceId).orElse(null);
         val role = roleStore.get().get(serviceId, roleId).orElse(null);
@@ -391,29 +393,13 @@ public class Engine {
         if (service == null || service.isDeleted()
                 || role == null || role.isDeleted()
                 || user == null || user.isDeleted()) {
-            return redirectToHome();
+            return new GeneralOpFailure();
         }
         val status = userRoleStore.get().unmapUserFromRole(userId, serviceId);
         log.info("Status for unmapping user {} from role: {}/{}: {}", userId, serviceId, roleId, status);
         if (null == referer || referer.toString().isEmpty()) {
-            return redirectToUserPage(userId);
+            return new UserOpSuccess(userId);
         }
-        return Response.seeOther(URI.create(referer.getPath())).build();
-    }
-
-    private static Response redirectToHome() {
-        return Response.seeOther(URI.create("/")).build();
-    }
-
-    private static Response redirectToServicePage(final String serviceId) {
-        return Response.seeOther(URI.create("/services/" + serviceId)).build();
-    }
-
-    private static Response redirectToUserPage(final String userId) {
-        return Response.seeOther(URI.create("/users/" + userId)).build();
-    }
-
-    private static Response redirectToPasswordChangePage(final String userId) {
-        return Response.seeOther(URI.create("/users/" + userId + "/update/password")).build();
+        return new RedirectToParam(referer.getPath());
     }
 }

@@ -15,9 +15,9 @@
 package io.appform.idman.server.resources;
 
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
-import io.appform.idman.server.Engine;
+import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.auth.IdmanRoles;
-import io.appform.idman.server.db.*;
+import io.appform.idman.server.engine.ViewEngineResponseTranslator;
 import io.appform.idman.server.views.NewUserView;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -28,7 +28,6 @@ import ru.vyarus.guicey.gsp.views.template.TemplateView;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -48,26 +47,13 @@ import java.net.URI;
 @PermitAll
 public class Home {
 
-    private final Provider<ServiceStore> serviceStore;
-    private final Provider<RoleStore> roleStore;
-    private final Provider<UserInfoStore> userInfoStore;
-    private final Provider<PasswordStore> passwordStore;
-    private final Provider<UserRoleStore> userRoleStore;
     private final Engine engine;
+    private final ViewEngineResponseTranslator translator;
 
     @Inject
-    public Home(
-            Provider<ServiceStore> serviceStore,
-            Provider<RoleStore> roleStore,
-            Provider<UserInfoStore> userInfoStore,
-            Provider<PasswordStore> passwordStore,
-            Provider<UserRoleStore> userRoleStore, Engine engine) {
-        this.serviceStore = serviceStore;
-        this.roleStore = roleStore;
-        this.userInfoStore = userInfoStore;
-        this.passwordStore = passwordStore;
-        this.userRoleStore = userRoleStore;
+    public Home(Engine engine, ViewEngineResponseTranslator translator) {
         this.engine = engine;
+        this.translator = translator;
     }
 
     @GET
@@ -75,7 +61,7 @@ public class Home {
     public Response home(
             @Auth final ServiceUserPrincipal principal,
             @QueryParam("redirect") @Size(max = 4096) final String redirect) {
-        return engine.renderHome(principal, redirect);
+        return translator.translate(engine.renderHome(principal, redirect));
     }
 
     @Path("/services")
@@ -86,7 +72,7 @@ public class Home {
             @FormParam("newServiceName") @NotNull @Size(min = 1, max = 45) final String newServiceName,
             @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription,
             @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
-        return engine.createService(newServiceName, newServiceDescription, newServiceCallbackUrl);
+        return translator.translate(engine.createService(newServiceName, newServiceDescription, newServiceCallbackUrl));
     }
 
     @Path("/services/new")
@@ -101,7 +87,7 @@ public class Home {
     public Response serviceDetails(
             @Auth final ServiceUserPrincipal principal,
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
-        return engine.renderServiceDetails(principal, serviceId);
+        return translator.translate(engine.renderServiceDetails(principal, serviceId));
     }
 
     @Path("/services/{serviceId}/update/description")
@@ -111,7 +97,7 @@ public class Home {
     public Response updateServiceDescription(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription) {
-        return engine.updateServiceDescription(serviceId, newServiceDescription);
+        return translator.translate(engine.updateServiceDescription(serviceId, newServiceDescription));
     }
 
     @Path("/services/{serviceId}/update/callback")
@@ -121,7 +107,7 @@ public class Home {
     public Response updateServiceCallbackUrl(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
-        return engine.updateServiceCallbackUrl(serviceId, newServiceCallbackUrl);
+        return translator.translate(engine.updateServiceCallbackUrl(serviceId, newServiceCallbackUrl));
     }
 
 
@@ -131,7 +117,7 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response updateServiceSecret(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
-        return engine.regenerateServiceSecret(serviceId);
+        return translator.translate(engine.regenerateServiceSecret(serviceId));
     }
 
     @Path("/services/{serviceId}/delete")
@@ -140,7 +126,7 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response deleteService(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
-        return engine.deleteService(serviceId);
+        return translator.translate(engine.deleteService(serviceId));
     }
 
     @Path("/services/{serviceId}/roles")
@@ -151,7 +137,7 @@ public class Home {
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("newRoleName") @NotEmpty @Size(max = 45) final String newRoleName,
             @FormParam("newRoleDescription") @NotEmpty @Size(max = 45) final String newRoleDescription) {
-        return engine.createRole(serviceId, newRoleName, newRoleDescription);
+        return translator.translate(engine.createRole(serviceId, newRoleName, newRoleDescription));
     }
 
     @Path("/services/{serviceId}/roles/{roleId}/update")
@@ -163,7 +149,7 @@ public class Home {
             @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
             @FormParam("roleDescription") @NotEmpty @Size(max = 45) final String roleDescription) {
 
-        return engine.updateRole(serviceId, roleId, roleDescription);
+        return translator.translate(engine.updateRole(serviceId, roleId, roleDescription));
     }
 
     @Path("/services/{serviceId}/roles/{roleId}/delete")
@@ -173,7 +159,7 @@ public class Home {
     public Response deleteRole(
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId) {
-        return engine.deleteRole(serviceId, roleId);
+        return translator.translate(engine.deleteRole(serviceId, roleId));
     }
 
     @Path("/users/new")
@@ -191,7 +177,7 @@ public class Home {
             @FormParam("email") @Email @NotEmpty @Size(max = 255) final String email,
             @FormParam("name") @NotEmpty @Size(max = 255) final String name,
             @FormParam("password") @NotEmpty final String password) {
-        return engine.createHumanUser(email, name, password);
+        return translator.translate(engine.createHumanUser(email, name, password));
     }
 
     @Path("/users/{userId}")
@@ -200,7 +186,7 @@ public class Home {
     public Response userDetails(
             @Auth final ServiceUserPrincipal principal,
             @PathParam("userId") @NotEmpty @Size(max = 255) final String userId) {
-        return engine.userDetails(principal, userId);
+        return translator.translate(engine.userDetails(principal, userId));
     }
 
     @Path("/users/{userId}/update")
@@ -210,7 +196,7 @@ public class Home {
             @Auth final ServiceUserPrincipal sessionUser,
             @PathParam("userId") @NotEmpty @Size(max = 255) final String userId,
             @FormParam("name") @NotEmpty @Size(max = 255) final String name) {
-        return engine.updateUser(sessionUser, userId, name);
+        return translator.translate(engine.updateUser(sessionUser, userId, name));
     }
 
     @Path("/users/{userId}/delete")
@@ -219,7 +205,7 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response deleteUser(
             @PathParam("userId") @NotEmpty @Size(max = 255) final String userId) {
-        return engine.deleteUser(userId);
+        return translator.translate(engine.deleteUser(userId));
     }
 
     @Path("/users/{userId}/update/password")
@@ -228,7 +214,7 @@ public class Home {
     public Response renderPasswordChangePage(
             @Auth final ServiceUserPrincipal principal,
             @PathParam("userId") @NotEmpty @Size(max = 45) final String userId) {
-        return engine.renderPasswordChangePage(principal, userId);
+        return translator.translate(engine.renderPasswordChangePage(principal, userId));
     }
 
     @Path("/users/{userId}/update/password")
@@ -240,7 +226,11 @@ public class Home {
             @FormParam("oldPassword") @NotEmpty @Size(max = 255) final String oldPassword,
             @FormParam("newPassword") @NotEmpty @Size(max = 255) final String newPassword,
             @FormParam("newPasswordConf") @NotEmpty @Size(max = 255) final String newPasswordConf) {
-        return engine.changePassword(sessionUser, userId, oldPassword, newPassword, newPasswordConf);
+        return translator.translate(engine.changePassword(sessionUser,
+                                                          userId,
+                                                          oldPassword,
+                                                          newPassword,
+                                                          newPasswordConf));
     }
 
     @Path("/users/{userId}/update/password/forced")
@@ -252,7 +242,7 @@ public class Home {
             @PathParam("userId") @NotEmpty @Size(max = 255) final String userId,
             @FormParam("newPassword") @NotEmpty @Size(max = 255) final String newPassword,
             @FormParam("newPasswordConf") @NotEmpty @Size(max = 255) final String newPasswordConf) {
-        return engine.changePasswordForced(sessionUser, userId, newPassword, newPasswordConf);
+        return translator.translate(engine.changePasswordForced(sessionUser, userId, newPassword, newPasswordConf));
     }
 
     @Path("/roles/{serviceId}/map")
@@ -265,7 +255,7 @@ public class Home {
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @FormParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
             @FormParam("userId") @NotEmpty @Size(max = 45) final String userId) {
-        return engine.mapUserToRole(sessionUser, referer, serviceId, roleId, userId);
+        return translator.translate(engine.mapUserToRole(sessionUser, referer, serviceId, roleId, userId));
     }
 
     @Path("/roles/{serviceId}/{roleId}/unmap/{userId}")
@@ -277,7 +267,7 @@ public class Home {
             @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
             @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
             @PathParam("userId") @NotEmpty @Size(max = 45) final String userId) {
-        return engine.unmapUserFromRole(referer, serviceId, roleId, userId);
+        return translator.translate(engine.unmapUserFromRole(referer, serviceId, roleId, userId));
     }
 
 }

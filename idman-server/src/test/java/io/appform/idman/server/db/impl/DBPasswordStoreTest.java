@@ -50,6 +50,7 @@ class DBPasswordStoreTest {
 
         //Test failed update
         assertFalse(database.inTransaction(() -> passwordStore.update("TU1", "password1", "password1")));
+        assertFalse(database.inTransaction(() -> passwordStore.update("TU1", "password", "password")));
 
         //Test successful update
         assertTrue(database.inTransaction(() -> passwordStore.update("TU1", "password", "password1")));

@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.ServiceStore;
 import io.appform.idman.server.db.SessionStore;
@@ -36,6 +35,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 
 import javax.inject.Inject;
+
+import static io.appform.idman.server.utils.Utils.toWire;
 
 /**
  *
@@ -115,10 +116,7 @@ public class LocalIdmanAuthClient extends IdManClient {
         log.debug("authentication_success userId:{} tokenId:{}", userId, sessionId);
         return new IdmanUser(sessionId,
                              serviceId,
-                             new User(user.getUserId(),
-                                      user.getName(),
-                                      user.getUserType(),
-                                      user.getAuthState().getAuthMode()),
+                             toWire(user),
                              role);
     }
 

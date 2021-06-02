@@ -16,6 +16,7 @@ package io.appform.idman.server.utils;
 
 import com.google.common.base.Charsets;
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.model.StoredUserSession;
@@ -108,5 +109,12 @@ public class Utils {
                         AlgorithmIdentifiers.HMAC_SHA512))
                 .setExpectedAudience(serviceId)
                 .build();
+    }
+
+    public static User toWire(io.appform.idman.server.db.model.StoredUser user) {
+        return new User(user.getUserId(),
+                        user.getName(),
+                        user.getUserType(),
+                        user.getAuthState().getAuthMode());
     }
 }

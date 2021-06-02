@@ -54,7 +54,7 @@ public class DBPasswordStore extends AbstractDAO<StoredPassword> implements Pass
     @Override
     public boolean update(String userId, String oldPassword, String newPassword) {
         return updatePasswordObject(userId, pwd -> {
-            if (verify(oldPassword, pwd)) {
+            if (verify(oldPassword, pwd) && !oldPassword.equals(newPassword)) {
                 pwd.setPassword(hash(newPassword));
                 return pwd;
             }

@@ -22,10 +22,11 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
-import io.appform.idman.server.Engine;
+import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
+import io.appform.idman.server.engine.ViewEngineResponseTranslator;
 import io.appform.idman.server.utils.TestingUtils;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
@@ -40,7 +41,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import ru.vyarus.guicey.gsp.app.rest.support.TemplateAnnotationFilter;
+import ru.vyarus.guicey.gsp.views.template.TemplateContext;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Optional;
@@ -80,12 +84,11 @@ class HomeTest2 {
             .addProvider(new AuthValueFactoryProvider.Binder<>(ServiceUserPrincipal.class))
             .addProvider(new TemplateAnnotationFilter())
 //            .addResource(new Hello())
-            .addResource(new Home(() -> serviceStore,
-                                  () -> roleStore,
-                                  () -> userInfoStore,
-                                  () -> passwordStore,
-                                  () -> userRoleStore,
-                                  new Engine(null, null, null, null, null)))
+            .addResource(new Home(new Engine(() -> serviceStore,
+                                             () -> roleStore,
+                                             () -> userInfoStore,
+                                             () -> passwordStore,
+                                             () -> userRoleStore), new ViewEngineResponseTranslator()))
             .build();
 
     @BeforeEach
@@ -111,22 +114,28 @@ class HomeTest2 {
 
     @Test
     void testRun() {
-        assertEquals("hello TU",
-                     EXT.target("/ui")
-                             .request()
-                             .header(HttpHeaders.AUTHORIZATION, "Bearer USER_TOKEN")
-                             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                             .get(String.class));
-        assertEquals("hello TA",
-                     EXT.target("/hello")
-                             .request()
-                             .header(HttpHeaders.AUTHORIZATION, "Bearer ADMIN_TOKEN")
-                             .get(String.class));
-        assertEquals(HttpStatus.SC_NOT_FOUND,
-                     EXT.target("/hello")
-                             .request()
-                             .header(HttpHeaders.AUTHORIZATION, "Bearer WRONG_TOKEN")
-                             .get()
-                             .getStatus());
+        val ctx = mock(TemplateContext.class);
+        doReturn("testpath")
+                .when(ctx).lookupTemplatePath(anyString());
+        try (MockedStatic<TemplateContext> ctxM = Mockito.mockStatic(TemplateContext.class)) {
+            ctxM.when(TemplateContext::getInstance).thenReturn(ctx);
+            assertEquals("hello TU",
+                         EXT.target("/ui")
+                                 .request()
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer USER_TOKEN")
+                                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                                 .get(String.class));
+            assertEquals("hello TA",
+                         EXT.target("/hello")
+                                 .request()
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer ADMIN_TOKEN")
+                                 .get(String.class));
+            assertEquals(HttpStatus.SC_NOT_FOUND,
+                         EXT.target("/hello")
+                                 .request()
+                                 .header(HttpHeaders.AUTHORIZATION, "Bearer WRONG_TOKEN")
+                                 .get()
+                                 .getStatus());
+        }
     }
 }
