@@ -73,7 +73,7 @@ class PasswordAuthenticationProviderTest {
                                                                      UserType.HUMAN,
                                                                      AuthMode.PASSWORD)).orElse(null);
         Objects.requireNonNull(user);
-        database.inTransaction(() -> passwordStore.set(user.getUserId(), "TESTPASSWORD"));
+        database.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "TESTPASSWORD"));
 
         authenticationConfig = TestingUtils.passwordauthConfig();
     }

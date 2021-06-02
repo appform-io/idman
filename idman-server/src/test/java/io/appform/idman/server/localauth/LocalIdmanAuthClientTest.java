@@ -32,6 +32,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Optional;
+import java.util.concurrent.Callable;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -75,16 +78,16 @@ class LocalIdmanAuthClientTest {
         val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
                 .orElse(null));
         assertNotNull(user);
-        db.inTransaction(() -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
         val role = db.inTransaction(() -> roleStore.create(service.getServiceId(), "TestRole", "")).orElse(null);
         assertNotNull(role);
-        db.inTransaction(() -> userRoleStore.mapUserToRole(user.getUserId(),
-                                                           service.getServiceId(),
-                                                           role.getRoleId(),
-                                                           "TEST"));
+        db.inTransaction((Runnable) () -> userRoleStore.mapUserToRole(user.getUserId(),
+                                                                      service.getServiceId(),
+                                                                      role.getRoleId(),
+                                                                      "TEST"));
         val authProvider = new PasswordAuthenticationProvider(config,
                                                               () -> userStore,
                                                               () -> passwordStore,
@@ -105,7 +108,7 @@ class LocalIdmanAuthClientTest {
         val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
                 .orElse(null));
         assertNotNull(user);
-        db.inTransaction(() -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
@@ -121,7 +124,7 @@ class LocalIdmanAuthClientTest {
         assertFalse(Strings.isNullOrEmpty(jwt));
         val idmanUser = db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId()));
         assertNotNull(idmanUser);
-        assertTrue(db.inTransaction(() -> serviceStore.delete(service.getServiceId())));
+        assertTrue(db.inTransaction((Callable<Boolean>) () -> serviceStore.delete(service.getServiceId())));
         assertNull(db.inTransaction(() -> client.validateImpl(jwt, "S2")));
         assertNull(db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId())));
     }
@@ -136,10 +139,14 @@ class LocalIdmanAuthClientTest {
 
     @Test
     void testValidateWrongService() {
-        val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
-                .orElse(null));
+        val user = db.inTransaction((Callable<Optional<StoredUser>>) () -> userStore.create("U1",
+                                                                                            "u@u.t",
+                                                                                            "TestUser",
+                                                                                            UserType.HUMAN,
+                                                                                            AuthMode.PASSWORD)
+                                   ).orElse(null);
         assertNotNull(user);
-        db.inTransaction(() -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
@@ -161,10 +168,14 @@ class LocalIdmanAuthClientTest {
 
     @Test
     void testValidateNoSession() {
-        val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
-                .orElse(null));
+        val user = db.inTransaction((Callable<Optional<StoredUser>>) () -> userStore.create("U1",
+                                                                                            "u@u.t",
+                                                                                            "TestUser",
+                                                                                            UserType.HUMAN,
+                                                                                            AuthMode.PASSWORD))
+                .orElse(null);
         assertNotNull(user);
-        db.inTransaction(() -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
@@ -172,7 +183,7 @@ class LocalIdmanAuthClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
-        val session = db.inTransaction(() -> authProvider.login(
+        val session = db.inTransaction((Callable<Optional<StoredUserSession>>)() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
@@ -187,7 +198,7 @@ class LocalIdmanAuthClientTest {
         val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
                 .orElse(null));
         assertNotNull(user);
-        db.inTransaction(() -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
