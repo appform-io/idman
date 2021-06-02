@@ -2,6 +2,7 @@
 ## _OAuth Server_
 
 [![Build Status](https://github.com/appform-io/idman/actions/workflows/github-ci.yml/badge.svg?branch=master)](https://github.com/appform-io/idman/actions/workflows/github-ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=appform-io_idman&metric=alert_status)](https://sonarcloud.io/dashboard?id=appform-io_idman)
 
 IDMan is an all in one authentication and authorisation service.
 * Provides centralised authorisation and authentication mechanism for multiple services
