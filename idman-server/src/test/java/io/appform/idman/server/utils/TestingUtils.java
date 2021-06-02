@@ -26,8 +26,15 @@ import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.dropwizard.util.Duration;
 import lombok.experimental.UtilityClass;
 import lombok.val;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import ru.vyarus.guicey.gsp.views.template.TemplateContext;
 
 import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  *
@@ -72,5 +79,16 @@ public class TestingUtils {
     public static StoredService testService() {
         //String serviceId, String name, String description, String callbackUrl, String secret
         return new StoredService("S", "S", "S", "s.com", "S_S");
+    }
+
+    public static void runInCtx(Runnable r) {
+        val ctx = mock(TemplateContext.class);
+        doReturn("testpath")
+                .when(ctx).lookupTemplatePath(anyString());
+        try (MockedStatic<TemplateContext> ctxM = Mockito.mockStatic(TemplateContext.class)) {
+            ctxM.when(TemplateContext::getInstance)
+                    .thenReturn(ctx);
+            r.run();
+        }
     }
 }

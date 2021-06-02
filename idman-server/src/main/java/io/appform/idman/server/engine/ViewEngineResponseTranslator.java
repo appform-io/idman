@@ -64,6 +64,11 @@ public class ViewEngineResponseTranslator implements EngineEvalResultVisitor<Res
     }
 
     @Override
+    public Response visit(GeneralOpFailure generalOpFailure) {
+        return redirectToHome();
+    }
+
+    @Override
     public Response visit(UserOpSuccess userOpSuccess) {
         return redirectToUserPage(userOpSuccess.getUserId());
     }
@@ -73,10 +78,6 @@ public class ViewEngineResponseTranslator implements EngineEvalResultVisitor<Res
         return redirectToUserPage(userOpFailure.getUserId());
     }
 
-    @Override
-    public Response visit(GeneralOpFailure generalOpFailure) {
-        return redirectToHome();
-    }
 
     @Override
     public Response visit(RoleOpFailure roleOpFailure) {

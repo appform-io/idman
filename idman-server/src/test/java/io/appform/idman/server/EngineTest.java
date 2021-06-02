@@ -35,10 +35,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import ru.vyarus.guicey.gsp.views.template.TemplateContext;
 
 import java.net.URI;
 import java.util.Collections;
@@ -108,7 +105,7 @@ class EngineTest {
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
 
         val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", user, IdmanRoles.ADMIN));
-        runInCtx(() -> {
+        TestingUtils.runInCtx(() -> {
             val r = engine.renderHome(principal, null);
             assertEquals(ViewOpSuccess.class, r.getClass());
         });
@@ -204,7 +201,7 @@ class EngineTest {
         doReturn(Collections.singletonList(storedUser)).when(userInfoStore).list(false);
         doReturn(Collections.singletonList(adminRole()))
                 .when(roleStore).list("S", false);
-        runInCtx(() -> {
+        TestingUtils.runInCtx(() -> {
             val r = engine.renderServiceDetails(principal, "S");
             assertEquals(ViewOpSuccess.class, r.getClass());
             val v = ((ViewOpSuccess) r).getView();
@@ -424,7 +421,7 @@ class EngineTest {
         doReturn(Collections.singletonList(new StoredRole("S_ADMIN", testService.getServiceId(), "Admin", "test")))
                 .when(roleStore).get(anyCollection());
 
-        runInCtx(() -> {
+        TestingUtils.runInCtx(() -> {
             val r = engine.userDetails(principal, storedUser.getUserId());
             assertEquals(ViewOpSuccess.class, r.getClass());
             val v = (UserDetailsView) ((ViewOpSuccess) r).getView();
@@ -523,7 +520,7 @@ class EngineTest {
 
         val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(TestingUtils.adminUser()), IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        runInCtx(() -> {
+        TestingUtils.runInCtx(() -> {
             val r = engine.renderPasswordChangePage(principal, storedUser.getUserId());
             assertEquals(ViewOpSuccess.class, r.getClass());
             val v = (PasswordChangeView) ((ViewOpSuccess) r).getView();
@@ -539,7 +536,7 @@ class EngineTest {
 
         val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", user, IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        runInCtx(() -> {
+        TestingUtils.runInCtx(() -> {
             val r = engine.renderPasswordChangePage(principal, storedUser.getUserId());
             assertEquals(ViewOpSuccess.class, r.getClass());
             val v = (PasswordChangeView) ((ViewOpSuccess) r).getView();
@@ -905,14 +902,4 @@ class EngineTest {
         doReturn(Optional.of(testService)).when(serviceStore).get("S");
     }
 
-    void runInCtx(Runnable r) {
-        val ctx = mock(TemplateContext.class);
-        doReturn("testpath")
-                .when(ctx).lookupTemplatePath(anyString());
-        try (MockedStatic<TemplateContext> ctxM = Mockito.mockStatic(TemplateContext.class)) {
-            ctxM.when(TemplateContext::getInstance)
-                    .thenReturn(ctx);
-            r.run();
-        }
-    }
 }
