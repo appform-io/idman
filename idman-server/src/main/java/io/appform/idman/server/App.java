@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.Stage;
 import io.appform.idman.server.db.model.*;
-import io.appform.idman.server.handlebars.HandlebarsHelperBundle;
-import io.appform.idman.server.handlebars.HandlebarsHelpers;
 import io.appform.idman.server.handlebars.HandlebarsViewRenderer;
 import io.appform.idman.server.modules.CoreModule;
 import io.dropwizard.Application;
@@ -56,11 +54,6 @@ public class App extends Application<AppConfig> {
         }
     };
 
-    private HandlebarsHelperBundle<AppConfig> handlebarsBundle = new HandlebarsHelperBundle<AppConfig>() {
-        @Override
-        protected void configureHandlebars(AppConfig configuration) {
-        }
-    };
 
     @Override
     public void initialize(Bootstrap<AppConfig> bootstrap) {
@@ -70,10 +63,6 @@ public class App extends Application<AppConfig> {
                                                new EnvironmentVariableSubstitutor(true)));
         bootstrap.addBundle(hibernate);
 
-        /*
-                bootstrap.addBundle(new AssetsBundle("/assets", "/static"));
-        bootstrap.addBundle(new ViewBundle<>());
-        bootstrap.addBundle(handlebarsBundle);*/
         bootstrap.addBundle(
                 GuiceBundle.<AppConfig>builder()
                         .enableAutoConfig("io.appform.idman.server.resources", "io.appform.idman.authcomponents")
@@ -87,8 +76,6 @@ public class App extends Application<AppConfig> {
                                          .build())
                         .printDiagnosticInfo()
                         .build(Stage.PRODUCTION));
-
-        HandlebarsHelperBundle.registerHelpers(new HandlebarsHelpers());
     }
 
     @Override

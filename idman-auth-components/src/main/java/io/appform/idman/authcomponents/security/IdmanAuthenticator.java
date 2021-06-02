@@ -14,8 +14,8 @@
 
 package io.appform.idman.authcomponents.security;
 
-import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.client.IdManClient;
+import io.appform.idman.client.IdmanClientConfig;
 import io.dropwizard.auth.Authenticator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

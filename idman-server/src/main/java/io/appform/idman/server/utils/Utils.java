@@ -14,7 +14,6 @@
 
 package io.appform.idman.server.utils;
 
-import com.google.common.base.Charsets;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
@@ -45,7 +44,7 @@ import java.util.UUID;
 @UtilityClass
 public class Utils {
     public static String hashedId(String value) {
-        return UUID.nameUUIDFromBytes(value.getBytes(Charsets.UTF_8)).toString();
+        return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     public static String readableId(String value) {

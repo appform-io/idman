@@ -15,9 +15,9 @@
 package io.appform.idman.authcomponents.resource;
 
 import com.google.common.base.Strings;
-import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
+import io.appform.idman.client.IdmanClientConfig;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -76,7 +76,7 @@ public class IdmanAuthHandler {
                         NewCookie.DEFAULT_MAX_AGE,
                         null,
                         false,
-                        false))
+                        true))
                 .cookie(new NewCookie(
                         IDMAN_STATE_COOKIE_NAME,
                         clientAuthSessionId,
@@ -87,7 +87,7 @@ public class IdmanAuthHandler {
                         NewCookie.DEFAULT_MAX_AGE,
                         null,
                         false,
-                        false))
+                        true))
                 .build();
     }
 
@@ -123,8 +123,8 @@ public class IdmanAuthHandler {
                                       null,
                                       false,
                                       true),
-                        new NewCookie(cookieState, null, 0, false),
-                        new NewCookie(localRedirect, null, 0, false))
+                        new NewCookie(cookieState, null, 0, null, false, true),
+                        new NewCookie(localRedirect, null, 0, null, false, true))
                 .build();
     }
 
@@ -135,6 +135,7 @@ public class IdmanAuthHandler {
             @io.dropwizard.auth.Auth final ServiceUserPrincipal principal,
             @CookieParam("idman-token") final Cookie idmanToken) {
         val sessionId = principal.getServiceUser().getSessionId();
+        log.debug("Logging out session: {}", sessionId);
 //        TODO::INTRODUCE CLIENT LEVEL LOGOUT val status = sessionStore.get().delete(sessionId);
 //        log.info("Session {} deletion status for user {}: {}",
 //                 sessionId, principal.getServiceUser().getUser().getId(), status);

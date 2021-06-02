@@ -57,7 +57,6 @@ public class CoreModule extends AbstractModule {
         bind(PasswordStore.class).to(DBPasswordStore.class);
         bind(SessionStore.class).to(DBSessionStore.class);
         bind(UserInfoStore.class).to(DBUserInfoStore.class);
-//        bind(IdManClient.class).to(LocalIdmanAuthClient.class);
     }
 
     @Provides

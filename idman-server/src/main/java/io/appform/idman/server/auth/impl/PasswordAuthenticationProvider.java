@@ -74,6 +74,22 @@ public class PasswordAuthenticationProvider extends AuthenticationProvider {
         return passwordStore.get().match(user.getUserId(), pwdCtx.getPwdAuthInfo().getPassword());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     private PasswordAuthInfo toPwdAuthInfo(AuthInfo authInfo) {
         return authInfo.accept(new AuthInfoVisitor<PasswordAuthInfo>() {
             @Override

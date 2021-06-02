@@ -17,10 +17,10 @@ package io.appform.idman.server.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.appform.idman.server.auth.configs.*;
 import io.appform.idman.server.auth.impl.GoogleAuthenticationProvider;
+import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.PasswordStore;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
-import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 
 import javax.inject.Provider;
 

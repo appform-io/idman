@@ -95,4 +95,25 @@ public abstract class AuthenticationProvider {
     protected abstract Optional<StoredUser> fetchUserDetails(final AuthenticatorContext context);
 
     protected abstract boolean authenticate(final AuthenticatorContext context, final StoredUser user);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        AuthenticationProvider that = (AuthenticationProvider) o;
+
+        return getAuthMode() == that.getAuthMode();
+    }
+
+    @Override
+    public int hashCode() {
+        return getAuthMode() != null
+               ? getAuthMode().hashCode()
+               : 0;
+    }
 }

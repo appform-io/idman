@@ -79,7 +79,7 @@ public class OAuth {
                         NewCookie.DEFAULT_MAX_AGE,
                         null,
                         false,
-                        false))
+                        true))
                 .build();
     }
 
@@ -103,10 +103,10 @@ public class OAuth {
         }
         //val token = authProvider.login(new GoogleAuthInfo(authCode, a, clientSessionId), sessionId).orElse(null);
         val token = "blah";
-        if (null == token) {
+/*        if (null == token) {
             log.debug("No token returned by provider login.");
             return seeOther(cookieState);
-        }
+        }*/
         //TODO::SUBDOMAIN COOKIE
         return Response.seeOther(URI.create("/"))
                 .cookie(new NewCookie("token",
@@ -120,13 +120,13 @@ public class OAuth {
                                       null,
                                       true,
                                       true),
-                        new NewCookie(cookieState, null, 0, false))
+                        new NewCookie(cookieState, null, 0, null, false, true))
                 .build();
     }
 
     private Response seeOther(final Cookie cookieState) {
         return Response.seeOther(URI.create("/"))
-                .cookie(new NewCookie(cookieState, null, 0, false))
+                .cookie(new NewCookie(cookieState, null, 0, null, false, true))
                 .build();
     }
 }

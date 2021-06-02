@@ -54,7 +54,7 @@ class DBServiceStoreTest {
 
         assertNotNull(service);
         val serviceId = service.getServiceId();
-        assertEquals("TESTS", serviceId);
+        assertEquals("TESTS", service.getServiceId());
         assertEquals("TestS", service.getName());
         assertEquals("Test service", service.getDescription());
         assertEquals("https://idman.test", service.getCallbackUrl());
