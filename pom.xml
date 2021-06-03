@@ -140,6 +140,8 @@
                         <exclude>**/*Google*.*</exclude>
                         <exclude>**/*Gauth*.*</exclude>
                         <exclude>**/modules/*.*</exclude>
+                        <exclude>**/Handlebars*.*</exclude>
+
                     </excludes>
                 </configuration>
             </plugin>
