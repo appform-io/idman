@@ -41,10 +41,10 @@ public class StoredRole {
     @Column(name = "role_id", unique = true, nullable = false)
     private String roleId;
 
-    @Column(name = "service_id", nullable = false)
+    @Column(name = "service_id", nullable = false, length = 45)
     private String serviceId;
 
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name", nullable = false, length = 45)
     private String displayName;
 
     @Column(name = "description", nullable = false)

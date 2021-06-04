@@ -69,14 +69,15 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response createService(
-            @FormParam("newServiceName") @NotNull @Size(min = 1, max = 45) final String newServiceName,
-            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription,
-            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
+            @FormParam("newServiceName") @NotNull @Size(min = 1, max = 40) final String newServiceName,
+            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 250) final String newServiceDescription,
+            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 250) final String newServiceCallbackUrl) {
         return translator.translate(engine.createService(newServiceName, newServiceDescription, newServiceCallbackUrl));
     }
 
     @Path("/services/new")
     @GET
+    @RolesAllowed(IdmanRoles.ADMIN)
     public Response newService() {
         return Response.ok(new TemplateView("templates/newservice.hbs")).build();
     }
@@ -86,7 +87,7 @@ public class Home {
     @UnitOfWork
     public Response serviceDetails(
             @Auth final ServiceUserPrincipal principal,
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
+            @PathParam("serviceId") @NotEmpty @Size(min = 1, max = 40) final String serviceId) {
         return translator.translate(engine.renderServiceDetails(principal, serviceId));
     }
 
@@ -95,8 +96,8 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response updateServiceDescription(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 255) final String newServiceDescription) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @FormParam("newServiceDescription") @NotNull @Size(min = 1, max = 250) final String newServiceDescription) {
         return translator.translate(engine.updateServiceDescription(serviceId, newServiceDescription));
     }
 
@@ -105,8 +106,8 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response updateServiceCallbackUrl(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 255) final String newServiceCallbackUrl) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @FormParam("newServiceCallbackUrl") @NotNull @Size(min = 1, max = 250) final String newServiceCallbackUrl) {
         return translator.translate(engine.updateServiceCallbackUrl(serviceId, newServiceCallbackUrl));
     }
 
@@ -116,7 +117,7 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response updateServiceSecret(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
+            @PathParam("serviceId") @NotEmpty @Size(min = 1, max = 40) final String serviceId) {
         return translator.translate(engine.regenerateServiceSecret(serviceId));
     }
 
@@ -125,7 +126,7 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response deleteService(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId) {
+            @PathParam("serviceId") @NotEmpty @Size(min = 1, max = 40) final String serviceId) {
         return translator.translate(engine.deleteService(serviceId));
     }
 
@@ -134,9 +135,9 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response createRole(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @FormParam("newRoleName") @NotEmpty @Size(max = 45) final String newRoleName,
-            @FormParam("newRoleDescription") @NotEmpty @Size(max = 45) final String newRoleDescription) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @FormParam("newRoleName") @NotEmpty @Size(max = 40) final String newRoleName,
+            @FormParam("newRoleDescription") @NotEmpty @Size(max = 250) final String newRoleDescription) {
         return translator.translate(engine.createRole(serviceId, newRoleName, newRoleDescription));
     }
 
@@ -145,9 +146,9 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response updateRole(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
-            @FormParam("roleDescription") @NotEmpty @Size(max = 45) final String roleDescription) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @PathParam("roleId") @NotEmpty @Size(max = 40) final String roleId,
+            @FormParam("roleDescription") @NotEmpty @Size(max = 250) final String roleDescription) {
 
         return translator.translate(engine.updateRole(serviceId, roleId, roleDescription));
     }
@@ -157,8 +158,8 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response deleteRole(
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @PathParam("roleId") @NotEmpty @Size(max = 40) final String roleId) {
         return translator.translate(engine.deleteRole(serviceId, roleId));
     }
 
@@ -174,9 +175,9 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response createHumanUser(
-            @FormParam("email") @Email @NotEmpty @Size(max = 255) final String email,
-            @FormParam("name") @NotEmpty @Size(max = 255) final String name,
-            @FormParam("password") @NotEmpty final String password) {
+            @FormParam("email") @Email @NotEmpty @Size(max = 250) final String email,
+            @FormParam("name") @NotEmpty @Size(max = 250) final String name,
+            @FormParam("password") @NotEmpty @Size(max = 40) final String password) {
         return translator.translate(engine.createHumanUser(email, name, password));
     }
 
@@ -185,7 +186,7 @@ public class Home {
     @UnitOfWork
     public Response userDetails(
             @Auth final ServiceUserPrincipal principal,
-            @PathParam("userId") @NotEmpty @Size(max = 255) final String userId) {
+            @PathParam("userId") @NotEmpty @Size(max = 250) final String userId) {
         return translator.translate(engine.userDetails(principal, userId));
     }
 
@@ -194,8 +195,8 @@ public class Home {
     @UnitOfWork
     public Response updateUser(
             @Auth final ServiceUserPrincipal sessionUser,
-            @PathParam("userId") @NotEmpty @Size(max = 255) final String userId,
-            @FormParam("name") @NotEmpty @Size(max = 255) final String name) {
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId,
+            @FormParam("name") @NotEmpty @Size(max = 250) final String name) {
         return translator.translate(engine.updateUser(sessionUser, userId, name));
     }
 
@@ -204,7 +205,7 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response deleteUser(
-            @PathParam("userId") @NotEmpty @Size(max = 255) final String userId) {
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.deleteUser(userId));
     }
 
@@ -213,7 +214,7 @@ public class Home {
     @UnitOfWork
     public Response renderPasswordChangePage(
             @Auth final ServiceUserPrincipal principal,
-            @PathParam("userId") @NotEmpty @Size(max = 45) final String userId) {
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.renderPasswordChangePage(principal, userId));
     }
 
@@ -222,10 +223,10 @@ public class Home {
     @UnitOfWork
     public Response changePassword(
             @Auth final ServiceUserPrincipal sessionUser,
-            @PathParam("userId") @NotEmpty @Size(max = 255) final String userId,
-            @FormParam("oldPassword") @NotEmpty @Size(max = 255) final String oldPassword,
-            @FormParam("newPassword") @NotEmpty @Size(max = 255) final String newPassword,
-            @FormParam("newPasswordConf") @NotEmpty @Size(max = 255) final String newPasswordConf) {
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId,
+            @FormParam("oldPassword") @NotEmpty @Size(max = 40) final String oldPassword,
+            @FormParam("newPassword") @NotEmpty @Size(max = 40) final String newPassword,
+            @FormParam("newPasswordConf") @NotEmpty @Size(max = 40) final String newPasswordConf) {
         return translator.translate(engine.changePassword(sessionUser,
                                                           userId,
                                                           oldPassword,
@@ -239,9 +240,9 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response changePasswordForced(
             @Auth final ServiceUserPrincipal sessionUser,
-            @PathParam("userId") @NotEmpty @Size(max = 255) final String userId,
-            @FormParam("newPassword") @NotEmpty @Size(max = 255) final String newPassword,
-            @FormParam("newPasswordConf") @NotEmpty @Size(max = 255) final String newPasswordConf) {
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId,
+            @FormParam("newPassword") @NotEmpty @Size(max = 40) final String newPassword,
+            @FormParam("newPasswordConf") @NotEmpty @Size(max = 40) final String newPasswordConf) {
         return translator.translate(engine.changePasswordForced(sessionUser, userId, newPassword, newPasswordConf));
     }
 
@@ -252,9 +253,9 @@ public class Home {
     public Response mapUserToRole(
             @Auth final ServiceUserPrincipal sessionUser,
             @HeaderParam("Referer") final URI referer,
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @FormParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
-            @FormParam("userId") @NotEmpty @Size(max = 45) final String userId) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @FormParam("roleId") @NotEmpty @Size(max = 40) final String roleId,
+            @FormParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.mapUserToRole(sessionUser, referer, serviceId, roleId, userId));
     }
 
@@ -264,9 +265,9 @@ public class Home {
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response unmapUserFromRole(
             @HeaderParam("Referer") final URI referer,
-            @PathParam("serviceId") @NotEmpty @Size(max = 45) final String serviceId,
-            @PathParam("roleId") @NotEmpty @Size(max = 45) final String roleId,
-            @PathParam("userId") @NotEmpty @Size(max = 45) final String userId) {
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @PathParam("roleId") @NotEmpty @Size(max = 40) final String roleId,
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.unmapUserFromRole(referer, serviceId, roleId, userId));
     }
 

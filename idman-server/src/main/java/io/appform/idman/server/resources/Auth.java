@@ -65,10 +65,10 @@ public class Auth {
     @Path("/login/{serviceId}")
     @GET
     public Response loginScreen(
-            @PathParam("serviceId") @NotEmpty @Size(max = 255) final String serviceId,
+            @PathParam("serviceId") @NotEmpty @Size(max = 250) final String serviceId,
             @QueryParam("redirect") @NotEmpty @Size(max = 4096) final String redirect,
-            @QueryParam("clientSessionId") @NotEmpty @Size(max = 255) final String clientSessionId,
-            @QueryParam("error") @Size(max = 255) final String error) {
+            @QueryParam("clientSessionId") @NotEmpty @Size(max = 250) final String clientSessionId,
+            @QueryParam("error") @Size(max = 250) final String error) {
         return Response.ok(new LoginScreenView(error, serviceId, clientSessionId, redirect)).build();
     }
 
@@ -77,11 +77,11 @@ public class Auth {
     @UnitOfWork
     public Response passwordLogin(
             @HeaderParam("Referer") final URI referer,
-            @FormParam("email") @NotEmpty @Size(max = 255) final String email,
-            @FormParam("password") @NotEmpty @Size(max = 255) final String password,
+            @FormParam("email") @NotEmpty @Size(max = 250) final String email,
+            @FormParam("password") @NotEmpty @Size(max = 250) final String password,
             @FormParam("redirect") @NotEmpty @Size(max = 4096) final String redirect,
-            @FormParam("serviceId") @Size(max = 255) final String serviceId,
-            @FormParam("clientSessionId") @Size(max = 255) final String clientSessionId) {
+            @FormParam("serviceId") @Size(max = 250) final String serviceId,
+            @FormParam("clientSessionId") @Size(max = 250) final String clientSessionId) {
         val service = Strings.isNullOrEmpty(serviceId)
                       ? null
                       : serviceStore.get().get(serviceId).orElse(null);

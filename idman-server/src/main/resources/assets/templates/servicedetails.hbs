@@ -25,7 +25,7 @@
                                            id="newServiceDescription"
                                            name="newServiceDescription"
                                            placeholder="A meaningful description" value="{{description}}"
-                                           maxlength="255" required>
+                                           maxlength="250" required>
 
                                     <button type="submit" class="btn btn-primary mb-2 float-right">Update
                                     </button>
@@ -45,7 +45,7 @@
                                     <input type="url" class="flex-fill form-control mb-2 mr-sm-2"
                                            id="newServiceCallbackUrl" name="newServiceCallbackUrl"
                                            placeholder="Callback URL. Example: https://mydomain.com" value="{{callbackUrl}}"
-                                           maxlength="255" required>
+                                           maxlength="250" required>
 
                                     <button type="submit" class="btn btn-primary mb-2 float-right">Update
                                     </button>
@@ -111,11 +111,11 @@
 
                             <label class="sr-only" for="newRoleName">Name</label>
                             <input type="text" class="form-control mb-2 mr-sm-2" id="newRoleName" name="newRoleName"
-                                   placeholder="Role name" pattern="[a-zA-Z0-9\-_ ]+" maxlength="45" required>
+                                   placeholder="Role name" pattern="[a-zA-Z0-9\-_ ]+" maxlength="40" required>
                             <label class="sr-only" for="newRoleDescription">Name</label>
                             <input type="text" class="flex-fill form-control mb-2 mr-sm-2" id="newRoleDescription"
                                    name="newRoleDescription"
-                                   placeholder="Role description" pattern="[a-zA-Z0-9\-_,. ]+" maxlength="255" required>
+                                   placeholder="Role description" pattern="[a-zA-Z0-9\-_,. ]+" maxlength="250" required>
                             <button type="submit" class="btn btn-primary mb-2">Create Role</button>
                         </form>
                     </div>
@@ -145,7 +145,7 @@
                                               autocomplete="off">
                                             <label class="sr-only" for="roleDescription">Description</label>
                                             <input type="text" id="roleDescription" name="roleDescription"
-                                                   placeholder="Role description"  pattern="[a-zA-Z0-9\-_,. ]+" maxlength="255"
+                                                   placeholder="Role description"  pattern="[a-zA-Z0-9\-_,. ]+" maxlength="250"
                                                    value="{{description}}"
                                                    required/>
                                             <button type="submit" class="btn btn-sm btn-link btn-role-update">Update</button>

@@ -26,6 +26,7 @@ import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.dropwizard.util.Duration;
 import lombok.experimental.UtilityClass;
 import lombok.val;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import ru.vyarus.guicey.gsp.views.template.TemplateContext;
@@ -90,5 +91,9 @@ public class TestingUtils {
                     .thenReturn(ctx);
             r.run();
         }
+    }
+
+    public static String randomString(int size) {
+        return RandomStringUtils.randomAlphabetic(size);
     }
 }
