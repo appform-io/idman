@@ -32,7 +32,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -58,7 +57,8 @@ public class FirstTimeWizard {
             Provider<UserInfoStore> userStore,
             Provider<PasswordStore> passwordStore,
             Provider<UserRoleStore> userRoleStore,
-            Provider<ServiceStore> serviceStore, Provider<RoleStore> roleStore) {
+            Provider<ServiceStore> serviceStore,
+            Provider<RoleStore> roleStore) {
         this.userStore = userStore;
         this.passwordStore = passwordStore;
         this.userRoleStore = userRoleStore;
@@ -82,14 +82,14 @@ public class FirstTimeWizard {
     @UnitOfWork
     @SneakyThrows
     public Response setup(
-            @HeaderParam("Referer") final URL referer,
+            @HeaderParam("Referer") final URI referer,
             @FormParam("email") final String email,
             @FormParam("name") final String name,
             @FormParam("password") final String password) {
         if (null != serviceStore.get().get("IDMAN").orElse(null)) {
             return Response.seeOther(URI.create("/")).build();
         }
-        val redirectUri = UriBuilder.fromUri(referer.toURI()).replacePath("/apis/idman/auth/callback").build();
+        val redirectUri = UriBuilder.fromUri(referer).replacePath("/apis/idman/auth/callback").build();
         val service = serviceStore.get().create("IDMan",
                                                 "Identity management service",
                                                 redirectUri.toASCIIString())
