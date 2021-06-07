@@ -18,6 +18,7 @@ import com.google.common.base.Strings;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
+import io.dropwizard.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -60,7 +61,7 @@ public class IdmanAuthHandler {
                 .queryParam("redirect", callbackPath)
                 .queryParam("clientSessionId", clientAuthSessionId);
         if(!Strings.isNullOrEmpty(error)) {
-            uriBuilder.queryParam("error", Strings.isNullOrEmpty(error) ? "" : error);
+            uriBuilder.queryParam("error", error);
         }
         val idmanUri = uriBuilder.build();
         val finalRedirect = null != localRedirect ? localRedirect.getValue() : referrer;
@@ -98,6 +99,10 @@ public class IdmanAuthHandler {
             @CookieParam(IDMAN_LOCAL_REDIRECT) final Cookie localRedirect,
             @QueryParam("clientSessionId") final String clientSessionId,
             @QueryParam("code") final String token) {
+        if(null == cookieState || null == localRedirect) {
+            log.error("Missing cookie params for callback");
+            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
+        }
         if (!cookieState.getValue().equals(clientSessionId)) {
             log.error("State cookie mismatch. Expected: {} Received callback for: {}",
                       cookieState.getValue(), clientSessionId);
@@ -131,9 +136,7 @@ public class IdmanAuthHandler {
     @Path("/logout")
     @POST
     @PermitAll
-    public Response logout(
-            @io.dropwizard.auth.Auth final ServiceUserPrincipal principal,
-            @CookieParam("idman-token") final Cookie idmanToken) {
+    public Response logout(@Auth final ServiceUserPrincipal principal) {
         val sessionId = principal.getServiceUser().getSessionId();
         log.debug("Logging out session: {}", sessionId);
 //        TODO::INTRODUCE CLIENT LEVEL LOGOUT val status = sessionStore.get().delete(sessionId);

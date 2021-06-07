@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static io.appform.idman.server.utils.TestingUtils.adminUser;
-import static io.appform.idman.server.utils.TestingUtils.normalUser;
+import static io.appform.idman.server.utils.ServerTestingUtils.adminUser;
+import static io.appform.idman.server.utils.ServerTestingUtils.normalUser;
 import static io.appform.idman.server.utils.Utils.toWire;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

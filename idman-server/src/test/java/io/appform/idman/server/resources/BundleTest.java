@@ -18,11 +18,11 @@ import com.codahale.metrics.SharedMetricRegistries;
 import io.appform.idman.authcomponents.IdmanAuthDynamicFeature;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
+import io.appform.idman.client.ClientTestingUtils;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
-import io.appform.idman.server.utils.TestingUtils;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -74,7 +74,7 @@ class BundleTest {
 
     private final ResourceExtension EXT = ResourceExtension.builder()
             .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-            .addProvider(new IdmanAuthDynamicFeature(environment, TestingUtils.clientConfig(), idmanClient))
+            .addProvider(new IdmanAuthDynamicFeature(environment, ClientTestingUtils.clientConfig(), idmanClient))
             .addProvider(RolesAllowedDynamicFeature.class)
             .addProvider(new AuthValueFactoryProvider.Binder<>(ServiceUserPrincipal.class))
             .addResource(new Hello())

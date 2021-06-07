@@ -18,6 +18,7 @@ import com.codahale.metrics.SharedMetricRegistries;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.appform.idman.authcomponents.IdmanAuthDynamicFeature;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
+import io.appform.idman.client.ClientTestingUtils;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.IdmanUser;
@@ -28,7 +29,6 @@ import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
-import io.appform.idman.server.utils.TestingUtils;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -63,7 +63,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static io.appform.idman.server.utils.TestingUtils.randomString;
+import static io.appform.idman.server.utils.ServerTestingUtils.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -100,7 +100,7 @@ class HomeFormValidationsTest {
 
     private final ResourceExtension EXT = ResourceExtension.builder()
             .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-            .addProvider(new IdmanAuthDynamicFeature(environment, TestingUtils.clientConfig(), idmanClient))
+            .addProvider(new IdmanAuthDynamicFeature(environment, ClientTestingUtils.clientConfig(), idmanClient))
             .addProvider(RolesAllowedDynamicFeature.class)
             .addProvider(new AuthValueFactoryProvider.Binder<>(ServiceUserPrincipal.class))
             .addResource(new Home(new Engine(() -> serviceStore,

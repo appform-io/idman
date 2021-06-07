@@ -30,7 +30,7 @@ import io.appform.idman.server.db.model.StoredPassword;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.appform.idman.server.db.model.StoredUserSession;
-import io.appform.idman.server.utils.TestingUtils;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import lombok.val;
@@ -75,7 +75,7 @@ class PasswordAuthenticationProviderTest {
         Objects.requireNonNull(user);
         database.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "TESTPASSWORD"));
 
-        authenticationConfig = TestingUtils.passwordauthConfig();
+        authenticationConfig = ServerTestingUtils.passwordauthConfig();
     }
 
     @Test

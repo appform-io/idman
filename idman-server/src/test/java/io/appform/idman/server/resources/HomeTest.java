@@ -13,7 +13,7 @@ import ru.vyarus.guicey.gsp.views.template.TemplateView;
 
 import java.net.URI;
 
-import static io.appform.idman.server.utils.TestingUtils.runInCtx;
+import static io.appform.idman.server.utils.ServerTestingUtils.runInCtx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 

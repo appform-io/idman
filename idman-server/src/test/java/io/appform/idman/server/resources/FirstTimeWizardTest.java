@@ -4,7 +4,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
-import io.appform.idman.server.utils.TestingUtils;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.views.NewUserView;
 import lombok.val;
 import org.apache.http.HttpStatus;
@@ -16,8 +16,8 @@ import org.mockito.stubbing.Answer;
 import java.net.URI;
 import java.util.Optional;
 
-import static io.appform.idman.server.utils.TestingUtils.runInCtx;
-import static io.appform.idman.server.utils.TestingUtils.testService;
+import static io.appform.idman.server.utils.ServerTestingUtils.runInCtx;
+import static io.appform.idman.server.utils.ServerTestingUtils.testService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
@@ -85,7 +85,7 @@ class FirstTimeWizardTest {
     void testSetupSuccess() {
         val testService = testService();
         testService.setServiceId("IDMAN");
-        val adminUser = TestingUtils.adminUser();
+        val adminUser = ServerTestingUtils.adminUser();
         val adminRole = new StoredRole("IDMAN_ADMIN", testService.getServiceId(), "Admin", "Admin role");
         val userRole = new StoredRole("IDMAN_USER", testService.getServiceId(), "User", "General user");
         doReturn(Optional.empty())

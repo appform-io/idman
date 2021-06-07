@@ -7,7 +7,7 @@ import io.appform.idman.server.auth.impl.PasswordAuthInfo;
 import io.appform.idman.server.db.ServiceStore;
 import io.appform.idman.server.db.model.SessionType;
 import io.appform.idman.server.db.model.StoredUserSession;
-import io.appform.idman.server.utils.TestingUtils;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.views.LoginScreenView;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import lombok.val;
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.net.URI;
 import java.util.Optional;
 
-import static io.appform.idman.server.utils.TestingUtils.runInCtx;
-import static io.appform.idman.server.utils.TestingUtils.testService;
+import static io.appform.idman.server.utils.ServerTestingUtils.runInCtx;
+import static io.appform.idman.server.utils.ServerTestingUtils.testService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -33,7 +33,7 @@ class AuthTest {
     private AuthenticationProvider authenticationProvider = mock(AuthenticationProvider.class);
     private AuthenticationProviderRegistry authenticationProviderRegistry = mock(AuthenticationProviderRegistry.class);
     private ServiceStore serviceStore = mock(ServiceStore.class);
-    private Auth auth = new Auth(TestingUtils.passwordauthConfig(),
+    private Auth auth = new Auth(ServerTestingUtils.passwordauthConfig(),
                                  () -> authenticationProviderRegistry,
                                  () -> serviceStore);
 

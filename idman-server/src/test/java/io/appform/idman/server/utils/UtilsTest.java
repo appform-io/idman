@@ -56,7 +56,7 @@ class UtilsTest {
 
     @Test
     void testJWT() {
-        val config = TestingUtils.passwordauthConfig();
+        val config = ServerTestingUtils.passwordauthConfig();
         val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null);
         val jwt = Utils.createJWT(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));
@@ -94,7 +94,7 @@ class UtilsTest {
 
     @Test
     void testJWTError() {
-        val config = TestingUtils.passwordauthConfig();
+        val config = ServerTestingUtils.passwordauthConfig();
         val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null);
         val jwt = Utils.createJWT(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));
@@ -134,7 +134,7 @@ class UtilsTest {
     void testJWTWithExpiry() {
         val now = new Date();
         val expiry = new Date(now.getTime() + 3_000);
-        val config = TestingUtils.passwordauthConfig();
+        val config = ServerTestingUtils.passwordauthConfig();
         val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, expiry);
         val jwt = Utils.createJWT(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));

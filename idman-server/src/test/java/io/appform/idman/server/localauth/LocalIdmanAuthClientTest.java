@@ -23,7 +23,7 @@ import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.impl.*;
 import io.appform.idman.server.db.model.*;
-import io.appform.idman.server.utils.TestingUtils;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.utils.Utils;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -58,7 +58,7 @@ class LocalIdmanAuthClientTest {
     private UserRoleStore userRoleStore;
     private ServiceStore serviceStore;
     private PasswordStore passwordStore;
-    private final AuthenticationConfig config = TestingUtils.passwordauthConfig();
+    private final AuthenticationConfig config = ServerTestingUtils.passwordauthConfig();
 
     private LocalIdmanAuthClient client;
 
