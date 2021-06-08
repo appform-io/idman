@@ -32,6 +32,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -65,18 +66,20 @@ public class IdmanHttpClient extends IdManClient {
                 .build();
 
         val url = String.format("%s/apis/auth/check/v1/%s", clientConfig.getAuthEndpoint(), clientConfig.getServiceId());
-        log.info("Validation URL: {}", url);
+        log.debug("Validation URL: {}", url);
         HttpPost post = new HttpPost(url);
         post.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + clientConfig.getAuthSecret());
         post.setConfig(requestConfig);
         post.setEntity(new UrlEncodedFormEntity(Collections.singletonList(new BasicNameValuePair("token", token))));
-        log.info("Headers: {}", Arrays.toString(post.getAllHeaders()));
-        log.info("Entity: {}", post.getEntity());
-        log.info("Method: {}", post.getMethod());
+        log.debug("Headers: {}", Arrays.toString(post.getAllHeaders()));
+        log.debug("Entity: {}", post.getEntity());
+        log.debug("Method: {}", post.getMethod());
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             val statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_OK) {
-                return mapper.readValue(EntityUtils.toByteArray(response.getEntity()), IdmanUser.class);
+                val s = new String(EntityUtils.toByteArray(response.getEntity()), StandardCharsets.UTF_8);
+                log.debug("Server response: {}", s);
+                return mapper.readValue(s, IdmanUser.class);
             }
             log.error("Error returned by check api: {}", statusCode);
         }
