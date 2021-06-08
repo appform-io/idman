@@ -18,8 +18,7 @@ import org.mockito.ArgumentMatchers;
 import java.util.Collections;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -38,7 +37,7 @@ class IdmanHttpClientTest {
         MAPPER.registerModule(new ParameterNamesModule());
     }
 
-    private WireMockServer server = new WireMockServer();
+    private final WireMockServer server = new WireMockServer();
 
     @BeforeEach
     void setup() {
@@ -60,8 +59,9 @@ class IdmanHttpClientTest {
                                   .withBody(MAPPER.writeValueAsString(TEST_USER))));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.validate("T", "S").orElse(null);
-        assertEquals(TEST_USER, r);
+        val r = client.validate("T", "");
+        assertTrue(r.isPresent());
+        assertEquals(TEST_USER, r.get());
     }
 
     @Test
