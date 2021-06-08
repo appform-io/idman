@@ -59,7 +59,7 @@ class IdmanHttpClientTest {
                                   .withBody(MAPPER.writeValueAsString(TEST_USER))));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.validate("T", "");
+        val r = client.validate("T", "S");
         assertTrue(r.isPresent());
         assertEquals(TEST_USER, r.get());
     }
