@@ -5,8 +5,8 @@ import io.appform.idman.server.auth.AuthenticationProvider;
 import io.appform.idman.server.auth.AuthenticationProviderRegistry;
 import io.appform.idman.server.auth.impl.PasswordAuthInfo;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.db.model.SessionType;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.model.ClientSession;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.views.LoginScreenView;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.Optional;
 
 import static io.appform.idman.server.utils.ServerTestingUtils.runInCtx;
@@ -82,7 +83,11 @@ class AuthTest {
     @Test
     void testPasswordLoginLoginSuccess() {
         val s = testService();
-        val userSession = new StoredUserSession("S1", "U1", "S", "CS1", SessionType.DYNAMIC, null);
+        val userSession = new ClientSession("S1", "U1", "S", "CS1", TokenType.DYNAMIC,
+                                            null,
+                                            false,
+                                            new Date(),
+                                            new Date());
         doReturn(Optional.of(s)).when(serviceStore).get(anyString());
         doReturn(Optional.of(userSession))
                 .when(authenticationProvider).login(eq(new PasswordAuthInfo("a@a.com", "xx", "S", "CS1")), anyString());
@@ -94,7 +99,15 @@ class AuthTest {
     @Test
     void testPasswordLoginLoginFailure() {
         val s = testService();
-        val userSession = new StoredUserSession("S1", "U1", "S", "CS1", SessionType.DYNAMIC, null);
+        val userSession = new ClientSession("S1",
+                                            "U1",
+                                            "S",
+                                            "CS1",
+                                            TokenType.DYNAMIC,
+                                            null,
+                                            false,
+                                            new Date(),
+                                            new Date());
         doReturn(Optional.of(s)).when(serviceStore).get(anyString());
         doReturn(Optional.empty())
                 .when(authenticationProvider).login(any(), anyString());

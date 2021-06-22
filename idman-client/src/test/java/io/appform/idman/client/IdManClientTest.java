@@ -1,11 +1,10 @@
 package io.appform.idman.client;
 
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,13 +27,18 @@ class IdManClientTest {
         }
 
         @Override
-        protected IdmanUser validateImpl(String token, String serviceId) {
+        public Optional<TokenInfo> accessToken(String serviceId, String tokenId) {
+            return refreshAccessTokenImpl(serviceId, tokenId);
+        }
+
+        @Override
+        public Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
             if (!status) {
-                return null;
+                return Optional.empty();
             }
             invocations++;
             if (invocations == 1) {
-                return TEST_USER;
+                return Optional.of(new TokenInfo(null, null, 0L, "bearer", TEST_USER.getRole(), TEST_USER));
             }
             throw new IllegalAccessError("Should have been called only once");
         }
@@ -42,22 +46,22 @@ class IdManClientTest {
 
     @Test
     void validateInvalidParams() {
-        assertFalse(new TestClient(false).validate("T", null).isPresent());
-        assertFalse(new TestClient(false).validate(null, "S").isPresent());
+        assertFalse(new TestClient(false).refreshAccessToken(null, "T").isPresent());
+        assertFalse(new TestClient(false).refreshAccessToken("S", null).isPresent());
     }
 
     @Test
     void validateFailure() {
-        assertFalse(new TestClient(false).validate("T", "S").isPresent());
+        assertFalse(new TestClient(false).refreshAccessToken("S", "T").isPresent());
     }
 
     @Test
     void validateSuccess() {
         final TestClient client = new TestClient(true);
 
-        assertTrue(client.validate("T", "S").isPresent());
-        assertTrue(client.validate("T", "S").isPresent());
-        assertTrue(client.validate("T", "S").isPresent());
+        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
+        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
+        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
         assertEquals(1, client.getInvocations());
     }
 

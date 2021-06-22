@@ -3,10 +3,7 @@ package io.appform.idman.client.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.apache.http.HttpStatus;
@@ -53,33 +50,34 @@ class IdmanHttpClientTest {
     @Test
     @SneakyThrows
     void testSuccessCall() {
-        server.stubFor(post(urlEqualTo("/apis/auth/check/v1/S"))
-                       .willReturn(aResponse()
-                                  .withStatus(HttpStatus.SC_OK)
-                                  .withBody(MAPPER.writeValueAsString(TEST_USER))));
+        val tokenInfo = new TokenInfo("T", "T", 60, "bearer", TEST_USER.getRole(), TEST_USER);
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_OK)
+                                                   .withBody(MAPPER.writeValueAsString(tokenInfo))));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.validate("T", "S");
+        val r = client.refreshAccessToken("S", "T");
         assertTrue(r.isPresent());
-        assertEquals(TEST_USER, r.get());
+        assertEquals(tokenInfo, r.get());
     }
 
     @Test
     @SneakyThrows
     void testFailure() {
-        server.stubFor(post(urlEqualTo("/apis/auth/check/v1/S"))
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
                                .willReturn(aResponse()
                                                    .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.validate("T", "S").orElse(null);
+        val r = client.refreshAccessToken("S", "T").orElse(null);
         assertNull(r);
     }
 
     @Test
     @SneakyThrows
     void testException() {
-        server.stubFor(post(urlEqualTo("/apis/auth/check/v1/S"))
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
                                .willReturn(aResponse()
                                                    .withStatus(HttpStatus.SC_OK)
                                                    .withBody(MAPPER.writeValueAsString(TEST_USER))));
@@ -89,7 +87,7 @@ class IdmanHttpClientTest {
                 .when(mapper)
                 .readValue(anyString(), ArgumentMatchers.eq(IdmanUser.class));
         val client = new IdmanHttpClient(clientConfig(), mapper);
-        val r = client.validate("T", "S").orElse(null);
+        val r = client.refreshAccessToken("S", "T").orElse(null);
         assertNull(r);
     }
 

@@ -81,13 +81,13 @@ CREATE TABLE `services` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `sessions`
+-- Table structure for table `dynamic_sessions`
 --
 
-DROP TABLE IF EXISTS `sessions`;
+DROP TABLE IF EXISTS `dynamic_sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `sessions` (
+CREATE TABLE `dynamic_sessions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `session_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `user_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
@@ -161,6 +161,30 @@ CREATE TABLE `sessions` (
  PARTITION `p52` VALUES LESS THAN (53) ENGINE = InnoDB,
  PARTITION `p53` VALUES LESS THAN (54) ENGINE = InnoDB,
  PARTITION `p54` VALUES LESS THAN MAXVALUE ENGINE = InnoDB);
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `static_sessions`
+--
+
+DROP TABLE IF EXISTS `static_sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `static_sessions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `user_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `service_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `client_session_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created` datetime(3) DEFAULT current_timestamp(3),
+  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_session_id` (`session_id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_service_id` (`service_id`),
+  KEY `idx_service_client_session` (`service_id`,`client_session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

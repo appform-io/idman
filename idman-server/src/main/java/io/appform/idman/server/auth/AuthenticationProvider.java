@@ -19,11 +19,10 @@ import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.AuthState;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
-import io.appform.idman.server.db.model.SessionType;
+import io.appform.idman.server.db.model.ClientSession;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.db.model.StoredUser;
-import io.appform.idman.server.db.model.StoredUserSession;
 import io.appform.idman.server.utils.Utils;
-import io.dropwizard.util.Duration;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +60,7 @@ public abstract class AuthenticationProvider {
 
     public abstract String redirectionURL(String sessionId);
 
-    public final Optional<StoredUserSession> login(final AuthInfo authInfo, String sessionId) {
+    public final Optional<ClientSession> login(final AuthInfo authInfo, String sessionId) {
         val context = createContext(authInfo);
         val user = fetchUserDetails(context).orElse(null);
         if (user == null
@@ -84,13 +83,13 @@ public abstract class AuthenticationProvider {
         else {
             userStore.get().updateAuthState(userId, authState -> authState.setFailedAuthCount(0));
         }
-        final Duration sessionDuration = Utils.sessionDuration(authConfig);
+        val sessionDuration = Utils.sessionDuration(authConfig);
         return sessionStore.get().create(
                 sessionId,
                 user.getUserId(),
                 authInfo.getServiceId(),
                 authInfo.getClientSessionId(),
-                SessionType.DYNAMIC, new Date(new Date().getTime() + sessionDuration.toMilliseconds()));
+                TokenType.DYNAMIC, new Date(new Date().getTime() + sessionDuration.toMilliseconds()));
     }
 
     protected abstract AuthenticatorContext createContext(final AuthInfo authInfo);

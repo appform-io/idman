@@ -47,7 +47,7 @@ public class App extends Application<AppConfig> {
                                              StoredUserRole.class,
                                              StoredUser.class,
                                              StoredUserAuthState.class,
-                                             StoredUserSession.class) {
+                                             StoredDynamicSession.class) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfig appConfig) {
             return appConfig.getDb();

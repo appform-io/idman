@@ -36,6 +36,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Optional;
 
+import static io.appform.idman.client.ClientTestingUtils.tokenInfo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -133,9 +134,10 @@ class ApisTest {
         doReturn(Optional.of(service)).when(serviceStore).get("S1");
 
         val idmanUser = new IdmanUser("S1", service.getServiceId(), new User("U1", "TU", UserType.HUMAN, AuthMode.PASSWORD), "R");
-        doReturn(Optional.of(idmanUser))
+        val tokenInfo =
+        doReturn(Optional.of(tokenInfo("T", idmanUser)))
                 .when(client)
-                .validate("T", service.getServiceId());
+                .refreshAccessToken(service.getServiceId(), "T");
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")
@@ -155,7 +157,7 @@ class ApisTest {
         val idmanUser = new IdmanUser("S1", service.getServiceId(), new User("U1", "TU", UserType.HUMAN, AuthMode.PASSWORD), "R");
         doReturn(Optional.of(idmanUser))
                 .when(client)
-                .validate("T", service.getServiceId());
+                .refreshAccessToken(service.getServiceId(), "T");
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")
@@ -174,7 +176,7 @@ class ApisTest {
 
         doReturn(Optional.empty())
                 .when(client)
-                .validate(anyString(), anyString());
+                .refreshAccessToken(anyString(), anyString());
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")

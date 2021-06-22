@@ -14,6 +14,7 @@
 
 package io.appform.idman.server.resources;
 
+import io.appform.idman.model.TokenInfo;
 import io.appform.idman.server.db.ServiceStore;
 import io.appform.idman.server.localauth.LocalIdmanAuthClient;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -68,7 +69,10 @@ public class Apis {
         if (!service.getSecret().equals(providedSecret)) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        val validatedUser = client.get().validate(token, serviceId).orElse(null);
+        val validatedUser = client.get()
+                .refreshAccessToken(serviceId, token)
+                .map(TokenInfo::getUser)
+                .orElse(null);
         if(null == validatedUser) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }

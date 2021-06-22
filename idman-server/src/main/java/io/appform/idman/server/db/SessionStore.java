@@ -14,8 +14,8 @@
 
 package io.appform.idman.server.db;
 
-import io.appform.idman.server.db.model.SessionType;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.model.ClientSession;
+import io.appform.idman.model.TokenType;
 
 import java.util.Date;
 import java.util.List;
@@ -25,13 +25,13 @@ import java.util.Optional;
  * For session management
  */
 public interface SessionStore {
-    Optional<StoredUserSession> create(
+    Optional<ClientSession> create(
             String sessionId,
             String userId,
             String serviceId,
-            String clientSessionId, SessionType type,
+            String clientSessionId, TokenType type,
             Date expiry);
-    Optional<StoredUserSession> get(String sessionId);
-    List<StoredUserSession> sessionsForUser(String userId);
-    boolean delete(String sessionId);
+    Optional<ClientSession> get(String sessionId, TokenType type);
+    List<ClientSession> sessionsForUser(String userId, TokenType type);
+    boolean delete(String sessionId, TokenType type);
 }

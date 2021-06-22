@@ -39,6 +39,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import static io.appform.idman.client.ClientTestingUtils.tokenInfo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -78,9 +79,9 @@ class IdmanAuthComponentsTest {
 
     @BeforeEach
     void setup() {
-        doReturn(Optional.of(TEST_ADMIN)).when(idmanClient).validate(eq("ADMIN_TOKEN"), anyString());
-        doReturn(Optional.of(TEST_USER)).when(idmanClient).validate(eq("USER_TOKEN"), anyString());
-        doReturn(Optional.empty()).when(idmanClient).validate(eq("WRONG_TOKEN"), anyString());
+        doReturn(Optional.of(tokenInfo("ADMIN_TOKEN", TEST_ADMIN))).when(idmanClient).refreshAccessToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(tokenInfo("USER_TOKEN", TEST_USER))).when(idmanClient).refreshAccessToken(anyString(), eq("USER_TOKEN"));
+        doReturn(Optional.empty()).when(idmanClient).refreshAccessToken(anyString(), eq("WRONG_TOKEN"));
     }
 
     @AfterEach

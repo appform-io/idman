@@ -19,17 +19,12 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.AuthenticationProviderFactory;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.db.AuthState;
-import io.appform.idman.server.db.PasswordStore;
-import io.appform.idman.server.db.SessionStore;
-import io.appform.idman.server.db.UserInfoStore;
+import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.impl.DBPasswordStore;
-import io.appform.idman.server.db.impl.DBSessionStore;
+import io.appform.idman.server.db.impl.DBDynamicSessionStore;
+import io.appform.idman.server.db.impl.DBStaticSessionStore;
 import io.appform.idman.server.db.impl.DBUserInfoStore;
-import io.appform.idman.server.db.model.StoredPassword;
-import io.appform.idman.server.db.model.StoredUser;
-import io.appform.idman.server.db.model.StoredUserAuthState;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.model.*;
 import io.appform.idman.server.utils.ServerTestingUtils;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -53,7 +48,8 @@ class PasswordAuthenticationProviderTest {
             .addEntityClass(StoredUser.class)
             .addEntityClass(StoredUserAuthState.class)
             .addEntityClass(StoredPassword.class)
-            .addEntityClass(StoredUserSession.class)
+            .addEntityClass(StoredDynamicSession.class)
+            .addEntityClass(StoredStaticSession.class)
             .build();
 
     private UserInfoStore userInfoStore;
@@ -65,7 +61,8 @@ class PasswordAuthenticationProviderTest {
     void setup() {
         userInfoStore = new DBUserInfoStore(database.getSessionFactory());
         passwordStore = new DBPasswordStore(database.getSessionFactory());
-        sessionStore = new DBSessionStore(database.getSessionFactory());
+        sessionStore = new CompositeSessionStore(new DBDynamicSessionStore(database.getSessionFactory()),
+                                                 new DBStaticSessionStore(database.getSessionFactory()));
 
         val user = database.inTransaction(() -> userInfoStore.create("UI",
                                                                      "u@u.t",
@@ -90,12 +87,12 @@ class PasswordAuthenticationProviderTest {
         val user = userInfoStore.get("UI").orElse(null);
         {
             assertNotNull(user);
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
                     .orElse(null);
             assertNotNull(resp);
         }
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD1", "S1", "CS1"), "S1")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD1", "S1", "CS1"), "S1")
                     .orElse(null);
             assertNull(resp);
         }
@@ -132,13 +129,13 @@ class PasswordAuthenticationProviderTest {
         val user = userInfoStore.get("UI").orElse(null);
         {
             assertNotNull(user);
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
                     .orElse(null);
             assertNotNull(resp);
         }
         IntStream.rangeClosed(1, 3)
                 .forEach(i -> {
-                    val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD1", "S1", "CS1"), "S1")
+                    ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD1", "S1", "CS1"), "S1")
                             .orElse(null);
                     assertNull(resp);
                 });
@@ -148,7 +145,7 @@ class PasswordAuthenticationProviderTest {
 
         //Test with correct password
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S1")
                     .orElse(null);
             assertNull(resp);
         }
@@ -158,7 +155,7 @@ class PasswordAuthenticationProviderTest {
             authState.setFailedAuthCount(0);
         });
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
                     .orElse(null);
             assertNotNull(resp);
         }
@@ -174,13 +171,13 @@ class PasswordAuthenticationProviderTest {
 
         val authProvider = af.create(authenticationConfig.getProvider());
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
                     .orElse(null);
             assertNotNull(resp);
         }
         assertTrue(userInfoStore.deleteUser("UI"));
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
                     .orElse(null);
             assertNull(resp);
         }
@@ -196,7 +193,7 @@ class PasswordAuthenticationProviderTest {
 
         val authProvider = af.create(authenticationConfig.getProvider());
         {
-            val resp = authProvider.login(new PasswordAuthInfo("u1@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
+            ClientSession resp = authProvider.login(new PasswordAuthInfo("u1@u.t", "TESTPASSWORD", "S1", "CS1"), "S2")
                     .orElse(null);
             assertNull(resp);
         }

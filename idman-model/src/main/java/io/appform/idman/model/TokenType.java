@@ -12,12 +12,12 @@
  * under the License.
  */
 
-package io.appform.idman.server.db.model;
+package io.appform.idman.model;
 
 /**
  * Type of session
  */
-public enum SessionType {
+public enum TokenType {
     /**
      * Session is from a login context
      */

@@ -18,6 +18,7 @@ import com.google.common.base.Strings;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.auth.AuthenticationProviderRegistry;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -110,7 +111,7 @@ public class OAuth {
         //TODO::SUBDOMAIN COOKIE
         return Response.seeOther(URI.create("/"))
                 .cookie(new NewCookie("token",
-                                      Utils.createJWT(null, authConfig.getJwt()),
+                                      Utils.createAccessToken(null, authConfig.getJwt(), TokenType.DYNAMIC),
 //                                      Utils.createJWT(token, authConfig.getJwt()),
                                       "/",
                                       authConfig.getDomain(),

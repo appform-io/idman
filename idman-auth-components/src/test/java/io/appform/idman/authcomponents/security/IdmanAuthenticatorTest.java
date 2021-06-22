@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static io.appform.idman.client.ClientTestingUtils.tokenInfo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -39,13 +40,13 @@ class IdmanAuthenticatorTest {
 
     @Test
     void testInvToken() {
-        doReturn(Optional.empty()).when(client).validate(anyString(), anyString());
+        doReturn(Optional.empty()).when(client).refreshAccessToken(anyString(), anyString());
         assertFalse(authenticator.authenticate("T").isPresent());
     }
 
     @Test
     void testAuthSuccess() {
-        doReturn(Optional.of(TEST_USER)).when(client).validate(anyString(), anyString());
+        doReturn(Optional.of(tokenInfo("T",TEST_USER))).when(client).refreshAccessToken(anyString(), anyString());
         assertTrue(authenticator.authenticate("T").isPresent());
     }
 }

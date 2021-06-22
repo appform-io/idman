@@ -17,8 +17,8 @@ package io.appform.idman.server.utils;
 import com.google.common.base.Strings;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
-import io.appform.idman.server.db.model.SessionType;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.model.ClientSession;
+import io.appform.idman.model.TokenType;
 import lombok.val;
 import org.awaitility.Awaitility;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -57,8 +57,16 @@ class UtilsTest {
     @Test
     void testJWT() {
         val config = ServerTestingUtils.passwordauthConfig();
-        val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val session = new ClientSession("SS1",
+                                        "U1",
+                                        "S1",
+                                        "CS1",
+                                        TokenType.DYNAMIC,
+                                        null,
+                                        false,
+                                        new Date(),
+                                        new Date());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");
@@ -68,14 +76,16 @@ class UtilsTest {
             assertEquals("SS1", claims.getJwtId());
             assertEquals("U1", claims.getSubject());
             assertEquals(config.getJwt().getIssuerId(), claims.getIssuer());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             fail(e.getMessage());
         }
 
         try {
             consumer.process(jwt + "_");
             fail("Supposed to fail the match");
-        } catch (InvalidJwtSignatureException e) {
+        }
+        catch (InvalidJwtSignatureException e) {
             assertTrue(e.getMessage().startsWith("JWT rejected due to invalid signature"));
         }
         catch (Exception e) {
@@ -84,7 +94,8 @@ class UtilsTest {
         try {
             consumer.process("_" + jwt);
             fail("Supposed to fail the match");
-        } catch (InvalidJwtException e) {
+        }
+        catch (InvalidJwtException e) {
             assertTrue(e.getMessage().startsWith("JWT processing failed."));
         }
         catch (Exception e) {
@@ -95,8 +106,12 @@ class UtilsTest {
     @Test
     void testJWTError() {
         val config = ServerTestingUtils.passwordauthConfig();
-        val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        ClientSession session = new ClientSession("SS1", "U1", "S1", "CS1", TokenType.DYNAMIC,
+                                                  null,
+                                                  false,
+                                                  new Date(),
+                                                  new Date());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");
@@ -106,14 +121,16 @@ class UtilsTest {
             assertEquals("SS1", claims.getJwtId());
             assertEquals("U1", claims.getSubject());
             assertEquals(config.getJwt().getIssuerId(), claims.getIssuer());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             fail(e.getMessage());
         }
 
         try {
             consumer.process(jwt + "_");
             fail("Supposed to fail the match");
-        } catch (InvalidJwtSignatureException e) {
+        }
+        catch (InvalidJwtSignatureException e) {
             assertTrue(e.getMessage().startsWith("JWT rejected due to invalid signature"));
         }
         catch (Exception e) {
@@ -122,7 +139,8 @@ class UtilsTest {
         try {
             consumer.process("_" + jwt);
             fail("Supposed to fail the match");
-        } catch (InvalidJwtException e) {
+        }
+        catch (InvalidJwtException e) {
             assertTrue(e.getMessage().startsWith("JWT processing failed."));
         }
         catch (Exception e) {
@@ -135,8 +153,17 @@ class UtilsTest {
         val now = new Date();
         val expiry = new Date(now.getTime() + 3_000);
         val config = ServerTestingUtils.passwordauthConfig();
-        val session = new StoredUserSession("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, expiry);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        config.setSessionDuration(io.dropwizard.util.Duration.milliseconds(3));
+        ClientSession session = new ClientSession("SS1",
+                                                  "U1",
+                                                  "S1",
+                                                  "CS1",
+                                                  TokenType.DYNAMIC,
+                                                  expiry,
+                                                  false,
+                                                  new Date(),
+                                                  new Date());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");
@@ -146,7 +173,8 @@ class UtilsTest {
             assertEquals("SS1", claims.getJwtId());
             assertEquals("U1", claims.getSubject());
             assertEquals(config.getJwt().getIssuerId(), claims.getIssuer());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             fail(e.getMessage());
         }
 
@@ -156,7 +184,8 @@ class UtilsTest {
         try {
             consumer.process(jwt);
             fail("Supposed to fail the match");
-        } catch (InvalidJwtException e) {
+        }
+        catch (InvalidJwtException e) {
             assertTrue(e.getMessage().contains("The JWT is no longer valid"));
         }
         catch (Exception e) {

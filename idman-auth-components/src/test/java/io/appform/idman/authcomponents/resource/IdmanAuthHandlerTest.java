@@ -6,10 +6,7 @@ import io.appform.idman.authcomponents.IdmanAuthDynamicFeature;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -87,9 +84,24 @@ class IdmanAuthHandlerTest {
 
     @BeforeEach
     void setup() {
-        doReturn(Optional.of(TEST_ADMIN)).when(idmanClient).validate(eq("ADMIN_TOKEN"), anyString());
-        doReturn(Optional.of(TEST_USER)).when(idmanClient).validate(eq("USER_TOKEN"), anyString());
-        doReturn(Optional.empty()).when(idmanClient).validate(eq("WRONG_TOKEN"), anyString());
+        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN", "ADMIN_TOKEN", 60, "bearer", TEST_ADMIN.getRole(), TEST_ADMIN)))
+                         .when(idmanClient)
+                         .accessToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(new TokenInfo("USER_TOKEN", "USER_TOKEN", 60, "bearer", TEST_USER.getRole(), TEST_USER)))
+                .when(idmanClient)
+                .accessToken(anyString(), eq("USER_TOKEN"));
+        doReturn(Optional.empty())
+                .when(idmanClient)
+                .accessToken(anyString(), eq("WRONG_TOKEN"));
+        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN", "ADMIN_TOKEN", 60, "bearer", TEST_ADMIN.getRole(), TEST_ADMIN)))
+                .when(idmanClient)
+                .refreshAccessToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(new TokenInfo("USER_TOKEN", "USER_TOKEN", 60, "bearer", TEST_USER.getRole(), TEST_USER)))
+                .when(idmanClient)
+                .refreshAccessToken(anyString(), eq("USER_TOKEN"));
+        doReturn(Optional.empty())
+                .when(idmanClient)
+                .refreshAccessToken(anyString(), eq("WRONG_TOKEN"));
     }
 
     @AfterEach
@@ -124,8 +136,15 @@ class IdmanAuthHandlerTest {
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
             assertEquals(referer, cs.getCookies().stream().filter(c -> c.getName().equals("idman-local-redirect")).map(
                     Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
-            assertEquals(clientSessionId, cs.getCookies().stream().filter(c -> c.getName().equals("idman-auth-state")).map(
-                    Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
+            assertEquals(clientSessionId, cs.getCookies()
+                    .stream()
+                    .filter(c -> c.getName().equals("idman-auth-state"))
+                    .map(
+                            Cookie::getValue)
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .findAny()
+                    .orElse(null));
         }
     }
 
@@ -160,8 +179,15 @@ class IdmanAuthHandlerTest {
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
             assertEquals(referer, cs.getCookies().stream().filter(c -> c.getName().equals("idman-local-redirect")).map(
                     Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
-            assertEquals(clientSessionId, cs.getCookies().stream().filter(c -> c.getName().equals("idman-auth-state")).map(
-                    Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
+            assertEquals(clientSessionId, cs.getCookies()
+                    .stream()
+                    .filter(c -> c.getName().equals("idman-auth-state"))
+                    .map(
+                            Cookie::getValue)
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .findAny()
+                    .orElse(null));
         }
     }
 
@@ -191,10 +217,24 @@ class IdmanAuthHandlerTest {
             val clientSessionId = q.get("clientSessionId");
             assertTrue(clientSessionId
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
-            assertEquals("/protected", cs.getCookies().stream().filter(c -> c.getName().equals("idman-local-redirect")).map(
-                    Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
-            assertEquals(clientSessionId, cs.getCookies().stream().filter(c -> c.getName().equals("idman-auth-state")).map(
-                    Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
+            assertEquals("/protected", cs.getCookies()
+                    .stream()
+                    .filter(c -> c.getName().equals("idman-local-redirect"))
+                    .map(
+                            Cookie::getValue)
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .findAny()
+                    .orElse(null));
+            assertEquals(clientSessionId, cs.getCookies()
+                    .stream()
+                    .filter(c -> c.getName().equals("idman-auth-state"))
+                    .map(
+                            Cookie::getValue)
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .findAny()
+                    .orElse(null));
         }
     }
 
@@ -223,7 +263,8 @@ class IdmanAuthHandlerTest {
             assertEquals(uri.getPort(), u.getPort());
             assertEquals("http", u.getScheme());
 
-            assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName().equals("idman-token-testservice")).map(
+            assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName()
+                    .equals("idman-token-testservice")).map(
                     Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
         }
     }
@@ -253,7 +294,8 @@ class IdmanAuthHandlerTest {
             assertEquals(uri.getPort(), u.getPort());
             assertEquals("http", u.getScheme());
 
-            assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName().equals("idman-token-testservice")).map(
+            assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName()
+                    .equals("idman-token-testservice")).map(
                     Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
         }
     }

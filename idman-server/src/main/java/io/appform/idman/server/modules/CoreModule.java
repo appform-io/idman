@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.model.AuthMode;
@@ -55,7 +56,9 @@ public class CoreModule extends AbstractModule {
         bind(RoleStore.class).to(DBRoleStore.class);
         bind(UserRoleStore.class).to(DBUserRoleStore.class);
         bind(PasswordStore.class).to(DBPasswordStore.class);
-        bind(SessionStore.class).to(DBSessionStore.class);
+        bind(SessionStoreForType.class).annotatedWith(Names.named("dynamic")).to(DBDynamicSessionStore.class);
+        bind(SessionStoreForType.class).annotatedWith(Names.named("static")).to(DBStaticSessionStore.class);
+        bind(SessionStore.class).to(CompositeSessionStore.class);
         bind(UserInfoStore.class).to(DBUserInfoStore.class);
     }
 

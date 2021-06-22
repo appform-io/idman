@@ -15,19 +15,24 @@
 package io.appform.idman.server.utils;
 
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.model.User;
+import io.appform.idman.server.auth.ParsedTokenInfo;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.model.ClientSession;
 import io.dropwizard.util.Duration;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
@@ -36,12 +41,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.IsoFields;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  *
  */
 @UtilityClass
+@Slf4j
 public class Utils {
     public static String hashedId(String value) {
         return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8)).toString();
@@ -63,8 +70,11 @@ public class Utils {
     }
 
     @SneakyThrows
-    public static String createJWT(final StoredUserSession session, final JwtConfig jwtConfig) {
-        JwtClaims claims = new JwtClaims();
+    public static String createAccessToken(
+            final ClientSession session,
+            final JwtConfig jwtConfig,
+            TokenType sessionType) {
+        val claims = new JwtClaims();
         claims.setIssuer(jwtConfig.getIssuerId());
         claims.setGeneratedJwtId();
         claims.setIssuedAtToNow();
@@ -76,12 +86,60 @@ public class Utils {
         if(null != session.getExpiry()) {
             claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));
         }
-        JsonWebSignature jws = new JsonWebSignature();
+        val jws = new JsonWebSignature();
         jws.setPayload(claims.toJson());
-        final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
+        val secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
         jws.setKey(new HmacKey(secretKey));
         jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.HMAC_SHA512);
         return jws.getCompactSerialization();
+    }
+
+/*
+    @SneakyThrows
+    public static String createRefreshToken(
+            final ClientSession session,
+            final JwtConfig jwtConfig) {
+        if(session.getType() == TokenType.STATIC) {
+            throw new IllegalArgumentException("Refresh tokens are not possible for static sessions");
+        }
+        val claims = new JwtClaims();
+        claims.setIssuer(jwtConfig.getIssuerId());
+        claims.setGeneratedJwtId();
+        claims.setIssuedAtToNow();
+        claims.setJwtId(session.getRefreshToken());
+        claims.setNotBeforeMinutesInThePast(2);
+        claims.setSubject(session.getUserId());
+        claims.setAudience(session.getServiceId());
+        claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));
+        val jws = new JsonWebSignature();
+        jws.setPayload(claims.toJson());
+        val secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
+        jws.setKey(new HmacKey(secretKey));
+        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.HMAC_SHA512);
+        return jws.getCompactSerialization();
+    }
+*/
+
+    public Optional<ParsedTokenInfo> parseToken(String token, JwtConsumer jwtConsumer) {
+        final String userId;
+        final String sessionId;
+        final String extServiceId;
+        final NumericDate expiry;
+        try {
+
+            val jwtContext = jwtConsumer.process(token);
+
+            val claims = jwtContext.getJwtClaims();
+            userId = claims.getSubject();
+            sessionId = claims.getJwtId();
+            extServiceId = claims.getAudience().get(0);
+            expiry = claims.getExpirationTime();
+        }
+        catch (MalformedClaimException | InvalidJwtException e) {
+            log.error("exception in claim extraction {}. Token: {}", e.getMessage(), token);
+            return Optional.empty();
+        }
+        return Optional.of(new ParsedTokenInfo(userId, sessionId, extServiceId, expiry));
     }
 
     public static Duration sessionDuration(AuthenticationConfig authConfig) {
@@ -92,7 +150,7 @@ public class Utils {
     }
 
     public static String redirectionUrl(AuthMode authMode, AuthenticationConfig authenticationConfig) {
-        return  authenticationConfig.getServer() + "/oauth/callback/" + authMode.name();
+        return authenticationConfig.getServer() + "/oauth/callback/" + authMode.name();
     }
 
     public static JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {

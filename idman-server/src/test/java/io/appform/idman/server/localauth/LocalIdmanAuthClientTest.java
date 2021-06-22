@@ -16,6 +16,7 @@ package io.appform.idman.server.localauth;
 
 import com.google.common.base.Strings;
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.impl.PasswordAuthInfo;
@@ -46,7 +47,8 @@ class LocalIdmanAuthClientTest {
             .addEntityClass(StoredUser.class)
             .addEntityClass(StoredUserAuthState.class)
             .addEntityClass(StoredPassword.class)
-            .addEntityClass(StoredUserSession.class)
+            .addEntityClass(StoredDynamicSession.class)
+            .addEntityClass(StoredStaticSession.class)
             .addEntityClass(StoredService.class)
             .addEntityClass(StoredRole.class)
             .addEntityClass(StoredUserRole.class)
@@ -65,7 +67,8 @@ class LocalIdmanAuthClientTest {
     @BeforeEach
     void setup() {
         userStore = new DBUserInfoStore(db.getSessionFactory());
-        sessionStore = new DBSessionStore(db.getSessionFactory());
+        sessionStore = new CompositeSessionStore(new DBDynamicSessionStore(db.getSessionFactory()),
+                                                 new DBStaticSessionStore(db.getSessionFactory()));
         roleStore = new DBRoleStore(db.getSessionFactory());
         userRoleStore = new DBUserRoleStore(db.getSessionFactory());
         serviceStore = new DBServiceStore(db.getSessionFactory());
@@ -92,11 +95,11 @@ class LocalIdmanAuthClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
-        val session = db.inTransaction(() -> authProvider.login(
+        ClientSession session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
         val idmanUser = db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId()));
         assertNotNull(idmanUser);
@@ -116,11 +119,11 @@ class LocalIdmanAuthClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
-        val session = db.inTransaction(() -> authProvider.login(
+        ClientSession session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
         val idmanUser = db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId()));
         assertNotNull(idmanUser);
@@ -155,11 +158,11 @@ class LocalIdmanAuthClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
-        val session = db.inTransaction(() -> authProvider.login(
+        ClientSession session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
         val idmanUser = db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId()));
         assertNotNull(idmanUser);
@@ -183,13 +186,13 @@ class LocalIdmanAuthClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
-        val session = db.inTransaction((Callable<Optional<StoredUserSession>>)() -> authProvider.login(
+        val session = db.inTransaction((Callable<Optional<ClientSession>>) () -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
-        db.inTransaction(() -> sessionStore.delete(session.getSessionId()));
+        db.inTransaction(() -> sessionStore.delete(session.getSessionId(), session.getType()));
         assertNull(db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId())));
     }
 
@@ -210,7 +213,7 @@ class LocalIdmanAuthClientTest {
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
         assertNotNull(session);
-        val jwt = Utils.createJWT(session, config.getJwt());
+        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
         assertFalse(Strings.isNullOrEmpty(jwt));
         val idmanUser = db.inTransaction(() -> client.validateImpl(jwt, service.getServiceId()));
         assertNotNull(idmanUser);

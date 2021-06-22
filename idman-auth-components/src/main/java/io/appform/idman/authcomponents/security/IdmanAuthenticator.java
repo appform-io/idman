@@ -16,6 +16,7 @@ package io.appform.idman.authcomponents.security;
 
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
+import io.appform.idman.model.TokenInfo;
 import io.dropwizard.auth.Authenticator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -42,7 +43,11 @@ public class IdmanAuthenticator implements Authenticator<String, ServiceUserPrin
 
     @Override
     public Optional<ServiceUserPrincipal> authenticate(String token) {
-        val serviceSessionUser = idManClient.validate(token, config.getServiceId()).orElse(null);
+        val serviceSessionUser
+                = idManClient
+                .refreshAccessToken(config.getServiceId(), token)
+                .map(TokenInfo::getUser)
+                .orElse(null);
         if (serviceSessionUser == null) {
             log.warn("authentication_failed::invalid_session token:{}", token);
             return Optional.empty();

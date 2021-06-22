@@ -19,10 +19,7 @@ import io.appform.idman.authcomponents.IdmanAuthDynamicFeature;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.ClientTestingUtils;
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -82,9 +79,9 @@ class BundleTest {
 
     @BeforeEach
     void setup() {
-        doReturn(Optional.of(TEST_ADMIN)).when(idmanClient).validate(eq("ADMIN_TOKEN"), anyString());
-        doReturn(Optional.of(TEST_USER)).when(idmanClient).validate(eq("USER_TOKEN"), anyString());
-        doReturn(Optional.empty()).when(idmanClient).validate(eq("WRONG_TOKEN"), anyString());
+        doReturn(Optional.of(ClientTestingUtils.tokenInfo("ADMIN_TOKEN", TEST_ADMIN))).when(idmanClient).refreshAccessToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(ClientTestingUtils.tokenInfo("USER_TOKEN", TEST_USER))).when(idmanClient).refreshAccessToken(anyString(), eq("USER_TOKEN"));
+        doReturn(Optional.empty()).when(idmanClient).refreshAccessToken(eq("WRONG_TOKEN"), anyString());
     }
 
     @AfterEach
@@ -111,4 +108,5 @@ class BundleTest {
                              .get()
                              .getStatus());
     }
+
 }

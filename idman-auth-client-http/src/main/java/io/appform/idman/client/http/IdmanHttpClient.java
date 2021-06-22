@@ -15,13 +15,14 @@
 package io.appform.idman.client.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import io.appform.idman.client.IdManClient;
-import io.appform.idman.model.IdmanUser;
+import io.appform.idman.model.TokenInfo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,9 +33,10 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Optional;
 
 /**
  *
@@ -59,18 +61,34 @@ public class IdmanHttpClient extends IdManClient {
 
     @Override
     @SneakyThrows
-    protected IdmanUser validateImpl(String token, String serviceId) {
+    public Optional<TokenInfo> accessToken(String serviceId, String tokenId) {
+        return oauthTokenApiCall(tokenId, "authorization_code", "code");
+    }
+
+
+    @Override
+    @SneakyThrows
+    protected Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
+        return oauthTokenApiCall(token, "refresh_token", "refresh_token");
+    }
+
+    private Optional<TokenInfo> oauthTokenApiCall(String code, String grantType, String paramName) throws UnsupportedEncodingException {
         val requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
                 .setConnectionRequestTimeout(clientConfig.getRequestTimeoutMs())
                 .setConnectTimeout(clientConfig.getConnectionTimeoutMs())
                 .build();
 
-        val url = String.format("%s/apis/auth/check/v1/%s", clientConfig.getAuthEndpoint(), clientConfig.getServiceId());
-        log.debug("Validation URL: {}", url);
+        val url = String.format("%s/apis/oauth2/token", clientConfig.getAuthEndpoint());
+        log.debug("Token API URL: {}", url);
+        val params = ImmutableList.<NameValuePair>builder()
+                .add(new BasicNameValuePair(paramName, code))
+                .add(new BasicNameValuePair("client_id", clientConfig.getServiceId()))
+                .add(new BasicNameValuePair("client_secret", clientConfig.getAuthSecret()))
+                .add(new BasicNameValuePair("grant_type", grantType))
+                .build();
         HttpPost post = new HttpPost(url);
-        post.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + clientConfig.getAuthSecret());
         post.setConfig(requestConfig);
-        post.setEntity(new UrlEncodedFormEntity(Collections.singletonList(new BasicNameValuePair("token", token))));
+        post.setEntity(new UrlEncodedFormEntity(params));
         log.debug("Headers: {}", Arrays.toString(post.getAllHeaders()));
         log.debug("Entity: {}", post.getEntity());
         log.debug("Method: {}", post.getMethod());
@@ -79,14 +97,13 @@ public class IdmanHttpClient extends IdManClient {
             if (statusCode == HttpStatus.SC_OK) {
                 val s = new String(EntityUtils.toByteArray(response.getEntity()), StandardCharsets.UTF_8);
                 log.debug("Server response: {}", s);
-                return mapper.readValue(s, IdmanUser.class);
+                return Optional.of(mapper.readValue(s, TokenInfo.class));
             }
             log.error("Error returned by check api: {}", statusCode);
         }
         catch (Exception e) {
             log.error("Error calling auth api: " + url, e);
         }
-        return null;
+        return Optional.empty();
     }
-
 }

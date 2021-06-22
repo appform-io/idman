@@ -14,6 +14,7 @@
 
 package io.appform.idman.server.db.model;
 
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.utils.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,20 +29,20 @@ import java.util.Date;
  */
 @Entity
 @Table(
-        name = "sessions",
+        name = "dynamic_sessions",
         indexes = {
-                @Index(name = "idx_session", columnList = "session_id"),
-                @Index(name = "idx_user", columnList = "user_id"),
-                @Index(name = "idx_service_id", columnList = "service_id"),
-                @Index(name = "idx_service_client_session", columnList = "service_id, client_session_id")
+                @Index(name = "idx_ds_session", columnList = "session_id"),
+                @Index(name = "idx_ds_user", columnList = "user_id"),
+                @Index(name = "idx_ds_service_id", columnList = "service_id"),
+                @Index(name = "idx_ds_service_client_session", columnList = "service_id, client_session_id")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "pk_id_pid", columnNames = {"id", "partition_id"})
+                @UniqueConstraint(name = "pk_id_ds_pid", columnNames = {"id", "partition_id"})
         }
 )
 @Data
 @NoArgsConstructor
-public class StoredUserSession {
+public class StoredDynamicSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -60,7 +61,7 @@ public class StoredUserSession {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "session_type", nullable = false)
-    private SessionType type;
+    private TokenType type;
 
     @Column
     private Date expiry;
@@ -79,18 +80,17 @@ public class StoredUserSession {
     @Generated(value = GenerationTime.ALWAYS)
     private Date updated;
 
-    public StoredUserSession(
+    public StoredDynamicSession(
             String sessionId,
             String userId,
             String serviceId,
             String clientSessionId,
-            SessionType type,
             Date expiry) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.serviceId = serviceId;
         this.clientSessionId = clientSessionId;
-        this.type = type;
+        this.type = TokenType.DYNAMIC;
         this.expiry = expiry;
         this.partitionId = Utils.weekOfYear();
     }

@@ -12,30 +12,25 @@
  * under the License.
  */
 
-package io.appform.idman.server.auth.configs;
+package io.appform.idman.server.db.model;
 
-import io.dropwizard.util.Duration;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.appform.idman.model.TokenType;
+import lombok.Value;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  *
  */
-@Data
-@NoArgsConstructor
-public class JwtConfig {
-    @NotEmpty
-    private String privateKey;
-
-    @NotEmpty
-    private String issuerId;
-
-    @NotEmpty
-    private String authCachePolicy = "maximumSize=10000, expireAfterAccess=10m";
-
-    @NotNull
-    private Duration maxDynamicTokenLifetime = Duration.minutes(60);
+@Value
+public class ClientSession {
+    String sessionId;
+    String userId;
+    String serviceId;
+    String clientSessionId;
+    TokenType type;
+    Date expiry;
+    boolean deleted;
+    Date created;
+    Date updated;
 }

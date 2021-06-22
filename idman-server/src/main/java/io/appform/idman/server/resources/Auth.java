@@ -20,7 +20,6 @@ import io.appform.idman.server.auth.AuthenticationProviderRegistry;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.impl.PasswordAuthInfo;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.LoginScreenView;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
@@ -99,10 +98,9 @@ public class Auth {
         if (session == null) {
             return Response.seeOther(errorUri(referer, "Invalid credentials")).build();
         }
-        val token = Utils.createJWT(session, authenticationConfig.getJwt());
         val uri = UriBuilder.fromUri(service.getCallbackUrl())
                 .queryParam("clientSessionId", session.getClientSessionId())
-                .queryParam("code", token)
+                .queryParam("code", session.getSessionId())
                 .build();
         return Response.seeOther(uri).build();
     }

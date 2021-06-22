@@ -14,9 +14,9 @@
 
 package io.appform.idman.server.db.impl;
 
-import io.appform.idman.server.db.SessionStore;
-import io.appform.idman.server.db.model.SessionType;
-import io.appform.idman.server.db.model.StoredUserSession;
+import io.appform.idman.server.db.SessionStoreForType;
+import io.appform.idman.model.TokenType;
+import io.appform.idman.server.db.model.StoredDynamicSession;
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import lombok.val;
@@ -32,22 +32,22 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
-class DBSessionStoreTest {
+class DBDynamicSessionStoreTest {
     public DAOTestExtension database = DAOTestExtension.newBuilder()
-            .addEntityClass(StoredUserSession.class)
+            .addEntityClass(StoredDynamicSession.class)
             .build();
 
-    private SessionStore store;
+    private SessionStoreForType store;
 
     @BeforeEach
     void setup() {
-        this.store = new DBSessionStore(database.getSessionFactory());
+        this.store = new DBDynamicSessionStore(database.getSessionFactory());
     }
 
     @Test
     void testSessionCrud() {
         val session = database.inTransaction(
-                () -> store.create("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null))
+                () -> store.create("SS1", "U1", "S1", "CS1", null))
                 .orElse(null);
         assertNotNull(session);
         assertNull(database.inTransaction(() -> store.get("SS1x")).orElse(null));
@@ -58,13 +58,13 @@ class DBSessionStoreTest {
             assertEquals("U1", fetched.getUserId());
             assertEquals("S1", fetched.getServiceId());
             assertEquals("CS1", fetched.getClientSessionId());
-            assertEquals(SessionType.DYNAMIC, fetched.getType());
+            assertEquals(TokenType.DYNAMIC, fetched.getType());
             assertNull(fetched.getExpiry());
             assertFalse(fetched.isDeleted());
         }
         try {
             database.inTransaction(
-                    () -> store.create("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, null));
+                    () -> store.create("SS1", "U1", "S1", "CS1", null));
             fail("Should have thrown exception");
         }
         catch (IllegalArgumentException e) {
@@ -82,7 +82,7 @@ class DBSessionStoreTest {
         val before = new Date(now.getTime() - 864_00_000);
         {
             val session = database.inTransaction(
-                    () -> store.create("SS1", "U1", "S1", "CS1", SessionType.DYNAMIC, later))
+                    () -> store.create("SS1", "U1", "S1", "CS1", later))
                     .orElse(null);
             assertNotNull(session);
             assertEquals(1, database.inTransaction(() -> store.sessionsForUser("U1")).size());
@@ -90,7 +90,7 @@ class DBSessionStoreTest {
         }
         {
             val session = database.inTransaction(
-                    () -> store.create("SS2", "U1", "S1", "CS1", SessionType.DYNAMIC, before))
+                    () -> store.create("SS2", "U1", "S1", "CS1", before))
                     .orElse(null);
             assertNotNull(session);
             assertEquals(0, database.inTransaction(() -> store.sessionsForUser("U1")).size());
@@ -98,7 +98,7 @@ class DBSessionStoreTest {
         }
         {
             val session = database.inTransaction(
-                    () -> store.create("SS3", "U1", "S1", "CS1", SessionType.DYNAMIC, null))
+                    () -> store.create("SS3", "U1", "S1", "CS1", null))
                     .orElse(null);
             assertNotNull(session);
             assertEquals(1, database.inTransaction(() -> store.sessionsForUser("U1")).size());

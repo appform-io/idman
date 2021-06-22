@@ -14,8 +14,7 @@
 
 package io.appform.idman.server.utils;
 
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.AuthState;
@@ -66,8 +65,13 @@ public class ServerTestingUtils {
     }
 
     public static StoredService testService() {
-        //String serviceId, String name, String description, String callbackUrl, String secret
-        return new StoredService("S", "S", "S", "s.com", "S_S");
+        return testService(false);
+    }
+
+    public static StoredService testService(boolean deleted) {
+        val service = new StoredService("S", "S", "S", "s.com", "S_S");
+        service.setDeleted(deleted);
+        return service;
     }
 
     public static void runInCtx(Runnable r) {
@@ -84,4 +88,5 @@ public class ServerTestingUtils {
     public static String randomString(int size) {
         return RandomStringUtils.randomAlphabetic(size);
     }
+
 }
