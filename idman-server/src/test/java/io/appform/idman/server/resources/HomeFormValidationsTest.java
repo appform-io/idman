@@ -113,9 +113,9 @@ class HomeFormValidationsTest {
 
     @BeforeEach
     void setup() {
-        doReturn(Optional.of(tokenInfo("ADMIN_TOKEN", TEST_ADMIN))).when(idmanClient).refreshAccessToken(anyString(), eq("ADMIN_TOKEN"));
-        doReturn(Optional.of(tokenInfo("USER_TOKEN", TEST_USER))).when(idmanClient).refreshAccessToken(anyString(), eq("USER_TOKEN"));
-        doReturn(Optional.empty()).when(idmanClient).refreshAccessToken(anyString(), eq("WRONG_TOKEN"));
+        doReturn(Optional.of(tokenInfo("ADMIN_TOKEN", TEST_ADMIN))).when(idmanClient).validateToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(tokenInfo("USER_TOKEN", TEST_USER))).when(idmanClient).validateToken(anyString(), eq("USER_TOKEN"));
+        doReturn(Optional.empty()).when(idmanClient).validateToken(anyString(), eq("WRONG_TOKEN"));
         val admin = new StoredUser("TA1", "ta@t.com", "TA", UserType.HUMAN);
         admin.setAuthState(new StoredUserAuthState(AuthMode.PASSWORD, AuthState.ACTIVE, 0, admin));
 

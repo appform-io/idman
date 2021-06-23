@@ -94,8 +94,8 @@ public class LocalIdmanAuthClient extends IdManClient {
 
     @Override
     @UnitOfWork
-    protected Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
-        val user = validate(token, serviceId);
+    protected Optional<TokenInfo> validateTokenImpl(String serviceId, String token) {
+        val user = parseToken(token, serviceId);
         if(null == user) {
             return Optional.empty();
         }
@@ -107,7 +107,7 @@ public class LocalIdmanAuthClient extends IdManClient {
                                          user));
     }
 
-    private IdmanUser validate(String token, String serviceId) {
+    private IdmanUser parseToken(String token, String serviceId) {
         log.debug("Auth called");
         val service = serviceStore.get(serviceId).orElse(null);
         if (null == service || service.isDeleted()) {

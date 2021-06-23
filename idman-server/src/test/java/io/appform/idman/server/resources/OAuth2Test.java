@@ -58,7 +58,7 @@ class OAuth2Test {
                 .accessToken("S", "testCode");
         doReturn(Optional.of(ClientTestingUtils.tokenInfo("T", TEST_USER)))
                 .when(client)
-                .refreshAccessToken("S", "T");
+                .validateToken("S", "T");
     }
 
     @AfterEach

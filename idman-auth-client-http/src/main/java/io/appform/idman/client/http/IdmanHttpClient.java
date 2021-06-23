@@ -68,7 +68,7 @@ public class IdmanHttpClient extends IdManClient {
 
     @Override
     @SneakyThrows
-    protected Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
+    protected Optional<TokenInfo> validateTokenImpl(String serviceId, String token) {
         return oauthTokenApiCall(token, "refresh_token", "refresh_token");
     }
 

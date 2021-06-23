@@ -137,7 +137,7 @@ class ApisTest {
         val tokenInfo =
         doReturn(Optional.of(tokenInfo("T", idmanUser)))
                 .when(client)
-                .refreshAccessToken(service.getServiceId(), "T");
+                .validateToken(service.getServiceId(), "T");
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")
@@ -157,7 +157,7 @@ class ApisTest {
         val idmanUser = new IdmanUser("S1", service.getServiceId(), new User("U1", "TU", UserType.HUMAN, AuthMode.PASSWORD), "R");
         doReturn(Optional.of(idmanUser))
                 .when(client)
-                .refreshAccessToken(service.getServiceId(), "T");
+                .validateToken(service.getServiceId(), "T");
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")
@@ -176,7 +176,7 @@ class ApisTest {
 
         doReturn(Optional.empty())
                 .when(client)
-                .refreshAccessToken(anyString(), anyString());
+                .validateToken(anyString(), anyString());
         val form = new Form();
         form.param("token", "T");
         val response = EXT.target("/auth/check/v1/S1")

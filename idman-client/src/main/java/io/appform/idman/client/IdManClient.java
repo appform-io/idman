@@ -47,7 +47,7 @@ public abstract class IdManClient {
                     @Override
                     public TokenInfo load(@NonNull CacheKey key) {
                         log.debug("Actual Auth called");
-                        val tokenInfo = refreshAccessTokenImpl(key.getServiceId(), key.getToken()).orElse(null);
+                        val tokenInfo = validateTokenImpl(key.getServiceId(), key.getToken()).orElse(null);
                         if(null == tokenInfo) {
                             return null;
                         }
@@ -58,7 +58,7 @@ public abstract class IdManClient {
 
     public abstract Optional<TokenInfo> accessToken(String serviceId, String tokenId);
 
-    public Optional<TokenInfo> refreshAccessToken(String serviceId, String token) {
+    public Optional<TokenInfo> validateToken(String serviceId, String token) {
         log.info("Authenticator called. Service ID: {} Token: {}", serviceId, token);
         if (Strings.isNullOrEmpty(serviceId) || Strings.isNullOrEmpty(token)) {
             return Optional.empty();
@@ -67,7 +67,7 @@ public abstract class IdManClient {
 
     }
 
-    protected abstract Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token);
+    protected abstract Optional<TokenInfo> validateTokenImpl(String serviceId, String token);
 
     @Value
     private static class CacheKey {

@@ -95,13 +95,13 @@ class IdmanAuthHandlerTest {
                 .accessToken(anyString(), eq("WRONG_TOKEN"));
         doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN", "ADMIN_TOKEN", 60, "bearer", TEST_ADMIN.getRole(), TEST_ADMIN)))
                 .when(idmanClient)
-                .refreshAccessToken(anyString(), eq("ADMIN_TOKEN"));
+                .validateToken(anyString(), eq("ADMIN_TOKEN"));
         doReturn(Optional.of(new TokenInfo("USER_TOKEN", "USER_TOKEN", 60, "bearer", TEST_USER.getRole(), TEST_USER)))
                 .when(idmanClient)
-                .refreshAccessToken(anyString(), eq("USER_TOKEN"));
+                .validateToken(anyString(), eq("USER_TOKEN"));
         doReturn(Optional.empty())
                 .when(idmanClient)
-                .refreshAccessToken(anyString(), eq("WRONG_TOKEN"));
+                .validateToken(anyString(), eq("WRONG_TOKEN"));
     }
 
     @AfterEach

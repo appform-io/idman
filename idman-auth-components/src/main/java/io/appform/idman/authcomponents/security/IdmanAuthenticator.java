@@ -45,7 +45,7 @@ public class IdmanAuthenticator implements Authenticator<String, ServiceUserPrin
     public Optional<ServiceUserPrincipal> authenticate(String token) {
         val serviceSessionUser
                 = idManClient
-                .refreshAccessToken(config.getServiceId(), token)
+                .validateToken(config.getServiceId(), token)
                 .map(TokenInfo::getUser)
                 .orElse(null);
         if (serviceSessionUser == null) {

@@ -127,7 +127,7 @@ public class OAuth2 {
             if(Strings.isNullOrEmpty(refreshToken)) {
                 return badRequest(ErrorCodes.INVALID_REQUEST, "'refresh_token' parameter must be provided for grant type 'refresh_token'");
             }
-            token = client.refreshAccessToken(clientId, refreshToken).orElse(null);
+            token = client.validateToken(clientId, refreshToken).orElse(null);
         }
         else {
             token = null;

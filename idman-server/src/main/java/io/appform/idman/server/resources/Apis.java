@@ -70,7 +70,7 @@ public class Apis {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
         val validatedUser = client.get()
-                .refreshAccessToken(serviceId, token)
+                .validateToken(serviceId, token)
                 .map(TokenInfo::getUser)
                 .orElse(null);
         if(null == validatedUser) {

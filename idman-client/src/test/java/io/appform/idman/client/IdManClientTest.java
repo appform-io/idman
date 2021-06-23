@@ -28,11 +28,11 @@ class IdManClientTest {
 
         @Override
         public Optional<TokenInfo> accessToken(String serviceId, String tokenId) {
-            return refreshAccessTokenImpl(serviceId, tokenId);
+            return validateTokenImpl(serviceId, tokenId);
         }
 
         @Override
-        public Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
+        public Optional<TokenInfo> validateTokenImpl(String serviceId, String token) {
             if (!status) {
                 return Optional.empty();
             }
@@ -46,22 +46,22 @@ class IdManClientTest {
 
     @Test
     void validateInvalidParams() {
-        assertFalse(new TestClient(false).refreshAccessToken(null, "T").isPresent());
-        assertFalse(new TestClient(false).refreshAccessToken("S", null).isPresent());
+        assertFalse(new TestClient(false).validateToken(null, "T").isPresent());
+        assertFalse(new TestClient(false).validateToken("S", null).isPresent());
     }
 
     @Test
     void validateFailure() {
-        assertFalse(new TestClient(false).refreshAccessToken("S", "T").isPresent());
+        assertFalse(new TestClient(false).validateToken("S", "T").isPresent());
     }
 
     @Test
     void validateSuccess() {
         final TestClient client = new TestClient(true);
 
-        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
-        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
-        assertTrue(client.refreshAccessToken( "S", "T").isPresent());
+        assertTrue(client.validateToken("S", "T").isPresent());
+        assertTrue(client.validateToken("S", "T").isPresent());
+        assertTrue(client.validateToken("S", "T").isPresent());
         assertEquals(1, client.getInvocations());
     }
 

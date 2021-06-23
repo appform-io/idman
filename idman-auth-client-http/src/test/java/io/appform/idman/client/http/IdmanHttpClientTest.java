@@ -57,7 +57,7 @@ class IdmanHttpClientTest {
                                                    .withBody(MAPPER.writeValueAsString(tokenInfo))));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.refreshAccessToken("S", "T");
+        val r = client.validateToken("S", "T");
         assertTrue(r.isPresent());
         assertEquals(tokenInfo, r.get());
     }
@@ -70,7 +70,7 @@ class IdmanHttpClientTest {
                                                    .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
 
         val client = new IdmanHttpClient(clientConfig(), MAPPER);
-        val r = client.refreshAccessToken("S", "T").orElse(null);
+        val r = client.validateToken("S", "T").orElse(null);
         assertNull(r);
     }
 
@@ -87,7 +87,7 @@ class IdmanHttpClientTest {
                 .when(mapper)
                 .readValue(anyString(), ArgumentMatchers.eq(IdmanUser.class));
         val client = new IdmanHttpClient(clientConfig(), mapper);
-        val r = client.refreshAccessToken("S", "T").orElse(null);
+        val r = client.validateToken("S", "T").orElse(null);
         assertNull(r);
     }
 

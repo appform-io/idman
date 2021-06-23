@@ -40,13 +40,13 @@ class IdmanAuthenticatorTest {
 
     @Test
     void testInvToken() {
-        doReturn(Optional.empty()).when(client).refreshAccessToken(anyString(), anyString());
+        doReturn(Optional.empty()).when(client).validateToken(anyString(), anyString());
         assertFalse(authenticator.authenticate("T").isPresent());
     }
 
     @Test
     void testAuthSuccess() {
-        doReturn(Optional.of(tokenInfo("T",TEST_USER))).when(client).refreshAccessToken(anyString(), anyString());
+        doReturn(Optional.of(tokenInfo("T",TEST_USER))).when(client).validateToken(anyString(), anyString());
         assertTrue(authenticator.authenticate("T").isPresent());
     }
 }

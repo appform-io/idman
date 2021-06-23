@@ -106,7 +106,7 @@ class LocalIdmanAuthClientTest {
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
         assertEquals(tokenInfo.getAccessToken(), tokenInfo.getRefreshToken());
-        val refreshedInfo = db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(
+        val refreshedInfo = db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(
                 null);
         assertNotNull(refreshedInfo);
         assertNotNull(refreshedInfo.getUser());
@@ -143,12 +143,12 @@ class LocalIdmanAuthClientTest {
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
         assertEquals(tokenInfo.getAccessToken(), tokenInfo.getRefreshToken());
-        val refreshedInfo = db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(
+        val refreshedInfo = db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(
                 null);
         assertNotNull(refreshedInfo);
         assertNotNull(refreshedInfo.getUser());
         assertEquals(role.getRoleId(), refreshedInfo.getRole());
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl("S2", jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl("S2", jwt)).orElse(null));
     }
 
     @Test
@@ -173,13 +173,13 @@ class LocalIdmanAuthClientTest {
         assertNotNull(tokenInfo);
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
-        val refreshedInfo = db.inTransaction(() -> client.refreshAccessToken(service.getServiceId(), jwt)).orElse(null);
+        val refreshedInfo = db.inTransaction(() -> client.validateToken(service.getServiceId(), jwt)).orElse(null);
         assertNotNull(refreshedInfo);
         val idmanUser = refreshedInfo.getUser();
         assertNotNull(idmanUser);
         assertTrue(db.inTransaction((Callable<Boolean>) () -> serviceStore.delete(service.getServiceId())));
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(null));
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl("S2", jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl("S2", jwt)).orElse(null));
     }
 
     @Test
@@ -187,7 +187,7 @@ class LocalIdmanAuthClientTest {
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), "abc")).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), "abc")).orElse(null));
     }
 
     @Test
@@ -214,11 +214,11 @@ class LocalIdmanAuthClientTest {
         assertNotNull(tokenInfo);
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
-        val idmanUser = db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt))
+        val idmanUser = db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt))
                 .map(TokenInfo::getUser)
                 .orElse(null);
         assertNotNull(idmanUser);
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl("S2", jwt))
+        assertNull(db.inTransaction(() -> client.validateTokenImpl("S2", jwt))
                            .map(TokenInfo::getUser)
                            .orElse(null));
     }
@@ -250,7 +250,7 @@ class LocalIdmanAuthClientTest {
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
         db.inTransaction(() -> sessionStore.delete(session.getSessionId(), session.getType()));
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(null));
     }
 
     @Test
@@ -275,16 +275,16 @@ class LocalIdmanAuthClientTest {
         assertNotNull(tokenInfo);
         val jwt = tokenInfo.getRefreshToken();
         assertFalse(Strings.isNullOrEmpty(jwt));
-        val idmanUser = db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt))
+        val idmanUser = db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt))
                 .map(TokenInfo::getUser)
                 .orElse(null);
         assertNotNull(idmanUser);
         db.inTransaction(() -> userStore.deleteUser(user.getUserId()));
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(null));
         db.inTransaction(() -> db.getSessionFactory().getCurrentSession()
                 .createSQLQuery("delete from users where user_id = 'U1'")
                 .executeUpdate());
-        assertNull(db.inTransaction(() -> client.refreshAccessTokenImpl(service.getServiceId(), jwt)).orElse(null));
+        assertNull(db.inTransaction(() -> client.validateTokenImpl(service.getServiceId(), jwt)).orElse(null));
     }
 
     @Test
@@ -322,7 +322,7 @@ class LocalIdmanAuthClientTest {
         assertNotNull(session);
         val jwt = Utils.createAccessToken(session, config.getJwt());
         assertNotNull(jwt);
-        val idmanUser = client.refreshAccessTokenImpl(service.getServiceId(), jwt).map(TokenInfo::getUser).orElse(null);
+        val idmanUser = client.validateTokenImpl(service.getServiceId(), jwt).map(TokenInfo::getUser).orElse(null);
         assertNotNull(idmanUser);
         assertEquals(user.getUserId(), idmanUser.getUser().getId());
     }
