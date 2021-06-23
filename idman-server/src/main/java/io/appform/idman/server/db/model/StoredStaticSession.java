@@ -31,8 +31,7 @@ import java.util.Date;
         indexes = {
                 @Index(name = "idx_ss_session", columnList = "session_id"),
                 @Index(name = "idx_ss_user", columnList = "user_id"),
-                @Index(name = "idx_ss_service_id", columnList = "service_id"),
-                @Index(name = "idx_ss_service_client_session", columnList = "service_id, client_session_id")
+                @Index(name = "idx_ss_service_id", columnList = "service_id")
         }
 )
 @Data
@@ -51,9 +50,6 @@ public class StoredStaticSession {
     @Column(name = "service_id", nullable = false)
     private String serviceId;
 
-    @Column(name = "client_session_id", nullable = false)
-    private String clientSessionId;
-
     @Column
     private boolean deleted;
 
@@ -68,11 +64,9 @@ public class StoredStaticSession {
     public StoredStaticSession(
             String sessionId,
             String userId,
-            String serviceId,
-            String clientSessionId) {
+            String serviceId) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.serviceId = serviceId;
-        this.clientSessionId = clientSessionId;
     }
 }

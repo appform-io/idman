@@ -26,12 +26,11 @@ import ru.vyarus.guicey.gsp.views.template.TemplateView;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class NewUserView extends TemplateView {
-    private static final String TEMPALTE_VIEW = "templates/newuser.hbs";
 
     String actionPath;
 
     public NewUserView(String actionPath) {
-        super(TEMPALTE_VIEW);
+        super("templates/newuser.hbs");
         this.actionPath = actionPath;
     }
 }

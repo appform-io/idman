@@ -14,7 +14,6 @@
 
 package io.appform.idman.server.db.model;
 
-import io.appform.idman.model.TokenType;
 import io.appform.idman.server.utils.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,10 +58,6 @@ public class StoredDynamicSession {
     @Column(name = "client_session_id", nullable = false)
     private String clientSessionId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "session_type", nullable = false)
-    private TokenType type;
-
     @Column
     private Date expiry;
 
@@ -90,7 +85,6 @@ public class StoredDynamicSession {
         this.userId = userId;
         this.serviceId = serviceId;
         this.clientSessionId = clientSessionId;
-        this.type = TokenType.DYNAMIC;
         this.expiry = expiry;
         this.partitionId = Utils.weekOfYear();
     }

@@ -55,7 +55,7 @@ public class DBStaticSessionStore extends AbstractDAO<StoredStaticSession> imple
             throw new IllegalArgumentException("Static Session does not have expiry");
         }
         try {
-            return Optional.of(persist(new StoredStaticSession(sessionId, userId, serviceId, clientSessionId)))
+            return Optional.of(persist(new StoredStaticSession(sessionId, userId, serviceId)))
                     .map(DBStaticSessionStore::toWire);
         }
         catch (ConstraintViolationException e) {
@@ -112,7 +112,7 @@ public class DBStaticSessionStore extends AbstractDAO<StoredStaticSession> imple
                 dynamicSession.getSessionId(),
                 dynamicSession.getUserId(),
                 dynamicSession.getServiceId(),
-                dynamicSession.getClientSessionId(),
+                null,
                 TokenType.STATIC,
                 null,
                 dynamicSession.isDeleted(),

@@ -57,7 +57,7 @@ class DBStaticSessionStoreTest {
             assertEquals("SS1", fetched.getSessionId());
             assertEquals("U1", fetched.getUserId());
             assertEquals("S1", fetched.getServiceId());
-            assertEquals("CS1", fetched.getClientSessionId());
+            assertNull(fetched.getClientSessionId());
             assertEquals(TokenType.STATIC, fetched.getType());
             assertNull(fetched.getExpiry());
             assertFalse(fetched.isDeleted());
@@ -70,7 +70,7 @@ class DBStaticSessionStoreTest {
             assertEquals("SS1", fetched.getSessionId());
             assertEquals("U1", fetched.getUserId());
             assertEquals("S1", fetched.getServiceId());
-            assertEquals("CS1", fetched.getClientSessionId());
+            assertNull(fetched.getClientSessionId());
             assertEquals(TokenType.STATIC, fetched.getType());
             assertNull(fetched.getExpiry());
             assertFalse(fetched.isDeleted());
