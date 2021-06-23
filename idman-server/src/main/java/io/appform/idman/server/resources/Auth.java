@@ -99,7 +99,7 @@ public class Auth {
             return Response.seeOther(errorUri(referer, "Invalid credentials")).build();
         }
         val uri = UriBuilder.fromUri(service.getCallbackUrl())
-                .queryParam("clientSessionId", session.getClientSessionId())
+                .queryParam("state", session.getClientSessionId())
                 .queryParam("code", session.getSessionId())
                 .build();
         return Response.seeOther(uri).build();

@@ -81,21 +81,21 @@ public class LocalIdmanAuthClient extends IdManClient {
         if (!serviceId.equals(session.getServiceId())) {
             return Optional.empty();
         }
-        val token = Utils.createAccessToken(session, authConfig.getJwt(), TokenType.DYNAMIC);
+        val token = Utils.createAccessToken(session, authConfig.getJwt());
         val idmanUser = buildIdmanUser(session);
         return Optional.of(new TokenInfo(token,
                                          token,
                                          //Refresh token is same as token for us. We shall re-validate it every time refresh is called
                                          authConfig.getJwt().getMaxDynamicTokenLifetime().toSeconds(),
                                          "beader",
-                                         idmanUser.getRole(),
+                                         null == idmanUser ? null : idmanUser.getRole(),
                                          idmanUser));
     }
 
     @Override
     @UnitOfWork
-    public Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
-        val user = validateImpl(token, serviceId);
+    protected Optional<TokenInfo> refreshAccessTokenImpl(String serviceId, String token) {
+        val user = validate(token, serviceId);
         if(null == user) {
             return Optional.empty();
         }
@@ -107,7 +107,7 @@ public class LocalIdmanAuthClient extends IdManClient {
                                          user));
     }
 
-    public IdmanUser validateImpl(String token, String serviceId) {
+    private IdmanUser validate(String token, String serviceId) {
         log.debug("Auth called");
         val service = serviceStore.get(serviceId).orElse(null);
         if (null == service || service.isDeleted()) {
@@ -118,9 +118,6 @@ public class LocalIdmanAuthClient extends IdManClient {
         val parsedToken = Utils.parseToken(token, jwtConsumer).orElse(null);
         if (null == parsedToken) {
             return null;
-        }
-        if (!parsedToken.getServiceId().equals(serviceId)) {
-            log.error("authentication_failed::service id mismatch");
         }
         val session = sessionStore
                 .get(parsedToken.getSessionId(),

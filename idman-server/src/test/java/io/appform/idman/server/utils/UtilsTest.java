@@ -66,7 +66,7 @@ class UtilsTest {
                                         false,
                                         new Date(),
                                         new Date());
-        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
+        val jwt = Utils.createAccessToken(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");
@@ -111,7 +111,7 @@ class UtilsTest {
                                                   false,
                                                   new Date(),
                                                   new Date());
-        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
+        val jwt = Utils.createAccessToken(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");
@@ -163,7 +163,7 @@ class UtilsTest {
                                                   false,
                                                   new Date(),
                                                   new Date());
-        val jwt = Utils.createAccessToken(session, config.getJwt(), TokenType.DYNAMIC);
+        val jwt = Utils.createAccessToken(session, config.getJwt());
         assertFalse(Strings.isNullOrEmpty(jwt));
 
         val consumer = Utils.buildConsumer(config, "S1");

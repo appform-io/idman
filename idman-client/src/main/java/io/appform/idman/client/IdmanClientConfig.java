@@ -32,6 +32,8 @@ public class IdmanClientConfig {
     @NotEmpty
     private String authEndpoint;
 
+    private String publicEndpoint;
+
     private Set<String> allowedPaths = Collections.emptySet();
 
     private String cacheSpec = "maximumSize=10000, expireAfterAccess=10m";

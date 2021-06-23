@@ -123,15 +123,17 @@ class IdmanAuthHandlerTest {
         try (val r = client.execute(get, ctx)) {
             assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
             val u = URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue());
-            assertEquals("/auth/login/testservice", u.getPath());
+            assertEquals("/apis/oauth2/authorize", u.getPath());
             assertEquals("localhost", u.getHost());
             assertEquals(8080, u.getPort());
             assertEquals("http", u.getScheme());
             val q = URLEncodedUtils.parse(u.getQuery(), StandardCharsets.UTF_8)
                     .stream()
                     .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-            assertEquals("/apis/idman/auth/callback", q.get("redirect"));
-            val clientSessionId = q.get("clientSessionId");
+            assertEquals("http://localhost:3000/apis/idman/auth/callback", q.get("redirect_uri"));
+            assertEquals("testservice", q.get("client_id"));
+            assertEquals("code", q.get("response_type"));
+            val clientSessionId = q.get("state");
             assertTrue(clientSessionId
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
             assertEquals(referer, cs.getCookies().stream().filter(c -> c.getName().equals("idman-local-redirect")).map(
@@ -165,16 +167,18 @@ class IdmanAuthHandlerTest {
         try (val r = client.execute(get, ctx)) {
             assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
             val u = URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue());
-            assertEquals("/auth/login/testservice", u.getPath());
+            assertEquals("/apis/oauth2/authorize", u.getPath());
             assertEquals("localhost", u.getHost());
             assertEquals(8080, u.getPort());
             assertEquals("http", u.getScheme());
             val q = URLEncodedUtils.parse(u.getQuery(), StandardCharsets.UTF_8)
                     .stream()
                     .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-            assertEquals("/apis/idman/auth/callback", q.get("redirect"));
+            assertEquals("http://localhost:3000/apis/idman/auth/callback", q.get("redirect_uri"));
             assertEquals("Test Error", q.get("error"));
-            val clientSessionId = q.get("clientSessionId");
+            assertEquals("testservice", q.get("client_id"));
+            assertEquals("code", q.get("response_type"));
+            val clientSessionId = q.get("state");
             assertTrue(clientSessionId
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
             assertEquals(referer, cs.getCookies().stream().filter(c -> c.getName().equals("idman-local-redirect")).map(
@@ -206,17 +210,19 @@ class IdmanAuthHandlerTest {
         try (val r = client.execute(get, ctx)) {
             assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
             val u = URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue());
-            assertEquals("/auth/login/testservice", u.getPath());
+            assertEquals("/apis/oauth2/authorize", u.getPath());
             assertEquals("localhost", u.getHost());
             assertEquals(8080, u.getPort());
             assertEquals("http", u.getScheme());
             val q = URLEncodedUtils.parse(u.getQuery(), StandardCharsets.UTF_8)
                     .stream()
                     .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-            assertEquals("/apis/idman/auth/callback", q.get("redirect"));
-            val clientSessionId = q.get("clientSessionId");
+            assertEquals("http://localhost:3000/apis/idman/auth/callback", q.get("redirect_uri"));
+            val clientSessionId = q.get("state");
             assertTrue(clientSessionId
                                .matches("[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}"));
+            assertEquals("testservice", q.get("client_id"));
+            assertEquals("code", q.get("response_type"));
             assertEquals("/protected", cs.getCookies()
                     .stream()
                     .filter(c -> c.getName().equals("idman-local-redirect"))
@@ -248,7 +254,7 @@ class IdmanAuthHandlerTest {
         addCookie(cs, "idman-auth-state", csId);
         addCookie(cs, "idman-local-redirect", "/protected");
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "USER_TOKEN")
                 .build();
         val get = new HttpGet(uri);
@@ -279,7 +285,7 @@ class IdmanAuthHandlerTest {
         addCookie(cs, "idman-auth-state", csId);
         addCookie(cs, "idman-local-redirect", "");
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "USER_TOKEN")
                 .build();
         val get = new HttpGet(uri);
@@ -309,7 +315,7 @@ class IdmanAuthHandlerTest {
         val csId = UUID.randomUUID().toString();
         addCookie(cs, "idman-auth-state", csId);
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "USER_TOKEN")
                 .build();
         val get = new HttpGet(uri);
@@ -329,7 +335,7 @@ class IdmanAuthHandlerTest {
         ctx.setAttribute(HttpClientContext.COOKIE_STORE, cs);
         val csId = UUID.randomUUID().toString();
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "USER_TOKEN")
                 .build();
         val get = new HttpGet(uri);
@@ -351,7 +357,7 @@ class IdmanAuthHandlerTest {
         addCookie(cs, "idman-auth-state", csId);
         addCookie(cs, "idman-local-redirect", "");
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "WRONG_TOKEN")
                 .build();
         val get = new HttpGet(uri);
@@ -373,7 +379,7 @@ class IdmanAuthHandlerTest {
         addCookie(cs, "idman-local-redirect", "");
         val csId = UUID.randomUUID().toString();
         val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
-                .addParameter("clientSessionId", csId)
+                .addParameter("state", csId)
                 .addParameter("code", "USER_TOKEN")
                 .build();
         val get = new HttpGet(uri);

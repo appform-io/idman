@@ -58,7 +58,7 @@ public class IdmanAuthFilter extends AuthFilter<String, ServiceUserPrincipal> {
         if (!this.authenticate(requestContext, jwt, "FORM")) {
             val params = uriInfo.getQueryParameters(true);
             val uriBuilder = UriBuilder.fromUri(URI.create(
-                    config.getAuthEndpoint() +
+                    config.getPublicEndpoint() +
                     (!Strings.isNullOrEmpty(config.getResourcePrefix())
                      ? config.getResourcePrefix() : "") + "/idman/auth"));
             if(params.containsKey(ERROR_PARAM)) {

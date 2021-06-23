@@ -96,6 +96,7 @@ public class CoreModule extends AbstractModule {
                 "/setup"));
         idmanConf.setResourcePrefix("/apis");
         idmanConf.setAuthEndpoint(appConfig.getAuthenticationCore().getServer());
+        idmanConf.setPublicEndpoint(appConfig.getAuthenticationCore().getServer());
         return idmanConf;
     }
 

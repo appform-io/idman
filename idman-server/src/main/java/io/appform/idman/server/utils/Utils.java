@@ -15,7 +15,6 @@
 package io.appform.idman.server.utils;
 
 import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.TokenType;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.ParsedTokenInfo;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
@@ -70,10 +69,7 @@ public class Utils {
     }
 
     @SneakyThrows
-    public static String createAccessToken(
-            final ClientSession session,
-            final JwtConfig jwtConfig,
-            TokenType sessionType) {
+    public static String createAccessToken(final ClientSession session, final JwtConfig jwtConfig) {
         val claims = new JwtClaims();
         claims.setIssuer(jwtConfig.getIssuerId());
         claims.setGeneratedJwtId();

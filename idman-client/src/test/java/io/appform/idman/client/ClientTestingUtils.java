@@ -15,6 +15,7 @@ public class ClientTestingUtils {
     public static IdmanClientConfig clientConfig() {
         val clientConfig = new IdmanClientConfig();
         clientConfig.setAuthEndpoint("http://localhost:8080");
+        clientConfig.setPublicEndpoint("http://localhost:3000");
         clientConfig.setResourcePrefix("/apis");
         clientConfig.setServiceId("testservice");
         clientConfig.setAllowedPaths(Collections.singleton("unchecked"));

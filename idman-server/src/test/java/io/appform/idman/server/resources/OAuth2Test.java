@@ -41,7 +41,7 @@ class OAuth2Test {
     private static final ServiceStore serviceStore = mock(ServiceStore.class);
     private static final IdManClient client = mock(IdManClient.class);
     private static final ResourceExtension EXT = ResourceExtension.builder()
-            .addResource(new OAuth2(client, serviceStore))
+            .addResource(new OAuth2(client, serviceStore, ServerTestingUtils.passwordauthConfig()))
             .build();
     private static final IdmanUser TEST_USER = new IdmanUser("S1",
                                                              "S",

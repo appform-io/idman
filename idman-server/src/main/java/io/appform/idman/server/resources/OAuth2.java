@@ -4,6 +4,7 @@ import com.google.api.client.util.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.TokenInfo;
+import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.ServiceStore;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.experimental.UtilityClass;
@@ -30,6 +31,7 @@ public class OAuth2 {
 
     private final IdManClient client;
     private final ServiceStore serviceStore;
+    private final AuthenticationConfig authenticationConfig;
 
     @UtilityClass
     public static class ErrorCodes {
@@ -41,9 +43,13 @@ public class OAuth2 {
     }
 
     @Inject
-    public OAuth2(IdManClient client, ServiceStore serviceStore) {
+    public OAuth2(
+            IdManClient client,
+            ServiceStore serviceStore,
+            AuthenticationConfig authenticationConfig) {
         this.client = client;
         this.serviceStore = serviceStore;
+        this.authenticationConfig = authenticationConfig;
     }
 
 
@@ -78,7 +84,7 @@ public class OAuth2 {
                              "Redirect URI does not match the registered call back uri for service");
 
         }
-        val uri = UriBuilder.fromUri("/auth/login/" + clientId)
+        val uri = UriBuilder.fromUri(authenticationConfig.getServer() + "/auth/login/" + clientId)
                 .queryParam("redirect", redirectUri)
                 .queryParam("clientSessionId",
                             Strings.isNullOrEmpty(state)

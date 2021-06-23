@@ -15,6 +15,7 @@
 package io.appform.idman.authcomponents.resource;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
@@ -25,10 +26,7 @@ import lombok.val;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.UUID;
 
@@ -58,11 +56,13 @@ public class IdmanAuthHandler {
             @HeaderParam("Referer") final String referrer,
             @CookieParam(IDMAN_LOCAL_REDIRECT) final Cookie localRedirect,
             @QueryParam("error") final String error) {
-        val callbackPath = prexifedPath("/idman/auth/callback");
+        val callbackPath = prefixedPath("/idman/auth/callback");
         val clientAuthSessionId = UUID.randomUUID().toString();
-        val uriBuilder = UriBuilder.fromUri(config.getAuthEndpoint() + "/auth/login/" + config.getServiceId())
-                .queryParam("redirect", callbackPath)
-                .queryParam("clientSessionId", clientAuthSessionId);
+        val uriBuilder = UriBuilder.fromUri(config.getAuthEndpoint() + "/apis/oauth2/authorize")
+                .queryParam("response_type", "code")
+                .queryParam("client_id", config.getServiceId())
+                .queryParam("redirect_uri", URI.create(config.getPublicEndpoint() + callbackPath))
+                .queryParam("state", clientAuthSessionId);
         if (!Strings.isNullOrEmpty(error)) {
             uriBuilder.queryParam("error", error);
         }
@@ -99,24 +99,34 @@ public class IdmanAuthHandler {
 
     @GET
     @Path("/callback")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response handleCallback(
             @CookieParam(IDMAN_STATE_COOKIE_NAME) final Cookie cookieState,
             @CookieParam(IDMAN_LOCAL_REDIRECT) final Cookie localRedirect,
-            @QueryParam("clientSessionId") final String clientSessionId,
-            @QueryParam("code") final String code) {
+            @QueryParam("state") final String clientSessionId,
+            @QueryParam("code") final String code,
+            @QueryParam("error") final String errorCode,
+            @QueryParam("error_description") final String errorDescription) {
+        if (!Strings.isNullOrEmpty(errorCode)) {
+            return Response.ok(
+                    ImmutableMap.of(
+                            "errorCode", errorCode,
+                            "errorDescription", errorDescription))
+                    .build();
+        }
         if (null == cookieState || null == localRedirect) {
             log.error("Missing cookie params for callback");
-            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
         }
         if (!cookieState.getValue().equals(clientSessionId)) {
             log.error("State cookie mismatch. Expected: {} Received callback for: {}",
                       cookieState.getValue(), clientSessionId);
-            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
         }
         val tokenInfo = idManClient.accessToken(config.getServiceId(), code).orElse(null);
         if (null == tokenInfo) {
             log.error("Token validation failed. Token: {}", code);
-            return Response.seeOther(URI.create(prexifedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
         }
 
         val localRedirectPath = Strings.isNullOrEmpty(localRedirect.getValue())
@@ -163,7 +173,7 @@ public class IdmanAuthHandler {
 
     }
 
-    private String prexifedPath(String path) {
+    private String prefixedPath(String path) {
         return (!Strings.isNullOrEmpty(config.getResourcePrefix())
                 ? config.getResourcePrefix()
                 : "") + path;
