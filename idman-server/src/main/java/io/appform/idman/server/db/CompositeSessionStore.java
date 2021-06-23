@@ -38,7 +38,7 @@ public class CompositeSessionStore implements SessionStore {
 
     @Override
     public List<ClientSession> sessionsForUser(String userId, TokenType type) {
-        return stores.get(stores).sessionsForUser(userId);
+        return stores.get(type).sessionsForUser(userId);
     }
 
     @Override
