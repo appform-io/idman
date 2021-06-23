@@ -39,6 +39,7 @@ public class IdmanAuthHandler {
     private static final String IDMAN_STATE_COOKIE_NAME = "idman-auth-state";
     private static final String IDMAN_LOCAL_REDIRECT = "idman-local-redirect";
     private static final String IDMAN_TOKEN_COOKIE_NAME = "idman-token";
+    private static final String AUTH_API = "/idman/auth";
 
     private final IdManClient idManClient;
     private final IdmanClientConfig config;
@@ -116,17 +117,17 @@ public class IdmanAuthHandler {
         }
         if (null == cookieState || null == localRedirect) {
             log.error("Missing cookie params for callback");
-            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath(AUTH_API))).build();
         }
         if (!cookieState.getValue().equals(clientSessionId)) {
             log.error("State cookie mismatch. Expected: {} Received callback for: {}",
                       cookieState.getValue(), clientSessionId);
-            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath(AUTH_API))).build();
         }
         val tokenInfo = idManClient.accessToken(config.getServiceId(), code).orElse(null);
         if (null == tokenInfo) {
             log.error("Token validation failed. Token: {}", code);
-            return Response.seeOther(URI.create(prefixedPath("/idman/auth"))).build();
+            return Response.seeOther(URI.create(prefixedPath(AUTH_API))).build();
         }
 
         val localRedirectPath = Strings.isNullOrEmpty(localRedirect.getValue())

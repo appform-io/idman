@@ -39,6 +39,4 @@ public class IdmanClientConfig {
     private String cacheSpec = "maximumSize=10000, expireAfterAccess=10m";
 
     String resourcePrefix;
-
-//    String redirectionEndpoint;
 }

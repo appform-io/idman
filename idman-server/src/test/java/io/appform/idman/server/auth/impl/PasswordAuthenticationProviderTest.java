@@ -106,8 +106,9 @@ class PasswordAuthenticationProviderTest {
             }
         }
         {
+            val authInfo = new GoogleAuthInfo("XX", "xx", "xx");
             try {
-                authProvider.login(new GoogleAuthInfo("XX", "xx", "xx"), "S1");
+                authProvider.login(authInfo, "S1");
                 fail("Expected illegal argument exception");
             }
             catch (IllegalArgumentException e) {
