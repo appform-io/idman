@@ -17,8 +17,10 @@ package io.appform.idman.server.engine;
 import com.google.common.base.Strings;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
+import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.db.model.StoredService;
@@ -26,10 +28,7 @@ import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserRole;
 import io.appform.idman.server.engine.results.*;
 import io.appform.idman.server.utils.Utils;
-import io.appform.idman.server.views.HomeView;
-import io.appform.idman.server.views.PasswordChangeView;
-import io.appform.idman.server.views.ServiceDetailsView;
-import io.appform.idman.server.views.UserDetailsView;
+import io.appform.idman.server.views.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
@@ -56,6 +55,8 @@ public class Engine {
     private final Provider<UserInfoStore> userInfoStore;
     private final Provider<PasswordStore> passwordStore;
     private final Provider<UserRoleStore> userRoleStore;
+    private final Provider<SessionStore> sessionStore;
+    private final Provider<TokenManager> tokenManager;
 
     @Inject
     public Engine(
@@ -63,12 +64,16 @@ public class Engine {
             Provider<RoleStore> roleStore,
             Provider<UserInfoStore> userInfoStore,
             Provider<PasswordStore> passwordStore,
-            Provider<UserRoleStore> userRoleStore) {
+            Provider<UserRoleStore> userRoleStore,
+            Provider<SessionStore> sessionStore,
+            Provider<TokenManager> tokenManager) {
         this.serviceStore = serviceStore;
         this.roleStore = roleStore;
         this.userInfoStore = userInfoStore;
         this.passwordStore = passwordStore;
         this.userRoleStore = userRoleStore;
+        this.sessionStore = sessionStore;
+        this.tokenManager = tokenManager;
     }
 
     public EngineEvalResult renderHome(final ServiceUserPrincipal principal, final String redirect) {
@@ -230,6 +235,16 @@ public class Engine {
         return new UserOpSuccess(userId);
     }
 
+    public EngineEvalResult createSystemUser(
+            final String id,
+            final String maintainerEmail,
+            final String systemName) {
+        return userInfoStore.get()
+                .create(id, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN)
+                .map(user -> (EngineEvalResult) new UserOpSuccess(id))
+                .orElse(new GeneralOpFailure());
+    }
+
     public EngineEvalResult userDetails(final ServiceUserPrincipal principal, final String userId) {
         val user = userInfoStore.get().get(userId).orElse(null);
         if (null == user) {
@@ -258,11 +273,26 @@ public class Engine {
                                     if (service == null || role == null) {
                                         return null;
                                     }
-                                    return new UserDetailsView.UserServices(service, role);
+                                    return new UserDetailsView.UserService(service, role);
                                 })
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList()),
-                        principal.getServiceUser()));
+                        principal.getServiceUser(),
+                        sessionStore.get()
+                                .sessionsForUser(userId,
+                                                 user.getUserType() == UserType.HUMAN
+                                                 ? TokenType.DYNAMIC
+                                                 : TokenType.STATIC)
+                                .stream()
+                                .map(session -> {
+                                    val service  = services.get(session.getServiceId());
+                                    if(null == service) {
+                                        return null;
+                                    }
+                                    return new UserDetailsView.UserSession(service,session);
+                                })
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList())));
     }
 
     public EngineEvalResult updateUser(final ServiceUserPrincipal sessionUser, final String userId, final String name) {
@@ -401,5 +431,21 @@ public class Engine {
             return new UserOpSuccess(userId);
         }
         return new RedirectToParam(referer.getPath());
+    }
+
+    public EngineEvalResult createStaticSession(final String userId, final String serviceId) {
+        return tokenManager.get()
+                .createToken(serviceId, userId, null, TokenType.STATIC, null)
+                .map(session -> (EngineEvalResult) new TokenOpSuccess(session.getSessionId(), serviceId, userId))
+                .orElse(new UserOpFailure(userId));
+    }
+
+    public EngineEvalResult viewToken(final String serviceId, final String userId, final String sessionId) {
+        return tokenManager.get()
+                .generateTokenForSession(serviceId, sessionId, TokenType.STATIC)
+                .filter(generatedTokenInfo -> generatedTokenInfo.getUser().getUser().getId().equals(userId))
+                .map(generatedTokenInfo -> (EngineEvalResult) new ViewOpSuccess(
+                        new TokenView(generatedTokenInfo.getToken(), generatedTokenInfo.getUser().getUser().getId())))
+                .orElse(new GeneralOpFailure());
     }
 }

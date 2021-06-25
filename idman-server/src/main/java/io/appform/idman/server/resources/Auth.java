@@ -47,7 +47,6 @@ import java.util.UUID;
 @Produces(MediaType.TEXT_HTML)
 public class Auth {
 
-    private final AuthenticationConfig authenticationConfig;
     private final Provider<AuthenticationProviderRegistry> authenticators;
     private final Provider<ServiceStore> serviceStore;
 
@@ -56,7 +55,6 @@ public class Auth {
             AuthenticationConfig authenticationConfig,
             Provider<AuthenticationProviderRegistry> authenticators,
             Provider<ServiceStore> serviceStore) {
-        this.authenticationConfig = authenticationConfig;
         this.authenticators = authenticators;
         this.serviceStore = serviceStore;
     }

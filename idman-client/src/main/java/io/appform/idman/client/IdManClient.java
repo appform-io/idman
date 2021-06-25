@@ -69,6 +69,8 @@ public abstract class IdManClient {
 
     protected abstract Optional<TokenInfo> validateTokenImpl(String serviceId, String token);
 
+    public abstract boolean deleteToken(String userId, String serviceId, String jwt);
+
     @Value
     private static class CacheKey {
         String token;

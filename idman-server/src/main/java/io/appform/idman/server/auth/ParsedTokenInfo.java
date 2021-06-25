@@ -1,5 +1,6 @@
 package io.appform.idman.server.auth;
 
+import io.appform.idman.model.TokenType;
 import lombok.Value;
 import org.jose4j.jwt.NumericDate;
 
@@ -12,4 +13,5 @@ public class ParsedTokenInfo {
     String sessionId;
     String serviceId;
     NumericDate expiry;
+    TokenType type;
 }

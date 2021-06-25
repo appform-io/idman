@@ -20,7 +20,7 @@ import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.db.ServiceStore;
 import io.appform.idman.server.db.model.StoredService;
-import io.appform.idman.server.localauth.LocalIdmanAuthClient;
+import io.appform.idman.server.localauth.LocalIdmanClient;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import lombok.SneakyThrows;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.*;
 class ApisTest {
 
     private static final ServiceStore serviceStore = mock(ServiceStore.class);
-    private static final LocalIdmanAuthClient client = mock(LocalIdmanAuthClient.class);
+    private static final LocalIdmanClient client = mock(LocalIdmanClient.class);
     private static final ResourceExtension EXT = ResourceExtension.builder()
             .addResource(new Apis(() -> serviceStore, () -> client))
             .build();

@@ -18,7 +18,6 @@ import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
-import io.appform.idman.server.views.NewUserView;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
@@ -167,7 +166,7 @@ public class Home {
     @GET
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response newUser() {
-        return Response.ok(new NewUserView("/users/human")).build();
+        return Response.ok(new TemplateView("templates/newuser.hbs")).build();
     }
 
     @Path("/users/human")
@@ -179,6 +178,17 @@ public class Home {
             @FormParam("name") @NotEmpty @Size(max = 250) final String name,
             @FormParam("password") @NotEmpty @Size(max = 40) final String password) {
         return translator.translate(engine.createHumanUser(email, name, password));
+    }
+
+    @Path("/users/system")
+    @POST
+    @UnitOfWork
+    @RolesAllowed(IdmanRoles.ADMIN)
+    public Response createSystemUser(
+            @FormParam("systemId") @NotEmpty @Size(max = 250) final String systemId,
+            @FormParam("systemMaintainerEmail") @Email @NotEmpty @Size(max = 250) final String systemMaintainerEmail,
+            @FormParam("systemName") @NotEmpty @Size(max = 250) final String systemName) {
+        return translator.translate(engine.createSystemUser(systemId, systemMaintainerEmail, systemName));
     }
 
     @Path("/users/{userId}")
@@ -269,6 +279,25 @@ public class Home {
             @PathParam("roleId") @NotEmpty @Size(max = 40) final String roleId,
             @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.unmapUserFromRole(referer, serviceId, roleId, userId));
+    }
+
+    @Path("/tokens/{serviceId}/{userId}/create")
+    @POST
+    @RolesAllowed(IdmanRoles.ADMIN)
+    public Response createToken(
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
+        return translator.translate(engine.createStaticSession(userId, serviceId));
+    }
+
+    @Path("/tokens/{serviceId}/{userId}/{sessionId}")
+    @GET
+    @RolesAllowed(IdmanRoles.ADMIN)
+    public Response viewToken(
+        @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+        @PathParam("sessionId") @NotEmpty @Size(max = 40) final String sessionId,
+        @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
+        return translator.translate(engine.viewToken(serviceId, userId, sessionId));
     }
 
 }

@@ -43,4 +43,6 @@ public interface EngineEvalResultVisitor <T> {
     T visit(RoleOpFailure roleOpFailure);
 
     T visit(RoleOpSuccess roleOpSuccess);
+
+    T visit(TokenOpSuccess tokenOpSuccess);
 }

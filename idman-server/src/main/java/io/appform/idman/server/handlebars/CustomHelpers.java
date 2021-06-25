@@ -16,6 +16,7 @@ package io.appform.idman.server.handlebars;
 
 import com.github.jknack.handlebars.Options;
 import io.appform.idman.model.IdmanUser;
+import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.db.model.StoredUser;
 
@@ -36,6 +37,12 @@ public class CustomHelpers {
     public CharSequence adminOrSelf(final IdmanUser idmanUser, final StoredUser user, final Options options) throws IOException {
         return ((null != idmanUser && null != idmanUser.getRole() && idmanUser.getRole().equals(IdmanRoles.ADMIN))
                 || (null != user && null != idmanUser && user.getUserId().equals(idmanUser.getUser().getId())))
+                ? options.fn()
+               : options.inverse();
+    }
+
+    public CharSequence userTypeMatch(final UserType type, String value, Options options) throws IOException {
+        return type.equals(UserType.valueOf(value))
                 ? options.fn()
                : options.inverse();
     }

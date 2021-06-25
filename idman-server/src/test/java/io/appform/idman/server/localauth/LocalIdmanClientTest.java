@@ -19,6 +19,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.TokenInfo;
 import io.appform.idman.model.TokenType;
 import io.appform.idman.model.UserType;
+import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.impl.PasswordAuthInfo;
 import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
@@ -43,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
-class LocalIdmanAuthClientTest {
+class LocalIdmanClientTest {
     public DAOTestExtension db = DAOTestExtension.newBuilder()
             .addEntityClass(StoredUser.class)
             .addEntityClass(StoredUserAuthState.class)
@@ -63,7 +64,7 @@ class LocalIdmanAuthClientTest {
     private PasswordStore passwordStore;
     private final AuthenticationConfig config = ServerTestingUtils.passwordauthConfig();
 
-    private LocalIdmanAuthClient client;
+    private LocalIdmanClient client;
 
     @BeforeEach
     void setup() {
@@ -74,7 +75,13 @@ class LocalIdmanAuthClientTest {
         userRoleStore = new DBUserRoleStore(db.getSessionFactory());
         serviceStore = new DBServiceStore(db.getSessionFactory());
         passwordStore = new DBPasswordStore(db.getSessionFactory());
-        client = new LocalIdmanAuthClient(sessionStore, userStore, serviceStore, userRoleStore, config);
+        client = new LocalIdmanClient(
+                config,
+                                          new TokenManager(userStore,
+                                                           serviceStore,
+                                                           sessionStore,
+                                                           userRoleStore,
+                                                           config.getJwt()));
     }
 
     @Test

@@ -2,7 +2,7 @@
     {{#with user}}
         <section>
             <h3>Details for {{name}}</h3>
-            <div class="row">
+            <div class="row pt-2">
                 <div class="col">
                     <table class="table table-bordered">
                         <tbody>
@@ -34,30 +34,34 @@
                             <th scope="row">User Type</th>
                             <td>{{userType}}</td>
                         </tr>
-                        <tr>
-                            <th scope="row">Authentication Mode</th>
-                            <td>{{authMode}}</td>
-                        </tr>
-                        {{#adminOrSelf ../sessionUser this}}
-                        <tr>
-                            <th scope="row">Password</th>
-                            <td>
-                                <a href="/users/{{userId}}/update/password" class="btn btn-sm btn-info">Change</a>
-                            </td>
-                        </tr>
-                        {{/adminOrSelf}}
+                        {{#userTypeMatch userType "HUMAN"}}
+                            <tr>
+                                <th scope="row">Authentication Mode</th>
+                                <td>{{authMode}}</td>
+                            </tr>
+                            {{#adminOrSelf ../sessionUser this}}
+                                <tr>
+                                    <th scope="row">Password</th>
+                                    <td>
+                                        <a href="/users/{{userId}}/update/password"
+                                           class="btn btn-sm btn-info">Change</a>
+                                    </td>
+                                </tr>
+                            {{/adminOrSelf}}
+                        {{else}}
+                        {{/userTypeMatch}}
                         <tr>
                             <td colspan="2">
                                 <span style="font-size: smaller">Created at {{created}} Last updated at: {{updated}}
                                     .</span>
                                 {{#admin sessionUser}}
-                                <form class="form-inline confirmed-form float-right" method="post"
-                                      action="/users/{{userId}}/delete"
-                                      data-cnf-title="Delete User"
-                                      data-cnf-text="Are you sure that you want to delete the user {{name}}?">
-                                    <button type="submit" class="btn btn-sm btn-danger float-right">Delete
-                                    </button>
-                                </form>
+                                    <form class="form-inline confirmed-form float-right" method="post"
+                                          action="/users/{{userId}}/delete"
+                                          data-cnf-title="Delete User"
+                                          data-cnf-text="Are you sure that you want to delete the user {{name}}?">
+                                        <button type="submit" class="btn btn-sm btn-danger float-right">Delete
+                                        </button>
+                                    </form>
                                 {{/admin}}
                             </td>
                         </tr>
@@ -66,43 +70,132 @@
                 </div>
             </div>
         </section>
-        <section class="idm-section">
+        <section class="container-fluid">
             <div class="row">
-                <div class="col">
-                    <table class="table table-bordered data-table">
-                        <thead>
-                        <tr>
-                            <th scope="col">Service</th>
-                            <th scope="col">Role</th>
-                            {{#admin ../sessionUser}}
-                                <th scope="col" width="5%"></th>
-                            {{/admin}}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each services}}
+                <div class="col-sm-12 col-md-6">
+                    <section class="idm-section">
+                        <div class="row pb-2">
+                            <div class="col-sm-8">
+                                <h3>Role Mappings</h3>
+                            </div>
+                        </div>
+                        <table class="table table-bordered data-table">
+                            <thead>
                             <tr>
-                                {{#with service}}
-                                    <td><a href="/services/{{serviceId}}">{{name}}</a></td>
-                                {{/with}}
-                                {{#with role}}
-                                    <td>{{displayName}}</td>
-                                {{/with}}
-                                {{#admin ../sessionUser}}
-                                    <td>
-                                        <form class="form-inline confirmed-form" method="post"
-                                              action="/roles/{{#with role}}{{serviceId}}/{{roleId}}{{/with}}/unmap/{{#with
-                                                      ../user}}{{userId}}{{/with}}"
-                                              data-cnf-title="Unamp user"
-                                              data-cnf-text="Are you sure that you want to unmap user from role?">
-                                            <button class="btn btn-sm btn-outline-danger">Unmap</button>
-                                        </form>
-                                    </td>
+                                <th scope="col">Service</th>
+                                <th scope="col">Role</th>
+                                {{#admin sessionUser}}
+                                    {{#with user}}
+                                    {{#userTypeMatch userType "SYSTEM"}}
+                                        <th scope="col" width="5%"></th>
+                                    {{/userTypeMatch}}
+                                    {{/with}}
+                                    <th scope="col" width="5%"></th>
                                 {{/admin}}
                             </tr>
-                        {{/each}}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {{#each services}}
+                                <tr>
+                                    {{#with service}}
+                                        <td><a href="/services/{{serviceId}}">{{name}}</a></td>
+                                    {{/with}}
+                                    {{#with role}}
+                                        <td>{{displayName}}</td>
+                                    {{/with}}
+                                    {{#admin ../sessionUser}}
+                                        {{#with user}}
+                                            {{#userTypeMatch userType "SYSTEM"}}
+                                            <td>
+                                                <form class="form-inline confirmed-form" method="post"
+                                                      action="/tokens/{{#with role}}{{serviceId}}{{/with}}/{{#with
+                                                              ../user}}{{userId}}{{/with}}/create"
+                                                      data-cnf-title="Create New Authenticated Session"
+                                                      data-cnf-text="Are you sure that you want to create a new authentication session and token?">
+                                                    <button class="btn btn-sm btn-outline-primary">Create New Session</button>
+                                                </form>
+                                            </td>
+                                            {{/userTypeMatch}}
+                                        {{/with}}
+                                        <td>
+                                            <form class="form-inline confirmed-form" method="post"
+                                                  action="/roles/{{#with
+                                                          role}}{{serviceId}}/{{roleId}}{{/with}}/unmap/{{#with
+                                                          ../user}}{{userId}}{{/with}}"
+                                                  data-cnf-title="Unamp user"
+                                                  data-cnf-text="Are you sure that you want to unmap user from role?">
+                                                <button class="btn btn-sm btn-outline-danger">Unmap</button>
+                                            </form>
+                                        </td>
+                                    {{/admin}}
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <section class="idm-section">
+                        <div class="row pb-2">
+                            <div class="col-sm-8">
+                                <h3>Active Sessions</h3>
+                            </div>
+                        </div>
+                        <table class="table table-bordered data-table">
+                            <thead>
+                            <tr>
+                                <th scope="col">SessionID</th>
+                                <th scope="col">Service</th>
+                                <th scope="col">Expiry</th>
+                                {{#admin ../sessionUser}}
+                                    <th scope="col" width="5%"></th>
+                                {{/admin}}
+                                {{#adminOrSelf ../sessionUser ../user}}
+                                    <th scope="col" width="5%"></th>
+                                {{/adminOrSelf}}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each sessions}}
+                                <tr>
+                                    {{#with session}}
+                                        <td>{{sessionId}}</td>
+                                    {{/with}}
+                                    {{#with service}}
+                                        <td><a href="/services/{{serviceId}}">{{name}}</a></td>
+                                    {{/with}}
+                                    {{#with session}}
+                                        <td>{{expiry}}</td>
+                                    {{/with}}
+                                    {{#admin ../sessionUser}}
+                                        <td>
+                                            {{#with ../user}}
+                                                {{#userTypeMatch userType "SYSTEM" }}
+                                                    <form class="form-inline" method="get"
+                                                          action="/tokens/{{#with session}}{{serviceId}}{{/with}}/{{#with ../user}}{{userId}}{{/with}}/{{#with session}}{{sessionId}}{{/with}}">
+                                                        <button class="btn btn-sm btn-outline-primary">View Token</button>
+                                                    </form>
+                                                {{else}}
+                                                    Dynamic Session
+                                                {{/userTypeMatch}}
+                                            {{/with}}
+                                        </td>
+                                    {{/admin}}
+                                    {{#adminOrSelf ../sessionUser ../user}}
+                                        <td>
+                                            <form class="form-inline confirmed-form" method="post"
+                                                  action="/tokens/{{#with role}}{{serviceId}}{{/with}}/{{#with session}}{{sessionId}}{{/with}}/end"
+                                                  data-cnf-title="End Session"
+                                                  data-cnf-text="Are you sure that you want to end this session?">
+                                                <button class="btn btn-sm btn-outline-danger">End</button>
+                                            </form>
+                                        </td>
+                                    {{/adminOrSelf}}
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </section>
                 </div>
             </div>
         </section>

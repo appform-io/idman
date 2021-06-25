@@ -163,6 +163,19 @@ CREATE TABLE `dynamic_sessions` (
  PARTITION `p54` VALUES LESS THAN MAXVALUE ENGINE = InnoDB);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE TABLE `static_sessions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(45) NOT NULL,
+  `user_id` varchar(45) NOT NULL,
+  `service_id` varchar(255) NOT NULL,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created` datetime(3) DEFAULT current_timestamp(3),
+  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_ss_session_id` (`session_id`),
+  KEY `idx_ss_user` (`user_id`),
+  KEY `idx_ss_service_id` (`service_id`)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 --
 -- Table structure for table `static_sessions`
 --

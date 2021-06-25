@@ -5,13 +5,13 @@ import io.appform.idman.model.UserType;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.utils.ServerTestingUtils;
-import io.appform.idman.server.views.NewUserView;
 import lombok.val;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import ru.vyarus.guicey.gsp.views.template.TemplateView;
 
 import java.net.URI;
 import java.util.Optional;
@@ -57,7 +57,7 @@ class FirstTimeWizardTest {
         runInCtx(() -> {
             val r = firstTimeWizard.setupScreen();
             assertEquals(HttpStatus.SC_OK, r.getStatus());
-            assertEquals(NewUserView.class, r.getEntity().getClass());
+            assertEquals(TemplateView.class, r.getEntity().getClass());
         });
     }
 

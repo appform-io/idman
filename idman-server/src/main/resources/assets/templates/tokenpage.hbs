@@ -1,0 +1,37 @@
+{{#partial "content"}}
+    <section class="container-fluid">
+        <div class="row justify-content-md-center">
+            <div class="col-sm-auto">
+                <h2>Authentication Token Information</h2>
+            </div>
+        </div>
+        <div class="row  justify-content-md-center">
+            <div class="col col-sm-12 col-md-8">
+                <table class="table table-bordered" style="table-layout: fixed; word-wrap: break-word;">
+                    <tr>
+                        <th scope="row" colspan="1">Client ID</th>
+                        <td colspan="5">{{userId}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="1">Token</th>
+                        <td colspan="5"><code>{{token}}</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row  justify-content-md-center">
+            <div class="col col-sm-12 col-md-8">
+                <div class="alert alert-secondary" role="alert">
+                    <b>Note: </b>The token is transient. Every time you visit this page, a new token will be returned.
+                </div>
+            </div>
+        </div>
+        <div class="row  justify-content-md-center">
+            <div class="col-sm-auto">
+                <a href="/users/{{userId}}" class="btn btn-lg btn-outline-primary">Done</a>
+            </div>
+        </div>
+    </section>
+{{/partial}}
+
+{{> common/base}}

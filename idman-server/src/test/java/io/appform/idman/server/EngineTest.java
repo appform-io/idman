@@ -21,6 +21,7 @@ import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
+import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.*;
 import io.appform.idman.server.engine.Engine;
@@ -32,7 +33,6 @@ import io.appform.idman.server.views.UserDetailsView;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import lombok.val;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.stubbing.Answer;
@@ -52,27 +52,21 @@ import static org.mockito.Mockito.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 class EngineTest {
 
-    private ServiceStore serviceStore;
-    private RoleStore roleStore;
-    private UserInfoStore userInfoStore;
-    private PasswordStore passwordStore;
-    private UserRoleStore userRoleStore;
+    private ServiceStore serviceStore = mock(ServiceStore.class);
+    private RoleStore roleStore = mock(RoleStore.class);
+    private UserInfoStore userInfoStore = mock(UserInfoStore.class);
+    private PasswordStore passwordStore = mock(PasswordStore.class);
+    private UserRoleStore userRoleStore = mock(UserRoleStore.class);
+    private SessionStore sessionStore  = mock(SessionStore.class);
+    private TokenManager tokenManager = mock(TokenManager.class);
 
-    private Engine engine;
-
-    @BeforeEach
-    void setup() {
-        serviceStore = mock(ServiceStore.class);
-        roleStore = mock(RoleStore.class);
-        passwordStore = mock(PasswordStore.class);
-        userInfoStore = mock(UserInfoStore.class);
-        userRoleStore = mock(UserRoleStore.class);
-        engine = new Engine(() -> serviceStore,
-                            () -> roleStore,
-                            () -> userInfoStore,
-                            () -> passwordStore,
-                            () -> userRoleStore);
-    }
+    private Engine engine = new Engine(() -> serviceStore,
+                                       () -> roleStore,
+                                       () -> userInfoStore,
+                                       () -> passwordStore,
+                                       () -> userRoleStore,
+                                       () -> sessionStore,
+                                       () -> tokenManager);
 
     @AfterEach
     void destroy() {
@@ -80,7 +74,8 @@ class EngineTest {
               roleStore,
               passwordStore,
               userInfoStore,
-              userRoleStore);
+              userRoleStore,
+              sessionStore);
     }
 
     @Test

@@ -15,6 +15,7 @@
 package io.appform.idman.server.utils;
 
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.model.User;
 import io.appform.idman.server.auth.ParsedTokenInfo;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
@@ -78,8 +79,8 @@ public class Utils {
         claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject(session.getUserId());
         claims.setAudience(session.getServiceId());
-
-        if(null != session.getExpiry()) {
+        claims.setIssuedAt(NumericDate.fromMilliseconds(session.getCreated().getTime()));
+        if (null != session.getExpiry()) {
             claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));
         }
         val jws = new JsonWebSignature();
@@ -135,7 +136,13 @@ public class Utils {
             log.error("exception in claim extraction {}. Token: {}", e.getMessage(), token);
             return Optional.empty();
         }
-        return Optional.of(new ParsedTokenInfo(userId, sessionId, extServiceId, expiry));
+        return Optional.of(new ParsedTokenInfo(userId,
+                                               sessionId,
+                                               extServiceId,
+                                               expiry,
+                                               null == expiry
+                                               ? TokenType.STATIC
+                                               : TokenType.DYNAMIC));
     }
 
     public static Duration sessionDuration(AuthenticationConfig authConfig) {
@@ -150,7 +157,10 @@ public class Utils {
     }
 
     public static JwtConsumer buildConsumer(AuthenticationConfig authConfig, final String serviceId) {
-        val jwtConfig = authConfig.getJwt();
+        return buildConsumer(authConfig.getJwt(), serviceId);
+    }
+
+    public static JwtConsumer buildConsumer(JwtConfig jwtConfig, final String serviceId) {
         final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
         return new JwtConsumerBuilder()
                 .setRequireIssuedAt()

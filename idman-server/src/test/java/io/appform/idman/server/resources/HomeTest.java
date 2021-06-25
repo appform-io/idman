@@ -4,7 +4,6 @@ import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
 import io.appform.idman.server.engine.results.GeneralOpSuccess;
-import io.appform.idman.server.views.NewUserView;
 import lombok.val;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -226,7 +225,7 @@ class HomeTest {
         runInCtx(() -> {
             val r = home.newUser();
             assertEquals(HttpStatus.SC_OK, r.getStatus());
-            assertEquals(NewUserView.class, r.getEntity().getClass());
+            assertEquals(TemplateView.class, r.getEntity().getClass());
         });
     }
 }

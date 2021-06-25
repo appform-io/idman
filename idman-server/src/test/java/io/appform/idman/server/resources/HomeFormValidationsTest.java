@@ -24,6 +24,7 @@ import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.User;
 import io.appform.idman.model.UserType;
+import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
@@ -88,6 +89,9 @@ class HomeFormValidationsTest {
     private final UserInfoStore userInfoStore = mock(UserInfoStore.class);
     private final PasswordStore passwordStore = mock(PasswordStore.class);
     private final UserRoleStore userRoleStore = mock(UserRoleStore.class);
+    private final SessionStore sessionStore = mock(SessionStore.class);
+    private final TokenManager tokenManager = mock(TokenManager.class);
+
     private static final Environment environment = mock(Environment.class);
     private final IdManClient idmanClient = mock(IdManClient.class);
     private final CloseableHttpClient client = HttpClients.custom()
@@ -108,7 +112,9 @@ class HomeFormValidationsTest {
                                              () -> roleStore,
                                              () -> userInfoStore,
                                              () -> passwordStore,
-                                             () -> userRoleStore), new ViewEngineResponseTranslator()))
+                                             () -> userRoleStore,
+                                             () -> sessionStore,
+                                             () -> tokenManager), new ViewEngineResponseTranslator()))
             .build();
 
     @BeforeEach

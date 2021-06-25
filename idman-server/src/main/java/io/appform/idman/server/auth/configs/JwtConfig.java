@@ -14,12 +14,10 @@
 
 package io.appform.idman.server.auth.configs;
 
-import io.dropwizard.util.Duration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -36,6 +34,4 @@ public class JwtConfig {
     @NotEmpty
     private String authCachePolicy = "maximumSize=10000, expireAfterAccess=10m";
 
-    @NotNull
-    private Duration maxDynamicTokenLifetime = Duration.minutes(60);
 }

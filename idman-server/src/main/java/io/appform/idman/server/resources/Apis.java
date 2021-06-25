@@ -16,7 +16,7 @@ package io.appform.idman.server.resources;
 
 import io.appform.idman.model.TokenInfo;
 import io.appform.idman.server.db.ServiceStore;
-import io.appform.idman.server.localauth.LocalIdmanAuthClient;
+import io.appform.idman.server.localauth.LocalIdmanClient;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -38,10 +38,10 @@ import javax.ws.rs.core.Response;
 public class Apis {
 
     private final Provider<ServiceStore> serviceStore;
-    private final Provider<LocalIdmanAuthClient> client;
+    private final Provider<LocalIdmanClient> client;
 
     @Inject
-    public Apis(Provider<ServiceStore> serviceStore, Provider<LocalIdmanAuthClient> client) {
+    public Apis(Provider<ServiceStore> serviceStore, Provider<LocalIdmanClient> client) {
         this.serviceStore = serviceStore;
         this.client = client;
     }

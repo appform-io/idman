@@ -25,12 +25,14 @@ import io.appform.idman.client.IdmanClientConfig;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AppConfig;
 import io.appform.idman.server.auth.AuthenticationProvider;
+import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.AuthenticationProviderConfig;
+import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.auth.impl.PasswordAuthenticationProvider;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.impl.*;
-import io.appform.idman.server.localauth.LocalIdmanAuthClient;
+import io.appform.idman.server.localauth.LocalIdmanClient;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import lombok.val;
@@ -60,6 +62,7 @@ public class CoreModule extends AbstractModule {
         bind(SessionStoreForType.class).annotatedWith(Names.named("static")).to(DBStaticSessionStore.class);
         bind(SessionStore.class).to(CompositeSessionStore.class);
         bind(UserInfoStore.class).to(DBUserInfoStore.class);
+        bind(IdManClient.class).to(LocalIdmanClient.class);
     }
 
     @Provides
@@ -109,7 +112,7 @@ public class CoreModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public IdManClient idManClient(
+    public TokenManager idManClient(
             SessionStore sessionStore,
             UserInfoStore userInfoStore,
             ServiceStore serviceStore,
@@ -117,20 +120,20 @@ public class CoreModule extends AbstractModule {
             AuthenticationConfig authConfig) {
 
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(LocalIdmanAuthClient.class,
+                .create(TokenManager.class,
                         new Class[]{
-                                SessionStore.class,
                                 UserInfoStore.class,
                                 ServiceStore.class,
+                                SessionStore.class,
                                 UserRoleStore.class,
-                                AuthenticationConfig.class
+                                JwtConfig.class
                         },
                         new Object[]{
-                                sessionStore,
                                 userInfoStore,
                                 serviceStore,
+                                sessionStore,
                                 roleStore,
-                                authConfig
+                                authConfig.getJwt()
                         });
     }
 }

@@ -15,6 +15,7 @@
 package io.appform.idman.server.views;
 
 import io.appform.idman.model.IdmanUser;
+import io.appform.idman.server.db.model.ClientSession;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.db.model.StoredService;
 import io.appform.idman.server.db.model.StoredUser;
@@ -34,21 +35,30 @@ import java.util.List;
 public class UserDetailsView extends TemplateView {
 
     @Value
-    public static class UserServices {
+    public static class UserService {
         StoredService service;
         StoredRole role;
     }
 
+    @Value
+    public static class UserSession {
+        StoredService service;
+        ClientSession session;
+    }
     StoredUser user;
-    List<UserServices> services;
+    List<UserService> services;
     IdmanUser sessionUser;
+    List<UserSession> sessions;
 
     public UserDetailsView(
             StoredUser user,
-            List<UserServices> services, IdmanUser sessionUser) {
+            List<UserService> services,
+            IdmanUser sessionUser,
+            List<UserSession> sessions) {
         super("templates/userdetails.hbs");
         this.user = user;
         this.services = services;
         this.sessionUser = sessionUser;
+        this.sessions = sessions;
     }
 }

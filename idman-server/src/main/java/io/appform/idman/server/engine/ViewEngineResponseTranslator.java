@@ -89,6 +89,13 @@ public class ViewEngineResponseTranslator implements EngineEvalResultVisitor<Res
         return redirectToServicePage(roleOpSuccess.getServiceId());
     }
 
+    @Override
+    public Response visit(TokenOpSuccess tokenOpSuccess) {
+        return redirectToPage("/tokens/" + tokenOpSuccess.getServiceId()
+                                      + "/" + tokenOpSuccess.getUserId()
+                                      + "/" + tokenOpSuccess.getSessionId());
+    }
+
     private static Response redirectToLogin() {
         return redirectToPage("/auth/login");
     }

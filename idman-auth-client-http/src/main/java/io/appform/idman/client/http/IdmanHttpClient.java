@@ -72,6 +72,11 @@ public class IdmanHttpClient extends IdManClient {
         return oauthTokenApiCall(token, "refresh_token", "refresh_token");
     }
 
+    @Override
+    public boolean deleteToken(String userId, String serviceId, String jwt) {
+        return false;
+    }
+
     private Optional<TokenInfo> oauthTokenApiCall(String code, String grantType, String paramName) throws UnsupportedEncodingException {
         val requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
                 .setConnectionRequestTimeout(clientConfig.getRequestTimeoutMs())

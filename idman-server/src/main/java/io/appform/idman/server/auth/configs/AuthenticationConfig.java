@@ -46,4 +46,6 @@ public class AuthenticationConfig {
     @NotNull
     private Duration sessionDuration = Duration.days(30);
 
+    @NotNull
+    private Duration maxDynamicTokenRefreshInterval = Duration.minutes(15);
 }

@@ -42,6 +42,11 @@ class IdManClientTest {
             }
             throw new IllegalAccessError("Should have been called only once");
         }
+
+        @Override
+        public boolean deleteToken(String userId, String serviceId, String jwt) {
+            return false;
+        }
     }
 
     @Test

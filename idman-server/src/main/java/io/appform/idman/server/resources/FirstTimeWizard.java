@@ -17,12 +17,12 @@ package io.appform.idman.server.resources;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.db.*;
-import io.appform.idman.server.views.NewUserView;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.vyarus.guicey.gsp.views.template.Template;
+import ru.vyarus.guicey.gsp.views.template.TemplateView;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -74,7 +74,7 @@ public class FirstTimeWizard {
             return Response.seeOther(URI.create("/")).build();
         }
         log.info("Entering first time setup");
-        return Response.ok(new NewUserView("/setup")).build();
+        return Response.ok(new TemplateView("templates/createadminuser.hbs")).build();
     }
 
     @POST
