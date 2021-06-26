@@ -79,7 +79,12 @@ public class Utils {
         claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject(session.getUserId());
         claims.setAudience(session.getServiceId());
-        claims.setIssuedAt(NumericDate.fromMilliseconds(session.getCreated().getTime()));
+        if(null != session.getCreated()) {
+            claims.setIssuedAt(NumericDate.fromMilliseconds(session.getCreated().getTime()));
+        }
+        else {
+            claims.setIssuedAt(NumericDate.now());
+        }
         if (null != session.getExpiry()) {
             claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));
         }

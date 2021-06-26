@@ -17,6 +17,7 @@ package io.appform.idman.server.engine;
 import com.google.common.base.Strings;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.TokenType;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
@@ -41,7 +42,6 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.PathParam;
 import java.net.URI;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -233,13 +233,15 @@ public class Engine {
             return new GeneralOpFailure();
         }
         passwordStore.get().set(userId, password);
+        userRoleStore.get()
+                .mapUserToRole(userId, "IDMAN", IdmanRoles.USER, "IDMAN");
         return new UserOpSuccess(userId);
     }
 
     public EngineEvalResult createSystemUser(
             final String maintainerEmail,
             final String systemName) {
-        val userId = UUID.randomUUID().toString();
+        val userId = Utils.hashedId(systemName);
         return userInfoStore.get()
                 .create(userId, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN)
                 .map(user -> (EngineEvalResult) new UserOpSuccess(userId))
@@ -286,11 +288,11 @@ public class Engine {
                                                  : TokenType.STATIC)
                                 .stream()
                                 .map(session -> {
-                                    val service  = services.get(session.getServiceId());
-                                    if(null == service) {
+                                    val service = services.get(session.getServiceId());
+                                    if (null == service) {
                                         return null;
                                     }
-                                    return new UserDetailsView.UserSession(service,session);
+                                    return new UserDetailsView.UserSession(service, session);
                                 })
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList())));
@@ -448,5 +450,21 @@ public class Engine {
                 .map(generatedTokenInfo -> (EngineEvalResult) new ViewOpSuccess(
                         new TokenView(generatedTokenInfo.getToken(), generatedTokenInfo.getUser().getUser().getId())))
                 .orElse(new GeneralOpFailure());
+    }
+
+    public EngineEvalResult deleteToken(
+            IdmanUser user,
+            String serviceId,
+            String userId,
+            String sessionId,
+            TokenType type) {
+        return sessionStore.get()
+                       .get(sessionId, type)
+                       .filter(session -> user.getRole().equals(IdmanRoles.ADMIN)
+                               || (session.getUserId().equals(userId) && session.getServiceId().equals(serviceId)))
+                       .map(session -> sessionStore.get().delete(session.getSessionId(), type))
+                       .orElse(Boolean.FALSE)
+               ? new UserOpSuccess(userId)
+               : new UserOpFailure(userId);
     }
 }

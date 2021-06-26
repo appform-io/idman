@@ -73,7 +73,7 @@ public class IdmanHttpClient extends IdManClient {
     }
 
     @Override
-    public boolean deleteToken(String userId, String serviceId, String jwt) {
+    public boolean deleteToken(String serviceId, String jwt) {
         return false;
     }
 

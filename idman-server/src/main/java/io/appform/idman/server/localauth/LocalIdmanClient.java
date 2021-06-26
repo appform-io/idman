@@ -54,7 +54,7 @@ public class LocalIdmanClient extends IdManClient {
     }
 
     @Override
-    public boolean deleteToken(String userId, String serviceId, String jwt) {
+    public boolean deleteToken(String serviceId, String jwt) {
         return tokenManager.deleteToken(serviceId, jwt);
     }
 

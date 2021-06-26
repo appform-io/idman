@@ -109,15 +109,14 @@ public class TokenManager {
 
     @UnitOfWork
     public boolean deleteToken(String serviceId, String jwt) {
-        return parseToken(serviceId, jwt)
-                .map(parsedToken -> sessionStore.delete(parsedToken.getSessionId(),
-                                                        parsedToken.getExpiry() == null
-                                                        ? TokenType.STATIC
-                                                        : TokenType.DYNAMIC))
+        return serviceStore.get(serviceId)
+                .filter(service -> !service.isDeleted())
+                .flatMap(service -> parseToken(serviceId, jwt))
+                .map(parsedToken -> sessionStore.delete(parsedToken.getSessionId(), parsedToken.getType()))
                 .orElse(Boolean.FALSE);
     }
 
-    private Optional<ParsedTokenInfo> parseToken(String serviceId, String token) {
+    public Optional<ParsedTokenInfo> parseToken(String serviceId, String token) {
         return Optional.ofNullable(jwtConsumers.get(serviceId))
                 .flatMap(consumer -> Utils.parseToken(token, consumer));
     }

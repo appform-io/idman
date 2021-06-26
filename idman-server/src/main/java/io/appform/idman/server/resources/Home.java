@@ -15,6 +15,7 @@
 package io.appform.idman.server.resources;
 
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
@@ -297,6 +298,19 @@ public class Home {
         @PathParam("sessionId") @NotEmpty @Size(max = 40) final String sessionId,
         @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.viewToken(serviceId, userId, sessionId));
+    }
+
+    @Path("/tokens/{serviceId}/{userId}/{sessionId}/{type}/end")
+    @POST
+    @UnitOfWork
+    public Response deleteToken(
+            @Auth final ServiceUserPrincipal principal,
+            @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
+            @PathParam("sessionId") @NotEmpty @Size(max = 40) final String sessionId,
+            @PathParam("userId") @NotEmpty @Size(max = 40) final String userId,
+            @PathParam("type") @NotNull final TokenType type) {
+        return translator.translate(engine.deleteToken(principal.getServiceUser(),
+                                                       serviceId, userId, sessionId, type));
     }
 
 }

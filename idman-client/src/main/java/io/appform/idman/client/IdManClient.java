@@ -21,7 +21,6 @@ import com.google.common.base.Strings;
 import io.appform.idman.model.TokenInfo;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -47,11 +46,7 @@ public abstract class IdManClient {
                     @Override
                     public TokenInfo load(@NonNull CacheKey key) {
                         log.debug("Actual Auth called");
-                        val tokenInfo = validateTokenImpl(key.getServiceId(), key.getToken()).orElse(null);
-                        if(null == tokenInfo) {
-                            return null;
-                        }
-                        return tokenInfo;
+                        return validateTokenImpl(key.getServiceId(), key.getToken()).orElse(null);
                     }
                 });
     }
@@ -69,7 +64,7 @@ public abstract class IdManClient {
 
     protected abstract Optional<TokenInfo> validateTokenImpl(String serviceId, String token);
 
-    public abstract boolean deleteToken(String userId, String serviceId, String jwt);
+    public abstract boolean deleteToken(String serviceId, String jwt);
 
     @Value
     private static class CacheKey {

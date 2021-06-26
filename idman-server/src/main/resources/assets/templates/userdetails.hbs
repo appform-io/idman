@@ -184,7 +184,7 @@
                                     {{#adminOrSelf ../sessionUser ../user}}
                                         <td>
                                             <form class="form-inline confirmed-form" method="post"
-                                                  action="/tokens/{{#with role}}{{serviceId}}{{/with}}/{{#with session}}{{sessionId}}{{/with}}/end"
+                                                  action="/tokens/{{#with session}}{{serviceId}}/{{userId}}/{{sessionId}}/{{type}}{{/with}}/end"
                                                   data-cnf-title="End Session"
                                                   data-cnf-text="Are you sure that you want to end this session?">
                                                 <button class="btn btn-sm btn-outline-danger">End</button>
