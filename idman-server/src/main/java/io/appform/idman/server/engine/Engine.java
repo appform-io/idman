@@ -41,6 +41,7 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.PathParam;
 import java.net.URI;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -236,12 +237,12 @@ public class Engine {
     }
 
     public EngineEvalResult createSystemUser(
-            final String id,
             final String maintainerEmail,
             final String systemName) {
+        val userId = UUID.randomUUID().toString();
         return userInfoStore.get()
-                .create(id, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN)
-                .map(user -> (EngineEvalResult) new UserOpSuccess(id))
+                .create(userId, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN)
+                .map(user -> (EngineEvalResult) new UserOpSuccess(userId))
                 .orElse(new GeneralOpFailure());
     }
 

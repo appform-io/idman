@@ -185,10 +185,9 @@ public class Home {
     @UnitOfWork
     @RolesAllowed(IdmanRoles.ADMIN)
     public Response createSystemUser(
-            @FormParam("systemId") @NotEmpty @Size(max = 250) final String systemId,
             @FormParam("systemMaintainerEmail") @Email @NotEmpty @Size(max = 250) final String systemMaintainerEmail,
             @FormParam("systemName") @NotEmpty @Size(max = 250) final String systemName) {
-        return translator.translate(engine.createSystemUser(systemId, systemMaintainerEmail, systemName));
+        return translator.translate(engine.createSystemUser(systemMaintainerEmail, systemName));
     }
 
     @Path("/users/{userId}")

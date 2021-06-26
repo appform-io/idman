@@ -56,13 +56,7 @@
                     <div class="col">
                         <form class="form confirmed-form" action="/users/system" method="post" autocomplete="off"
                               data-cnf-title="Create New System User"
-                              data-cnf-text="Are you sure that you want to create a new user?">
-                            <div class="form-group">
-                                <label for="systemId">System ID</label>
-                                <input type="text" class="form-control" id="systemId" name="systemId" maxlength="250" pattern="[a-zA-Z0-9\-_]+"
-                                       placeholder="somesystem" aria-describedby="systemIdHelp" required>
-                                <small id="systemIdHelp" class="form-text text-muted">This is the id for the client system that will access your system</small>
-                            </div>
+                              data-cnf-text="Are you sure that you want to create a new system user?">
                             <div class="form-group">
                                 <label for="systemName">System Name</label>
                                 <input type="text" pattern="[a-zA-Z0-9 ]+" class="form-control" id="systemName" name="systemName"
