@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,8 +80,8 @@ class DBDynamicSessionStoreTest {
     @Test
     void testExpiry() {
         val now = new Date();
-        val later = new Date(now.getTime() + 864_00_000);
-        val before = new Date(now.getTime() - 864_00_000);
+        val later = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+        val before = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
         {
             val session = database.inTransaction(
                     () -> store.create("SS1", "U1", "S1", "CS1", later))

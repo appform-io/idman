@@ -9,6 +9,8 @@ import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.model.StoredService;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.utils.ServerTestingUtils;
+import io.appform.idman.server.utils.Utils;
+import io.dropwizard.util.Duration;
 import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +50,7 @@ class TokenManagerTest {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
         setupStores(user, testService);
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         doReturn(Optional.of(ServerTestingUtils.dynamicSession()))
                 .when(sessionStore)
                 .create(anyString(),
@@ -109,7 +111,7 @@ class TokenManagerTest {
         doReturn(Optional.empty())
                 .when(serviceStore)
                 .get(anyString());
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         doReturn(Optional.of(ServerTestingUtils.dynamicSession()))
                 .when(sessionStore)
                 .create(anyString(),
@@ -132,7 +134,7 @@ class TokenManagerTest {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
         setupStores(user, testService);
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         doReturn(Optional.of(ServerTestingUtils.dynamicSession()))
                 .when(sessionStore)
                 .create(anyString(),
@@ -156,7 +158,7 @@ class TokenManagerTest {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
         setupStores(user, testService);
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         doReturn(Optional.of(ServerTestingUtils.dynamicSession()))
                 .when(sessionStore)
                 .create(anyString(),
@@ -183,7 +185,7 @@ class TokenManagerTest {
         doReturn(Optional.of(testService))
                 .when(serviceStore)
                 .get(testService.getServiceId());
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
 
         assertNull(tokenManager.createToken(testService.getServiceId(),
                                             "U1",
@@ -198,7 +200,7 @@ class TokenManagerTest {
         val user = ServerTestingUtils.systemUser();
         val testService = ServerTestingUtils.testService();
         setupStores(user, testService);
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
 
         assertNull(tokenManager.createToken(testService.getServiceId(),
                                             user.getUserId(),
@@ -222,7 +224,7 @@ class TokenManagerTest {
     void testDeleteTokenSuccess() {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         val session = ServerTestingUtils.dynamicSession();
         setupStores(user, testService);
         doReturn(Optional.of(session))
@@ -241,7 +243,7 @@ class TokenManagerTest {
     void testDeleteTokenFailDeletedService() {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
+        val expiry = Utils.futureTime(Duration.days(7));
         val session = ServerTestingUtils.dynamicSession();
         setupStores(user, testService);
         testService.setDeleted(true);
@@ -261,7 +263,6 @@ class TokenManagerTest {
     void testDeleteTokenFailSessionDeleteFailure() {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
-        val expiry = new Date(System.currentTimeMillis() + 7 * 864_00_000);
         val session = ServerTestingUtils.dynamicSession();
         setupStores(user, testService);
         doReturn(Optional.of(session))

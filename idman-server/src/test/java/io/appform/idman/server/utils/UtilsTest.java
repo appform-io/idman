@@ -151,7 +151,7 @@ class UtilsTest {
     @Test
     void testJWTWithExpiry() {
         val now = new Date();
-        val expiry = new Date(now.getTime() + 3_000);
+        val expiry = Utils.futureTime(io.dropwizard.util.Duration.seconds(3));
         val config = ServerTestingUtils.passwordauthConfig();
         config.setSessionDuration(io.dropwizard.util.Duration.milliseconds(3));
         ClientSession session = new ClientSession("SS1",

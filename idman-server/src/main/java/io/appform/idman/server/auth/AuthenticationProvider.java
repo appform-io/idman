@@ -15,12 +15,12 @@
 package io.appform.idman.server.auth;
 
 import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.AuthState;
 import io.appform.idman.server.db.SessionStore;
 import io.appform.idman.server.db.UserInfoStore;
 import io.appform.idman.server.db.model.ClientSession;
-import io.appform.idman.model.TokenType;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.utils.Utils;
 import lombok.Data;
@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import javax.inject.Provider;
-import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -90,7 +89,7 @@ public abstract class AuthenticationProvider {
                 authInfo.getServiceId(),
                 authInfo.getClientSessionId(),
                 TokenType.DYNAMIC,
-                new Date(System.currentTimeMillis() + sessionDuration.toMilliseconds()));
+                Utils.futureTime(sessionDuration));
     }
 
     protected abstract AuthenticatorContext createContext(final AuthInfo authInfo);

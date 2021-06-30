@@ -38,9 +38,12 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -95,32 +98,6 @@ public class Utils {
         jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.HMAC_SHA512);
         return jws.getCompactSerialization();
     }
-
-/*
-    @SneakyThrows
-    public static String createRefreshToken(
-            final ClientSession session,
-            final JwtConfig jwtConfig) {
-        if(session.getType() == TokenType.STATIC) {
-            throw new IllegalArgumentException("Refresh tokens are not possible for static sessions");
-        }
-        val claims = new JwtClaims();
-        claims.setIssuer(jwtConfig.getIssuerId());
-        claims.setGeneratedJwtId();
-        claims.setIssuedAtToNow();
-        claims.setJwtId(session.getRefreshToken());
-        claims.setNotBeforeMinutesInThePast(2);
-        claims.setSubject(session.getUserId());
-        claims.setAudience(session.getServiceId());
-        claims.setExpirationTime(NumericDate.fromMilliseconds(session.getExpiry().getTime()));
-        val jws = new JsonWebSignature();
-        jws.setPayload(claims.toJson());
-        val secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
-        jws.setKey(new HmacKey(secretKey));
-        jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.HMAC_SHA512);
-        return jws.getCompactSerialization();
-    }
-*/
 
     public Optional<ParsedTokenInfo> parseToken(String token, JwtConsumer jwtConsumer) {
         final String userId;
@@ -193,5 +170,9 @@ public class Utils {
         }
         return cleanedHost + (path.startsWith("/") ? path : "/" + path);
 
+    }
+
+    public static Date futureTime(Duration sessionDuration) {
+        return Date.from(Instant.now().plus(sessionDuration.toMilliseconds(), ChronoUnit.MILLIS));
     }
 }

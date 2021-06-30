@@ -84,7 +84,7 @@ public class ServerTestingUtils {
                                  "S",
                                  "CS1",
                                  TokenType.DYNAMIC,
-                                 new Date(System.currentTimeMillis() + 864_00_000),
+                                 Utils.futureTime(Duration.days(1)),
                                  false,
                                  new Date(),
                                  new Date());
