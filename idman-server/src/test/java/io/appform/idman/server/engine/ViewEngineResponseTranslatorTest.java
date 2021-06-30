@@ -104,4 +104,11 @@ class ViewEngineResponseTranslatorTest {
         assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
         assertEquals(URI.create("/services/S1"), r.getLocation());
     }
+
+    @Test
+    void testVisitTokenOpSuccess() {
+        val r = translator.translate(new TokenOpSuccess("S1", "S", "U1"));
+        assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
+        assertEquals(URI.create("/tokens/S/U1/S1"), r.getLocation());
+    }
 }

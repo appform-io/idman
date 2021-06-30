@@ -16,15 +16,13 @@ package io.appform.idman.server;
 
 import com.google.common.collect.ImmutableList;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
-import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
-import io.appform.idman.model.User;
-import io.appform.idman.model.UserType;
+import io.appform.idman.model.*;
 import io.appform.idman.server.auth.IdmanRoles;
 import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.*;
 import io.appform.idman.server.engine.Engine;
+import io.appform.idman.server.engine.results.TokenOpSuccess;
 import io.appform.idman.server.engine.results.*;
 import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.views.PasswordChangeView;
@@ -39,6 +37,7 @@ import org.mockito.stubbing.Answer;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -57,7 +56,7 @@ class EngineTest {
     private UserInfoStore userInfoStore = mock(UserInfoStore.class);
     private PasswordStore passwordStore = mock(PasswordStore.class);
     private UserRoleStore userRoleStore = mock(UserRoleStore.class);
-    private SessionStore sessionStore  = mock(SessionStore.class);
+    private SessionStore sessionStore = mock(SessionStore.class);
     private TokenManager tokenManager = mock(TokenManager.class);
 
     private Engine engine = new Engine(() -> serviceStore,
@@ -139,13 +138,13 @@ class EngineTest {
     @Test
     void renderHomeInvalidPrincipal() {
         doReturn(Optional.empty()).when(userInfoStore).get(anyString());
-        val invalidPrincipal = new ServiceUserPrincipal(new IdmanUser("Ts1",
-                                                                      "S1",
-                                                                      new User("blah",
-                                                                               "",
-                                                                               UserType.HUMAN,
-                                                                               AuthMode.PASSWORD),
-                                                                      IdmanRoles.ADMIN));
+        val invalidPrincipal = new ServiceUserPrincipal(idmanUser("Ts1",
+                                                                  "S1",
+                                                                  "blah",
+                                                                  "",
+                                                                  UserType.HUMAN,
+                                                                  AuthMode.PASSWORD,
+                                                                  IdmanRoles.ADMIN));
         val r = engine.renderHome(invalidPrincipal, "/");
         assertEquals(InvalidUser.class, r.getClass());
     }
@@ -391,6 +390,25 @@ class EngineTest {
     }
 
     @Test
+    void createSystemUserSuccess() {
+        val user = ServerTestingUtils.systemUser();
+        doReturn(Optional.of(user)).when(userInfoStore)
+                .create(user.getUserId(), user.getEmail(), user.getName(), UserType.SYSTEM, AuthMode.TOKEN, false);
+        val r = engine.createSystemUser(user.getEmail(), user.getName());
+        assertEquals(UserOpSuccess.class, r.getClass());
+        assertEquals(user.getUserId(), ((UserOpSuccess) r).getUserId());
+    }
+
+    @Test
+    void createSystemUserFailure() {
+        val user = ServerTestingUtils.systemUser();
+        doReturn(Optional.empty()).when(userInfoStore)
+                .create(user.getUserId(), user.getEmail(), user.getName(), UserType.SYSTEM, AuthMode.TOKEN, false);
+        val r = engine.createSystemUser(user.getEmail(), user.getName());
+        assertEquals(GeneralOpFailure.class, r.getClass());
+    }
+
+    @Test
     void userDetailsInvalidUser() {
         doReturn(Optional.empty()).when(userInfoStore).get(anyString());
 
@@ -415,6 +433,75 @@ class EngineTest {
                 .getUserRoles(storedUser.getUserId());
         doReturn(Collections.singletonList(new StoredRole("S_ADMIN", testService.getServiceId(), "Admin", "test")))
                 .when(roleStore).get(anyCollection());
+        doReturn(ImmutableList.of(
+                new ClientSession("S1",
+                                  storedUser.getUserId(),
+                                  testService.getServiceId(),
+                                  "CS1",
+                                  TokenType.DYNAMIC,
+                                  new Date(),
+                                  false,
+                                  null,
+                                  null),
+                new ClientSession("S2",
+                                  storedUser.getUserId(),
+                                  "S1",
+                                  "CS1",
+                                  TokenType.DYNAMIC,
+                                  new Date(),
+                                  false,
+                                  null,
+                                  null)))
+                .when(sessionStore)
+                .sessionsForUser(user.getId(), TokenType.DYNAMIC);
+
+        ServerTestingUtils.runInCtx(() -> {
+            val r = engine.userDetails(principal, storedUser.getUserId());
+            assertEquals(ViewOpSuccess.class, r.getClass());
+            val v = (UserDetailsView) ((ViewOpSuccess) r).getView();
+            assertEquals(storedUser, v.getUser());
+            assertEquals(1, v.getServices().size());
+        });
+    }
+
+    @Test
+    void userDetailsStaticSuccess() {
+        val testService = ServerTestingUtils.testService();
+        val storedUser = ServerTestingUtils.systemUser();
+        val user = toWire(storedUser);
+
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", user, IdmanRoles.ADMIN));
+        doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
+        doReturn(Collections.singletonList(testService)).when(serviceStore).get(anyCollection());
+        doReturn(ImmutableList.of(
+                new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN", "TEST"),
+                new StoredUserRole(storedUser.getUserId(), "S1", "S_ADMIN", "TEST"),
+                new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN_1", "TEST")))
+                .when(userRoleStore)
+                .getUserRoles(storedUser.getUserId());
+        doReturn(Collections.singletonList(new StoredRole("S_ADMIN", testService.getServiceId(), "Admin", "test")))
+                .when(roleStore).get(anyCollection());
+        doReturn(ImmutableList.of(
+                new ClientSession("S1",
+                                  storedUser.getUserId(),
+                                  testService.getServiceId(),
+                                  null,
+                                  TokenType.STATIC,
+                                  null,
+                                  false,
+                                  null,
+                                  null),
+                new ClientSession("S2",
+                                  storedUser.getUserId(),
+                                  "S1",
+                                  null,
+                                  TokenType.STATIC,
+                                  null,
+                                  false,
+                                  null,
+                                  null)))
+                .when(sessionStore)
+                .sessionsForUser(user.getId(), TokenType.STATIC);
 
         ServerTestingUtils.runInCtx(() -> {
             val r = engine.userDetails(principal, storedUser.getUserId());
@@ -436,7 +523,10 @@ class EngineTest {
     void updateUserNonAdminFailure() {
         val storedUser = ServerTestingUtils.adminUser();
 
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.normalUser()), IdmanRoles.USER));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.normalUser()),
+                                                               IdmanRoles.USER));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         val r = engine.updateUser(principal, storedUser.getUserId(), "Test1");
         assertEquals(UserOpFailure.class, r.getClass());
@@ -447,7 +537,10 @@ class EngineTest {
     void updateUserAdminSuccess() {
         val storedUser = ServerTestingUtils.normalUser();
 
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         doReturn(Optional.of(storedUser)).when(userInfoStore).updateName(storedUser.getUserId(), "Test1");
 
@@ -503,7 +596,10 @@ class EngineTest {
     @Test
     void renderPasswordChangePageInvUser() {
         doReturn(Optional.empty()).when(userInfoStore).get(anyString());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         val r = engine.renderPasswordChangePage(principal, "U1");
         assertEquals(UserOpFailure.class, r.getClass());
         assertEquals("U1", ((UserOpFailure) r).getUserId());
@@ -513,7 +609,10 @@ class EngineTest {
     void renderPasswordChangePageAdminSuccess() {
         val storedUser = ServerTestingUtils.normalUser();
 
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         ServerTestingUtils.runInCtx(() -> {
             val r = engine.renderPasswordChangePage(principal, storedUser.getUserId());
@@ -544,7 +643,10 @@ class EngineTest {
     void renderPasswordChangePageNonAdminFailure() {
         val storedUser = ServerTestingUtils.normalUser();
 
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.USER));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.USER));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         val r = engine.renderPasswordChangePage(principal, storedUser.getUserId());
         assertEquals(UserOpFailure.class, r.getClass());
@@ -554,7 +656,10 @@ class EngineTest {
     @Test
     void changePasswordInvUser() {
         doReturn(Optional.empty()).when(userInfoStore).get(anyString());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         val r = engine.changePassword(principal, "U1", "xx", "yy", "yy");
         assertEquals(CredentialsExpired.class, r.getClass());
         assertEquals("U1", ((CredentialsExpired) r).getUserId());
@@ -564,7 +669,10 @@ class EngineTest {
     void changePasswordIdMismatch() {
         val storedUser = ServerTestingUtils.normalUser();
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.USER));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.USER));
         val r = engine.changePassword(principal, storedUser.getUserId(), "xx", "yy", "yy");
         assertEquals(CredentialsExpired.class, r.getClass());
         assertEquals(storedUser.getUserId(), ((CredentialsExpired) r).getUserId());
@@ -624,7 +732,10 @@ class EngineTest {
     @Test
     void changePasswordForcedInvUser() {
         doReturn(Optional.empty()).when(userInfoStore).get(anyString());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         val r = engine.changePasswordForced(principal, "U1", "yy", "yy");
         assertEquals(UserOpFailure.class, r.getClass());
         assertEquals("U1", ((UserOpFailure) r).getUserId());
@@ -644,7 +755,10 @@ class EngineTest {
     void changePasswordForcedNonAdminFail() {
         val storedUser = ServerTestingUtils.normalUser();
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.USER));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.USER));
         val r = engine.changePasswordForced(principal, storedUser.getUserId(), "yy", "yy");
         assertEquals(UserOpFailure.class, r.getClass());
         assertEquals(storedUser.getUserId(), ((UserOpFailure) r).getUserId());
@@ -654,7 +768,10 @@ class EngineTest {
     void changePasswordForcedConfMismatchFail() {
         val storedUser = ServerTestingUtils.normalUser();
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         val r = engine.changePasswordForced(principal, storedUser.getUserId(), "yy", "yy1");
         assertEquals(UserOpFailure.class, r.getClass());
         assertEquals(storedUser.getUserId(), ((UserOpFailure) r).getUserId());
@@ -665,7 +782,10 @@ class EngineTest {
     void changePasswordForcedAdminSuccess() {
         val storedUser = ServerTestingUtils.normalUser();
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
-        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", toWire(ServerTestingUtils.adminUser()), IdmanRoles.ADMIN));
+        val principal = new ServiceUserPrincipal(new IdmanUser("Ts1",
+                                                               "S1",
+                                                               toWire(ServerTestingUtils.adminUser()),
+                                                               IdmanRoles.ADMIN));
         doNothing().when(passwordStore).set(storedUser.getUserId(), "xx");
         doAnswer((Answer<Optional<StoredUser>>) invocationOnMock -> {
             val consumer = (Consumer<StoredUserAuthState>) invocationOnMock.getArgument(1);
@@ -752,7 +872,11 @@ class EngineTest {
         doReturn(Optional.of(user)).when(userInfoStore).get(user.getUserId());
 
         val principal = new ServiceUserPrincipal(new IdmanUser("ts1", "IDMAN", toWire(user), IdmanRoles.ADMIN));
-        val r = engine.mapUserToRole(principal, URI.create("/role"), service.getServiceId(), "S_ADMIN", user.getUserId());
+        val r = engine.mapUserToRole(principal,
+                                     URI.create("/role"),
+                                     service.getServiceId(),
+                                     "S_ADMIN",
+                                     user.getUserId());
         assertEquals(RedirectToParam.class, r.getClass());
     }
 
@@ -888,6 +1012,151 @@ class EngineTest {
         assertEquals(UserOpSuccess.class, r.getClass());
     }
 
+    @Test
+    void createTokenSuccess() {
+        doReturn(Optional.of(ServerTestingUtils.staticSession()))
+                .when(tokenManager)
+                .createToken("S", "U1", null, TokenType.STATIC, null);
+        val r = engine.createStaticSession("U1", "S");
+        assertEquals(TokenOpSuccess.class, r.getClass());
+    }
+
+    @Test
+    void createTokenFailure() {
+        doReturn(Optional.empty())
+                .when(tokenManager)
+                .createToken("S", "U1", null, TokenType.STATIC, null);
+        val r = engine.createStaticSession("U1", "S");
+        assertEquals(UserOpFailure.class, r.getClass());
+    }
+
+    @Test
+    void testViewTokenSuccess() {
+        val user = storedToIdmanUser("SS1", "S", "S_USER", ServerTestingUtils.systemUser());
+        val tokenInfo = new TokenManager.GeneratedTokenInfo(user.getServiceUser(), "AT1");
+        doReturn(Optional.of(tokenInfo))
+                .when(tokenManager)
+                .generateTokenForSession("S", "SS1", TokenType.STATIC);
+        ServerTestingUtils.runInCtx(() -> {
+            val r = engine.viewToken("S", user.getServiceUser().getUser().getId(), "SS1");
+            assertEquals(ViewOpSuccess.class, r.getClass());
+
+        });
+    }
+
+    @Test
+    void testViewTokenNoTokenFail() {
+        doReturn(Optional.empty())
+                .when(tokenManager)
+                .generateTokenForSession("S", "SS1", TokenType.STATIC);
+        val r = engine.viewToken("S", "WRONG", "SS1");
+        assertEquals(GeneralOpFailure.class, r.getClass());
+    }
+
+    @Test
+    void testViewTokenFail() {
+        val user = ServerTestingUtils.systemUser();
+        val tokenInfo = new TokenManager.GeneratedTokenInfo(
+                idmanUser("SS1", "S", user.getUserId(), user.getName(), user.getUserType(), user.getAuthState()
+                        .getAuthMode(), "S_USER"),
+                "AT1");
+        doReturn(Optional.of(tokenInfo))
+                .when(tokenManager)
+                .generateTokenForSession("S", "SS1", TokenType.STATIC);
+        val r = engine.viewToken("S", "WRONG", "SS1");
+        assertEquals(GeneralOpFailure.class, r.getClass());
+    }
+
+
+    @Test
+    void testDeleteTokenSuccessAdmin() {
+        doReturn(Optional.of(new ClientSession("SS1", "U1", "S", null, TokenType.STATIC, null, false, null, null)))
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.ADMIN, ServerTestingUtils.adminUser());
+        val r = engine.deleteToken(user, "S", "U1", "SS1", TokenType.STATIC);
+        assertEquals(UserOpSuccess.class, r.getClass());
+        assertEquals("U1", ((UserOpSuccess)r).getUserId());
+    }
+
+    @Test
+    void testDeleteTokenSuccessSelf() {
+        val normalUser = ServerTestingUtils.normalUser();
+        doReturn(Optional.of(new ClientSession("SS1", normalUser.getUserId(), "S", null, TokenType.STATIC, null, false, null, null)))
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.USER, normalUser);
+        val r = engine.deleteToken(user, "S", normalUser.getUserId(), "SS1", TokenType.STATIC);
+        assertEquals(UserOpSuccess.class, r.getClass());
+        assertEquals(normalUser.getUserId(), ((UserOpSuccess)r).getUserId());
+    }
+
+    @Test
+    void testDeleteTokenFailDifferentUser() {
+        doReturn(Optional.of(new ClientSession("SS1", "U1", "S", null, TokenType.STATIC, null, false, null, null)))
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.USER, ServerTestingUtils.normalUser());
+        val r = engine.deleteToken(user, "S", "U2", "SS1", TokenType.STATIC);
+        assertEquals(UserOpFailure.class, r.getClass());
+    }
+
+
+    @Test
+    void testDeleteTokenFailDifferentService() {
+        val normalUser = ServerTestingUtils.normalUser();
+        doReturn(Optional.of(new ClientSession("SS1", normalUser.getUserId(), "S1", null, TokenType.STATIC, null, false, null, null)))
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.USER, normalUser);
+        val r = engine.deleteToken(user, "S", normalUser.getUserId(), "SS1", TokenType.STATIC);
+        assertEquals(UserOpFailure.class, r.getClass());
+        assertEquals(normalUser.getUserId(), ((UserOpFailure)r).getUserId());
+    }
+
+    @Test
+    void testDeleteTokenNoSession() {
+        doReturn(Optional.of(new ClientSession("SS1", "U1", "S", null, TokenType.STATIC, null, false, null, null)))
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(false)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.USER, ServerTestingUtils.normalUser());
+        val r = engine.deleteToken(user, "S", "U2", "SS1", TokenType.STATIC);
+        assertEquals(UserOpFailure.class, r.getClass());
+    }
+
+    @Test
+    void testDeleteTokenDeleteFail() {
+        doReturn(Optional.empty())
+                .when(sessionStore)
+                .get("SS1", TokenType.STATIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete("SS1", TokenType.STATIC);
+
+        val user = storedToIdmanUser("CS1", "S", IdmanRoles.USER, ServerTestingUtils.normalUser());
+        val r = engine.deleteToken(user, "S", "U2", "SS1", TokenType.STATIC);
+        assertEquals(UserOpFailure.class, r.getClass());
+    }
 
     private StoredRole adminRole() {
         return new StoredRole("S_ADMIN", "S", "Admin", "test");
@@ -897,4 +1166,34 @@ class EngineTest {
         doReturn(Optional.of(testService)).when(serviceStore).get("S");
     }
 
+    private static ServiceUserPrincipal storedToIdmanUser(
+            String sessionId,
+            String serviceId,
+            String role,
+            StoredUser user) {
+        return new ServiceUserPrincipal(idmanUser(sessionId,
+                         serviceId,
+                         user.getUserId(),
+                         user.getName(),
+                         user.getUserType(),
+                         user.getAuthState().getAuthMode(),
+                         role));
+    }
+
+    private static IdmanUser idmanUser(
+            String sessionId,
+            String serviceId,
+            String userId,
+            String name,
+            UserType userType,
+            AuthMode authMode,
+            String role) {
+        return new IdmanUser(
+                sessionId, serviceId,
+                new User(userId,
+                         name,
+                         userType,
+                         authMode),
+                role);
+    }
 }

@@ -17,7 +17,6 @@ package io.appform.idman.server.engine;
 import com.google.common.base.Strings;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.AuthMode;
-import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.TokenType;
 import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.IdmanRoles;
@@ -243,7 +242,7 @@ public class Engine {
             final String systemName) {
         val userId = Utils.hashedId(systemName);
         return userInfoStore.get()
-                .create(userId, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN)
+                .create(userId, maintainerEmail, systemName, UserType.SYSTEM, AuthMode.TOKEN, false)
                 .map(user -> (EngineEvalResult) new UserOpSuccess(userId))
                 .orElse(new GeneralOpFailure());
     }
@@ -453,14 +452,14 @@ public class Engine {
     }
 
     public EngineEvalResult deleteToken(
-            IdmanUser user,
+            ServiceUserPrincipal principal,
             String serviceId,
             String userId,
             String sessionId,
             TokenType type) {
         return sessionStore.get()
                        .get(sessionId, type)
-                       .filter(session -> user.getRole().equals(IdmanRoles.ADMIN)
+                       .filter(session -> principal.getServiceUser().getRole().equals(IdmanRoles.ADMIN)
                                || (session.getUserId().equals(userId) && session.getServiceId().equals(serviceId)))
                        .map(session -> sessionStore.get().delete(session.getSessionId(), type))
                        .orElse(Boolean.FALSE)

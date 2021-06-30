@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Strings;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.model.TokenType;
+import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.ServiceStore;
 import io.appform.idman.server.db.SessionStore;
@@ -66,12 +67,15 @@ public class TokenManager {
             String clientSessionId,
             TokenType type,
             Date expiry) {
-        if (type == TokenType.DYNAMIC && expiry == null) {
+        if ((type == TokenType.DYNAMIC && expiry == null)
+            || (type == TokenType.STATIC && expiry != null)) {
             return Optional.empty();
         }
         val user = userInfoStore.get(userId).orElse(null);
         val service = serviceStore.get(serviceId).orElse(null);
         if (null == user || user.isDeleted()
+                || (user.getUserType() == UserType.HUMAN && type == TokenType.STATIC)
+                || (user.getUserType() == UserType.SYSTEM && type == TokenType.DYNAMIC)
                 || null == service || service.isDeleted()) {
             return Optional.empty();
         }

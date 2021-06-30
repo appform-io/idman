@@ -80,6 +80,6 @@ class ServiceInvocationTest {
         catch (Exception e) {
             fail();
         }
-
+        client.close();
     }
 }

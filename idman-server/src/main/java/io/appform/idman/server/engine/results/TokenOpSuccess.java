@@ -1,5 +1,7 @@
-package io.appform.idman.server.engine;
+package io.appform.idman.server.engine.results;
 
+import io.appform.idman.server.engine.EngineEvalResult;
+import io.appform.idman.server.engine.EngineEvalResultVisitor;
 import lombok.Value;
 
 /**

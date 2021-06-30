@@ -1,6 +1,7 @@
 package io.appform.idman.server.resources;
 
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
+import io.appform.idman.model.TokenType;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
 import io.appform.idman.server.engine.results.GeneralOpSuccess;
@@ -130,6 +131,15 @@ class HomeTest {
     }
 
     @Test
+    void createSystemUser() {
+        doReturn(new GeneralOpSuccess())
+                .when(engine)
+                .createSystemUser(anyString(), anyString());
+        val r = home.createSystemUser("a@a.com", "A");
+        assertResponse(r);
+    }
+
+    @Test
     void userDetails() {
         doReturn(new GeneralOpSuccess())
                 .when(engine)
@@ -201,14 +211,31 @@ class HomeTest {
         assertResponse(r);
     }
 
-
-    private static void assertResponse(javax.ws.rs.core.Response r) {
-        assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
-        assertEquals(URI.create("/"), r.getLocation());
+    @Test
+    void createStaticSession() {
+        doReturn(new GeneralOpSuccess())
+                .when(engine)
+                .createStaticSession(anyString(), anyString());
+        val r = home.createStaticSession("S", "U1");
+        assertResponse(r);
     }
 
-    private static ServiceUserPrincipal principal() {
-        return new ServiceUserPrincipal(null);
+    @Test
+    void viewToken() {
+        doReturn(new GeneralOpSuccess())
+                .when(engine)
+                .viewToken(anyString(), anyString(), anyString());
+        val r = home.viewToken("S", "U1", "SS1");
+        assertResponse(r);
+    }
+
+    @Test
+    void deleteToken() {
+        doReturn(new GeneralOpSuccess())
+                .when(engine)
+                .deleteToken(any(), anyString(), anyString(), anyString(), any());
+        val r = home.deleteToken(principal(), "A", "p", "q", TokenType.DYNAMIC);
+        assertResponse(r);
     }
 
     @Test
@@ -228,4 +255,15 @@ class HomeTest {
             assertEquals(TemplateView.class, r.getEntity().getClass());
         });
     }
+
+
+    private static void assertResponse(javax.ws.rs.core.Response r) {
+        assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
+        assertEquals(URI.create("/"), r.getLocation());
+    }
+
+    private static ServiceUserPrincipal principal() {
+        return new ServiceUserPrincipal(null);
+    }
+
 }

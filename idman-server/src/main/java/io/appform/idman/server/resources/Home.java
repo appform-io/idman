@@ -284,7 +284,7 @@ public class Home {
     @Path("/tokens/{serviceId}/{userId}/create")
     @POST
     @RolesAllowed(IdmanRoles.ADMIN)
-    public Response createToken(
+    public Response createStaticSession(
             @PathParam("serviceId") @NotEmpty @Size(max = 40) final String serviceId,
             @PathParam("userId") @NotEmpty @Size(max = 40) final String userId) {
         return translator.translate(engine.createStaticSession(userId, serviceId));
@@ -309,7 +309,7 @@ public class Home {
             @PathParam("sessionId") @NotEmpty @Size(max = 40) final String sessionId,
             @PathParam("userId") @NotEmpty @Size(max = 40) final String userId,
             @PathParam("type") @NotNull final TokenType type) {
-        return translator.translate(engine.deleteToken(principal.getServiceUser(),
+        return translator.translate(engine.deleteToken(principal,
                                                        serviceId, userId, sessionId, type));
     }
 

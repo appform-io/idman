@@ -14,10 +14,13 @@
 
 package io.appform.idman.server.utils;
 
-import io.appform.idman.model.*;
+import io.appform.idman.model.AuthMode;
+import io.appform.idman.model.TokenType;
+import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.AuthState;
+import io.appform.idman.server.db.model.ClientSession;
 import io.appform.idman.server.db.model.StoredService;
 import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
@@ -28,6 +31,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import ru.vyarus.guicey.gsp.views.template.TemplateContext;
+
+import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -62,6 +67,39 @@ public class ServerTestingUtils {
         val storedUser = new StoredUser(Utils.hashedId("test@a.com"), "test@a.com", "Test", UserType.HUMAN);
         storedUser.setAuthState(new StoredUserAuthState(AuthMode.PASSWORD, AuthState.ACTIVE, 0, storedUser));
         return storedUser;
+    }
+
+    public static StoredUser systemUser() {
+        val storedUser = new StoredUser(Utils.hashedId("Test System"),
+                                        "testsystem@a.com",
+                                        "Test System",
+                                        UserType.SYSTEM);
+        storedUser.setAuthState(new StoredUserAuthState(AuthMode.TOKEN, AuthState.ACTIVE, 0, storedUser));
+        return storedUser;
+    }
+
+    public static ClientSession dynamicSession() {
+        return new ClientSession("DS1",
+                                 Utils.hashedId("test@a.com"),
+                                 "S",
+                                 "CS1",
+                                 TokenType.DYNAMIC,
+                                 new Date(System.currentTimeMillis() + 864_00_000),
+                                 false,
+                                 new Date(),
+                                 new Date());
+    }
+
+    public static ClientSession staticSession() {
+        return new ClientSession("SS1",
+                                 Utils.hashedId("test@a.com"),
+                                 "S",
+                                 "CS1",
+                                 TokenType.STATIC,
+                                 null,
+                                 false,
+                                 new Date(),
+                                 new Date());
     }
 
     public static StoredService testService() {
