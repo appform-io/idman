@@ -16,6 +16,7 @@ package io.appform.idman.server.resources;
 
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
+import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.*;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.SneakyThrows;
@@ -51,6 +52,7 @@ public class FirstTimeWizard {
     private final Provider<UserRoleStore> userRoleStore;
     private final Provider<ServiceStore> serviceStore;
     private final Provider<RoleStore> roleStore;
+    private final AuthenticationConfig authenticationConfig;
 
     @Inject
     public FirstTimeWizard(
@@ -58,12 +60,14 @@ public class FirstTimeWizard {
             Provider<PasswordStore> passwordStore,
             Provider<UserRoleStore> userRoleStore,
             Provider<ServiceStore> serviceStore,
-            Provider<RoleStore> roleStore) {
+            Provider<RoleStore> roleStore,
+            AuthenticationConfig authenticationConfig) {
         this.userStore = userStore;
         this.passwordStore = passwordStore;
         this.userRoleStore = userRoleStore;
         this.serviceStore = serviceStore;
         this.roleStore = roleStore;
+        this.authenticationConfig = authenticationConfig;
     }
 
     @Path("/setup")
@@ -71,7 +75,7 @@ public class FirstTimeWizard {
     @UnitOfWork
     public Response setupScreen() {
         if (null != serviceStore.get().get("IDMAN").orElse(null)) {
-            return Response.seeOther(URI.create("/")).build();
+            return Response.seeOther(redirectToHome()).build();
         }
         log.info("Entering first time setup");
         return Response.ok(new TemplateView("templates/createadminuser.hbs")).build();
@@ -87,7 +91,7 @@ public class FirstTimeWizard {
             @FormParam("name") final String name,
             @FormParam("password") final String password) {
         if (null != serviceStore.get().get("IDMAN").orElse(null)) {
-            return Response.seeOther(URI.create("/")).build();
+            return Response.seeOther(redirectToHome()).build();
         }
         val redirectUri = UriBuilder.fromUri(referer).replacePath("/apis/idman/auth/callback").build();
         val service = serviceStore.get().create("IDMan",
@@ -112,6 +116,11 @@ public class FirstTimeWizard {
         userRoleStore.get()
                 .mapUserToRole(user.getUserId(), service.getServiceId(), adminRole.getRoleId(), "SETUP_WIZ");
         log.info("First time setup completed");
-        return Response.seeOther(URI.create("/")).build();
+        return Response.seeOther(redirectToHome()).build();
     }
+
+    private URI redirectToHome() {
+        return URI.create(authenticationConfig.getServer());
+    }
+
 }

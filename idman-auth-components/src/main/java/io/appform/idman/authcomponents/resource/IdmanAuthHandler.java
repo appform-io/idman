@@ -62,7 +62,7 @@ public class IdmanAuthHandler {
         val uriBuilder = UriBuilder.fromUri(config.getAuthEndpoint() + "/apis/oauth2/authorize")
                 .queryParam("response_type", "code")
                 .queryParam("client_id", config.getServiceId())
-                .queryParam("redirect_uri", URI.create(config.getPublicEndpoint() + callbackPath))
+                .queryParam("redirect_uri", URI.create(callbackPath))
                 .queryParam("state", clientAuthSessionId);
         if (!Strings.isNullOrEmpty(error)) {
             uriBuilder.queryParam("error", error);
@@ -131,7 +131,7 @@ public class IdmanAuthHandler {
         }
 
         val localRedirectPath = Strings.isNullOrEmpty(localRedirect.getValue())
-                                ? "/"
+                                ? config.getPublicEndpoint()
                                 : localRedirect.getValue();
         log.debug("Redirecting to: {}. Local redirect: {}", localRedirectPath, localRedirect.getValue());
         return Response.seeOther(URI.create(localRedirectPath))
@@ -159,7 +159,7 @@ public class IdmanAuthHandler {
 //        TODO::INTRODUCE CLIENT LEVEL LOGOUT val status = sessionStore.get().delete(sessionId);
 //        log.info("Session {} deletion status for user {}: {}",
 //                 sessionId, principal.getServiceUser().getUser().getId(), status);
-        return Response.seeOther(URI.create("/"))
+        return Response.seeOther(URI.create(config.getPublicEndpoint()))
                 .cookie(new NewCookie(cookieName(),
                                       "",
                                       "/",
@@ -175,9 +175,10 @@ public class IdmanAuthHandler {
     }
 
     private String prefixedPath(String path) {
-        return (!Strings.isNullOrEmpty(config.getResourcePrefix())
-                ? config.getResourcePrefix()
-                : "") + path;
+        return config.getPublicEndpoint()
+                + ((!Strings.isNullOrEmpty(config.getResourcePrefix())
+                    ? config.getResourcePrefix()
+                    : "") + path);
     }
 
     private String cookieName() {

@@ -79,7 +79,7 @@ public class Utils {
         claims.setNotBeforeMinutesInThePast(2);
         claims.setSubject(session.getUserId());
         claims.setAudience(session.getServiceId());
-        if(null != session.getCreated()) {
+        if (null != session.getCreated()) {
             claims.setIssuedAt(NumericDate.fromMilliseconds(session.getCreated().getTime()));
         }
         else {
@@ -184,5 +184,14 @@ public class Utils {
                         user.getName(),
                         user.getUserType(),
                         user.getAuthState().getAuthMode());
+    }
+
+    public static String createUri(String host, String path) {
+        val cleanedHost = host.replaceAll("/$", "");
+        if(path.equals("/")) {
+            return cleanedHost;
+        }
+        return cleanedHost + (path.startsWith("/") ? path : "/" + path);
+
     }
 }

@@ -2,6 +2,7 @@ package io.appform.idman.server.resources;
 
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.model.UserType;
+import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.StoredRole;
 import io.appform.idman.server.utils.ServerTestingUtils;
@@ -31,11 +32,14 @@ class FirstTimeWizardTest {
     private UserRoleStore userRoleStore = mock(UserRoleStore.class);
     private ServiceStore serviceStore = mock(ServiceStore.class);
     private RoleStore roleStore = mock(RoleStore.class);
-    private FirstTimeWizard firstTimeWizard = new FirstTimeWizard(() -> userInfoStore,
-                                                                  () -> passwordStore,
-                                                                  () -> userRoleStore,
-                                                                  () -> serviceStore,
-                                                                  () -> roleStore);
+    private final AuthenticationConfig authenticationConfig = ServerTestingUtils.passwordauthConfig();
+    private FirstTimeWizard firstTimeWizard = new FirstTimeWizard(
+            () -> userInfoStore,
+            () -> passwordStore,
+            () -> userRoleStore,
+            () -> serviceStore,
+            () -> roleStore,
+            authenticationConfig);
 
     @AfterEach
     void destroy() {
@@ -48,7 +52,7 @@ class FirstTimeWizardTest {
         doReturn(Optional.of(testService)).when(serviceStore).get("IDMAN");
         val r = firstTimeWizard.setupScreen();
         assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
-        assertEquals(URI.create("/"), r.getLocation());
+        assertEquals(authenticationConfig.getServer(), r.getLocation().toString());
     }
 
     @Test
@@ -67,7 +71,7 @@ class FirstTimeWizardTest {
         doReturn(Optional.of(testService)).when(serviceStore).get("IDMAN");
         val r = firstTimeWizard.setup(URI.create("idmantest.com"), "a@a.com", "SS", "xx");
         assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
-        assertEquals(URI.create("/"), r.getLocation());
+        assertEquals(authenticationConfig.getServer(), r.getLocation().toString());
     }
 
     @Test
@@ -76,7 +80,8 @@ class FirstTimeWizardTest {
         try {
             val r = firstTimeWizard.setup(URI.create("idmantest.com"), "a@a.com", "SS", "xx");
             fail("Should have thrown exception");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             assertEquals(NullPointerException.class, e.getClass());
         }
     }
@@ -128,7 +133,7 @@ class FirstTimeWizardTest {
                                       adminUser.getName(),
                                       "xx");
         assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
-        assertEquals(URI.create("/"), r.getLocation());
+        assertEquals(authenticationConfig.getServer(), r.getLocation().toString());
         assertEquals("https://idmantest.com/apis/idman/auth/callback",
                      testService.getCallbackUrl());
     }

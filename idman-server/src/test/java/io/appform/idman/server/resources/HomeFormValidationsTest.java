@@ -30,6 +30,7 @@ import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -114,7 +115,8 @@ class HomeFormValidationsTest {
                                              () -> passwordStore,
                                              () -> userRoleStore,
                                              () -> sessionStore,
-                                             () -> tokenManager), new ViewEngineResponseTranslator()))
+                                             () -> tokenManager),
+                                  new ViewEngineResponseTranslator(ServerTestingUtils.passwordauthConfig())))
             .build();
 
     @BeforeEach

@@ -2,9 +2,11 @@ package io.appform.idman.server.resources;
 
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.TokenType;
+import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.engine.Engine;
 import io.appform.idman.server.engine.ViewEngineResponseTranslator;
 import io.appform.idman.server.engine.results.GeneralOpSuccess;
+import io.appform.idman.server.utils.ServerTestingUtils;
 import lombok.val;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -23,7 +25,9 @@ import static org.mockito.Mockito.*;
 class HomeTest {
 
     private Engine engine = mock(Engine.class);
-    private ViewEngineResponseTranslator translator = new ViewEngineResponseTranslator();
+    private AuthenticationConfig authConfig = ServerTestingUtils.passwordauthConfig();
+    private ViewEngineResponseTranslator translator
+            = new ViewEngineResponseTranslator(authConfig);
     private Home home = new Home(engine, translator);
 
     @AfterEach
@@ -257,9 +261,9 @@ class HomeTest {
     }
 
 
-    private static void assertResponse(javax.ws.rs.core.Response r) {
+    private void assertResponse(javax.ws.rs.core.Response r) {
         assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatus());
-        assertEquals(URI.create("/"), r.getLocation());
+        assertEquals(authConfig.getServer(), r.getLocation().toString());
     }
 
     private static ServiceUserPrincipal principal() {

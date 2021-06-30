@@ -14,8 +14,11 @@
 
 package io.appform.idman.server.engine;
 
+import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.engine.results.*;
+import io.appform.idman.server.utils.Utils;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 
@@ -23,6 +26,13 @@ import java.net.URI;
  *
  */
 public class ViewEngineResponseTranslator implements EngineEvalResultVisitor<Response> {
+
+    private final AuthenticationConfig config;
+
+    @Inject
+    public ViewEngineResponseTranslator(AuthenticationConfig config) {
+        this.config = config;
+    }
 
     public final Response translate(final EngineEvalResult result) {
         return result.accept(this);
@@ -96,28 +106,28 @@ public class ViewEngineResponseTranslator implements EngineEvalResultVisitor<Res
                                       + "/" + tokenOpSuccess.getSessionId());
     }
 
-    private static Response redirectToLogin() {
+    private Response redirectToLogin() {
         return redirectToPage("/auth/login");
     }
 
-    private static Response redirectToHome() {
+    private Response redirectToHome() {
         return redirectToPage("/");
     }
 
-    private static Response redirectToServicePage(final String serviceId) {
+    private Response redirectToServicePage(final String serviceId) {
         return redirectToPage("/services/" + serviceId);
     }
 
-    private static Response redirectToUserPage(final String userId) {
+    private Response redirectToUserPage(final String userId) {
         return redirectToPage("/users/" + userId);
     }
 
-    private static Response redirectToPasswordChangePage(final String userId) {
+    private Response redirectToPasswordChangePage(final String userId) {
         return redirectToPage("/users/" + userId + "/update/password");
     }
 
-    private static Response redirectToPage(final String path) {
-        return Response.seeOther(URI.create(path)).build();
+    private Response redirectToPage(final String path) {
+        return Response.seeOther(URI.create(Utils.createUri(config.getServer(), path))).build();
     }
 
 }

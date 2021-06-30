@@ -57,7 +57,7 @@ public class OAuth {
         val authProvider = authProviderRegistry.get().provider(providerType).orElse(null);
         if(null == authProvider) {
             log.warn("No provider found for type: {}", providerType.name());
-            return Response.seeOther(URI.create("/login")).build();
+            return Response.seeOther(URI.create(Utils.createUri(authConfig.getServer(), "/login"))).build();
         }
         final String sessionId = UUID.randomUUID().toString();
         final String redirectionURL = authProvider.redirectionURL(sessionId);
@@ -68,7 +68,7 @@ public class OAuth {
         if(!Strings.isNullOrEmpty(source)) {
             log.debug("Saved: {} against session: {}", source, sessionId);
         }
-        return Response.seeOther(URI.create(redirectionURL))
+        return Response.seeOther(URI.create(Utils.createUri(authConfig.getServer(), redirectionURL)))
                 .cookie(new NewCookie(
                         STATE_COOKIE_NAME,
                         sessionId,
@@ -108,7 +108,7 @@ public class OAuth {
             return seeOther(cookieState);
         }*/
         //TODO::SUBDOMAIN COOKIE
-        return Response.seeOther(URI.create("/"))
+        return Response.seeOther(URI.create(authConfig.getServer()))
                 .cookie(new NewCookie("token",
                                       Utils.createAccessToken(null, authConfig.getJwt()),
 //                                      Utils.createJWT(token, authConfig.getJwt()),
@@ -125,7 +125,7 @@ public class OAuth {
     }
 
     private Response seeOther(final Cookie cookieState) {
-        return Response.seeOther(URI.create("/"))
+        return Response.seeOther(URI.create(authConfig.getServer()))
                 .cookie(new NewCookie(cookieState, null, 0, null, false, true))
                 .build();
     }

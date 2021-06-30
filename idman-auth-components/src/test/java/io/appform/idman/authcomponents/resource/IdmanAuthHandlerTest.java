@@ -295,9 +295,9 @@ class IdmanAuthHandlerTest {
         try (val r = client.execute(get, ctx)) {
             assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
             val u = URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue());
-            assertEquals("/", u.getPath());
+            assertEquals("", u.getPath());
             assertEquals("localhost", u.getHost());
-            assertEquals(uri.getPort(), u.getPort());
+            assertEquals(3000, u.getPort());
             assertEquals("http", u.getScheme());
 
             assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName()
@@ -403,8 +403,8 @@ class IdmanAuthHandlerTest {
 
         try (val r = client.execute(get, ctx)) {
             assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
-            assertEquals("/",
-                         URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue()).getPath());
+            assertEquals("http://localhost:3000",
+                         r.getLastHeader(HttpHeaders.LOCATION).getValue());
         }
     }
 
