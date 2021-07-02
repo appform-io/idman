@@ -1,8 +1,8 @@
--- MariaDB dump 10.18  Distrib 10.5.7-MariaDB, for debian-linux-gnu (x86_64)
+-- MariaDB dump 10.19  Distrib 10.5.10-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: idman_db
 -- ------------------------------------------------------
--- Server version	10.5.7-MariaDB-1:10.5.7+maria~bionic
+-- Server version	10.5.10-MariaDB-1:10.5.10+maria~bionic
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,71 +14,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `passwords`
---
-
-DROP TABLE IF EXISTS `passwords`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `passwords` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `needs_change` tinyint(1) DEFAULT 0,
-  `failed_count` int(11) DEFAULT 0,
-  `deleted` tinyint(1) DEFAULT 0,
-  `created` datetime(3) DEFAULT current_timestamp(3),
-  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `roles`
---
-
-DROP TABLE IF EXISTS `roles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `roles` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `role_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
-  `service_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
-  `display_name` varchar(45) COLLATE utf8mb4_bin NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `deleted` tinyint(1) DEFAULT 0,
-  `created` datetime(3) DEFAULT current_timestamp(3),
-  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_role_id` (`role_id`),
-  KEY `idx_service_id` (`service_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `services`
---
-
-DROP TABLE IF EXISTS `services`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `services` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `service_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_bin NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `callback_url` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `secret` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `deleted` tinyint(1) DEFAULT 0,
-  `created` datetime(3) DEFAULT current_timestamp(3),
-  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_service_id` (`service_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `dynamic_sessions`
@@ -93,7 +28,6 @@ CREATE TABLE `dynamic_sessions` (
   `user_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `service_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `client_session_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `session_type` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `expiry` datetime(3) DEFAULT NULL,
   `partition_id` int(10) NOT NULL,
   `deleted` tinyint(1) DEFAULT 0,
@@ -164,6 +98,71 @@ CREATE TABLE `dynamic_sessions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `passwords`
+--
+
+DROP TABLE IF EXISTS `passwords`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `passwords` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `needs_change` tinyint(1) DEFAULT 0,
+  `failed_count` int(11) DEFAULT 0,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created` datetime(3) DEFAULT current_timestamp(3),
+  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `roles`
+--
+
+DROP TABLE IF EXISTS `roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `role_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `service_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `display_name` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created` datetime(3) DEFAULT current_timestamp(3),
+  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_role_id` (`role_id`),
+  KEY `idx_service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `services`
+--
+
+DROP TABLE IF EXISTS `services`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `services` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `service_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_bin NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `callback_url` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `secret` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `deleted` tinyint(1) DEFAULT 0,
+  `created` datetime(3) DEFAULT current_timestamp(3),
+  `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `static_sessions`
 --
 
@@ -175,16 +174,14 @@ CREATE TABLE `static_sessions` (
   `session_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `user_id` varchar(45) COLLATE utf8mb4_bin NOT NULL,
   `service_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `client_session_id` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `deleted` tinyint(1) DEFAULT 0,
   `created` datetime(3) DEFAULT current_timestamp(3),
   `updated` datetime(3) DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_session_id` (`session_id`),
-  KEY `idx_user` (`user_id`),
-  KEY `idx_service_id` (`service_id`),
-  KEY `idx_service_client_session` (`service_id`,`client_session_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin
+  UNIQUE KEY `uk_ss_session_id` (`session_id`),
+  KEY `idx_ss_user` (`user_id`),
+  KEY `idx_ss_service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -343,4 +340,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-12 13:35:36
+-- Dump completed on 2021-06-30 12:47:46
