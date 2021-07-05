@@ -233,6 +233,9 @@ class TokenManagerTest {
         doReturn(true)
                 .when(sessionStore)
                 .delete(session.getSessionId(), TokenType.DYNAMIC);
+        doReturn(Optional.of(ServerTestingUtils.normalRole(user.getUserId())))
+                .when(roleStore)
+                .getUserServiceRole(user.getUserId(), testService.getServiceId());
         val ti = tokenManager.generateTokenForSession(testService.getServiceId(), session.getSessionId(), TokenType.DYNAMIC)
                 .orElse(null);
         assertNotNull(ti);
@@ -253,6 +256,9 @@ class TokenManagerTest {
         doReturn(true)
                 .when(sessionStore)
                 .delete(session.getSessionId(), TokenType.DYNAMIC);
+        doReturn(Optional.of(ServerTestingUtils.normalRole(user.getUserId())))
+                .when(roleStore)
+                .getUserServiceRole(user.getUserId(), testService.getServiceId());
         val ti = tokenManager.generateTokenForSession(testService.getServiceId(), session.getSessionId(), TokenType.DYNAMIC)
                 .orElse(null);
         assertNotNull(ti);
@@ -265,12 +271,17 @@ class TokenManagerTest {
         val testService = ServerTestingUtils.testService();
         val session = ServerTestingUtils.dynamicSession();
         setupStores(user, testService);
+
         doReturn(Optional.of(session))
                 .when(sessionStore)
                 .get(session.getSessionId(), TokenType.DYNAMIC);
         doReturn(false)
                 .when(sessionStore)
                 .delete(session.getSessionId(), TokenType.DYNAMIC);
+        doReturn(Optional.of(ServerTestingUtils.normalRole(user.getUserId())))
+                .when(roleStore)
+                .getUserServiceRole(user.getUserId(), testService.getServiceId());
+
         val ti = tokenManager.generateTokenForSession(testService.getServiceId(), session.getSessionId(), TokenType.DYNAMIC)
                 .orElse(null);
         assertNotNull(ti);

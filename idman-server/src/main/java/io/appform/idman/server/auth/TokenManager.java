@@ -137,6 +137,7 @@ public class TokenManager {
                             .orElse(null);
                     if (Strings.isNullOrEmpty(role)) {
                         log.error("No valid role found for user: {} in service: {}", userId, serviceId);
+                        return Optional.<IdmanUser>empty();
                     }
                     log.debug("authentication_success userId:{} tokenId:{}", userId, sessionId);
                     return Optional.of(new IdmanUser(sessionId, serviceId, toWire(user), role));

@@ -20,10 +20,7 @@ import io.appform.idman.model.UserType;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
 import io.appform.idman.server.auth.configs.JwtConfig;
 import io.appform.idman.server.db.AuthState;
-import io.appform.idman.server.db.model.ClientSession;
-import io.appform.idman.server.db.model.StoredService;
-import io.appform.idman.server.db.model.StoredUser;
-import io.appform.idman.server.db.model.StoredUserAuthState;
+import io.appform.idman.server.db.model.*;
 import io.dropwizard.util.Duration;
 import lombok.experimental.UtilityClass;
 import lombok.val;
@@ -69,6 +66,13 @@ public class ServerTestingUtils {
         return storedUser;
     }
 
+    public static StoredUserRole normalRole(String userId) {
+        val role = new StoredUserRole();
+        role.setRoleId("S_USER");
+        role.setServiceId("S");
+        role.setUserId(userId);
+        return role;
+    }
     public static StoredUser systemUser() {
         val storedUser = new StoredUser(Utils.hashedId("Test System"),
                                         "testsystem@a.com",

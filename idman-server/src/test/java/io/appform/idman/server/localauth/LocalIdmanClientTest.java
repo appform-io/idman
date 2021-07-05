@@ -171,6 +171,7 @@ class LocalIdmanClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
+        userRoleStore.mapUserToRole(user.getUserId(), service.getServiceId(), "S_USER", "test");
         val session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
@@ -212,6 +213,7 @@ class LocalIdmanClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
+        userRoleStore.mapUserToRole(user.getUserId(), service.getServiceId(), "S_USER", "test");
         val session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
@@ -247,6 +249,7 @@ class LocalIdmanClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
+        userRoleStore.mapUserToRole(user.getUserId(), service.getServiceId(), "S_USER", "test");
         val session = db.inTransaction((Callable<Optional<ClientSession>>) () -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
@@ -273,6 +276,7 @@ class LocalIdmanClientTest {
                                                               () -> userStore,
                                                               () -> passwordStore,
                                                               () -> sessionStore);
+        userRoleStore.mapUserToRole(user.getUserId(), service.getServiceId(), "S_USER", "test");
         val session = db.inTransaction(() -> authProvider.login(
                 new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
                 .orElse(null);
@@ -319,6 +323,7 @@ class LocalIdmanClientTest {
         val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
                 .orElse(null);
         assertNotNull(service);
+        userRoleStore.mapUserToRole(user.getUserId(), service.getServiceId(), "S_USER", "test");
         val session = db.inTransaction(() -> sessionStore.create("S1",
                                                                  user.getUserId(),
                                                                  service.getServiceId(),
