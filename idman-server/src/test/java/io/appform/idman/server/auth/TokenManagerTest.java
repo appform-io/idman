@@ -221,10 +221,29 @@ class TokenManagerTest {
     }
 
     @Test
+    void generateTokenForSessionNoRoleFailure() {
+        val user = ServerTestingUtils.normalUser();
+        val testService = ServerTestingUtils.testService();
+        val session = ServerTestingUtils.dynamicSession();
+        setupStores(user, testService);
+        doReturn(Optional.of(session))
+                .when(sessionStore)
+                .get(session.getSessionId(), TokenType.DYNAMIC);
+        doReturn(true)
+                .when(sessionStore)
+                .delete(session.getSessionId(), TokenType.DYNAMIC);
+        doReturn(Optional.empty())
+                .when(roleStore)
+                .getUserServiceRole(user.getUserId(), testService.getServiceId());
+        val ti = tokenManager.generateTokenForSession(testService.getServiceId(), session.getSessionId(), TokenType.DYNAMIC)
+                .orElse(null);
+        assertNull(ti);
+    }
+
+    @Test
     void testDeleteTokenSuccess() {
         val user = ServerTestingUtils.normalUser();
         val testService = ServerTestingUtils.testService();
-        val expiry = Utils.futureTime(Duration.days(7));
         val session = ServerTestingUtils.dynamicSession();
         setupStores(user, testService);
         doReturn(Optional.of(session))
