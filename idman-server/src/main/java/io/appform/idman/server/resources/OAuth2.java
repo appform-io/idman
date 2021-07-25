@@ -12,11 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -62,26 +64,26 @@ public class OAuth2 {
             @QueryParam("client_id") final String clientId,
             @QueryParam("state") final String state,
             @QueryParam("redirect_uri") final URI redirectUri) {
-        if(null == redirectUri) {
+        if (null == redirectUri) {
             return badRequest(ErrorCodes.INVALID_REQUEST, "'redirect_uri' is mandatory parameter");
 
         }
-        if(Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(clientId)) {
+        if (Strings.isNullOrEmpty(type) || Strings.isNullOrEmpty(clientId)) {
             return errorRedirect(redirectUri, ErrorCodes.INVALID_REQUEST,
-                                    "'type', 'client_id' and 'redirect_uri' are mandatory parameters");
+                                 "'type', 'client_id' and 'redirect_uri' are mandatory parameters");
         }
-        if(!type.equals("code")) {
+        if (!type.equals("code")) {
             return errorRedirect(redirectUri, ErrorCodes.UNSUPPORTED_RESPONSE_TYPE,
-                                    "Only code grant is supported");
+                                 "Only code grant is supported");
         }
         val service = serviceStore.get(clientId).orElse(null);
-        if(null == service) {
+        if (null == service) {
             return errorRedirect(redirectUri, ErrorCodes.UNAUTHORISED_CLIENT,
-                                    "Unregistered client id. Please use id from IDMan console");
+                                 "Unregistered client id. Please use id from IDMan console");
         }
-        if(!redirectUri.toString().equalsIgnoreCase(service.getCallbackUrl())) {
+        if (!redirectUri.toString().equalsIgnoreCase(service.getCallbackUrl())) {
             return errorRedirect(redirectUri, ErrorCodes.UNAUTHORISED_CLIENT,
-                             "Redirect URI does not match the registered call back uri for service");
+                                 "Redirect URI does not match the registered call back uri for service");
 
         }
         val uri = UriBuilder.fromUri(authenticationConfig.getServer() + "/auth/login/" + clientId)
@@ -103,29 +105,25 @@ public class OAuth2 {
             @FormParam("client_id") final String clientId,
             @FormParam("client_secret") final String clientSecret,
             @FormParam("grant_type") final String grantType) {
-        if(Strings.isNullOrEmpty(grantType)) {
+        if (Strings.isNullOrEmpty(grantType)) {
             return badRequest(ErrorCodes.INVALID_REQUEST, "'grant_type' is a mandatory parameter");
         }
-        if(Strings.isNullOrEmpty(clientId) || Strings.isNullOrEmpty(clientSecret)) {
-            return unauthorised(ErrorCodes.INVALID_CLIENT, "'client_id' and 'client_secret' are mandatory");
-        }
-        val service = serviceStore.get(clientId).orElse(null);
-        if (null == service) {
-            return unauthorised(ErrorCodes.INVALID_CLIENT, "Unknown client. Please check client id from IDMan console");
-        }
-        if (!service.getSecret().equals(clientSecret) || service.isDeleted()) {
-            return unauthorised(ErrorCodes.INVALID_CLIENT, "Client authentication failure. Please check client id and secret from IDMan console");
+        val errResponse = validateClient(clientId, clientSecret).orElse(null);
+        if (null != errResponse) {
+            return errResponse;
         }
         final TokenInfo token;
         if (grantType.equals("authorization_code")) {
-            if(Strings.isNullOrEmpty(code)) {
-                return badRequest(ErrorCodes.INVALID_REQUEST, "'code' parameter must be provided for grant_type authorization_code");
+            if (Strings.isNullOrEmpty(code)) {
+                return badRequest(ErrorCodes.INVALID_REQUEST,
+                                  "'code' parameter must be provided for grant_type authorization_code");
             }
             token = client.accessToken(clientId, code).orElse(null);
         }
         else if (grantType.equals("refresh_token")) {
-            if(Strings.isNullOrEmpty(refreshToken)) {
-                return badRequest(ErrorCodes.INVALID_REQUEST, "'refresh_token' parameter must be provided for grant type 'refresh_token'");
+            if (Strings.isNullOrEmpty(refreshToken)) {
+                return badRequest(ErrorCodes.INVALID_REQUEST,
+                                  "'refresh_token' parameter must be provided for grant type 'refresh_token'");
             }
             token = client.validateToken(clientId, refreshToken).orElse(null);
         }
@@ -137,13 +135,46 @@ public class OAuth2 {
         }
         val user = token.getUser();
         return Response.ok(new TokenInfo(token.getAccessToken(),
-                                             token.getRefreshToken(),
-                                             token.getExpiry(),
-                                             "bearer",
-                                             user.getRole(),
-                                             user))
+                                         token.getRefreshToken(),
+                                         token.getExpiry(),
+                                         "bearer",
+                                         user.getRole(),
+                                         user))
                 .build();
 
+    }
+
+    @Path("/revoke")
+    @POST
+    @UnitOfWork
+    public Response revoke(
+            @FormParam("client_id") final String clientId,
+            @FormParam("client_secret") final String clientSecret,
+            @FormParam("token") @NotEmpty final String token) {
+        val errResponse = validateClient(clientId, clientSecret).orElse(null);
+        if (null != errResponse) {
+            return errResponse;
+        }
+        return client.deleteToken(clientId, token)
+               ? Response.ok().build()
+               : Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
+    private Optional<Response> validateClient(String clientId, String clientSecret) {
+        if (Strings.isNullOrEmpty(clientId) || Strings.isNullOrEmpty(clientSecret)) {
+            return Optional.of(unauthorised(ErrorCodes.INVALID_CLIENT,
+                                            "'client_id' and 'client_secret' are mandatory"));
+        }
+        val service = serviceStore.get(clientId).orElse(null);
+        if (null == service) {
+            return Optional.of(unauthorised(ErrorCodes.INVALID_CLIENT,
+                                            "Unknown client. Please check client id from IDMan console"));
+        }
+        if (!service.getSecret().equals(clientSecret) || service.isDeleted()) {
+            return Optional.of(unauthorised(ErrorCodes.INVALID_CLIENT,
+                                            "Client authentication failure. Please check client id and secret from IDMan console"));
+        }
+        return Optional.empty();
     }
 
     private Response badRequest(String errorCode, String errorDescription) {
@@ -162,9 +193,9 @@ public class OAuth2 {
 
     private Response errorRedirect(URI uri, String errorCode, String errorDescription) {
         return Response.seeOther(UriBuilder.fromUri(uri)
-                                .queryParam(ERROR_FIELD, errorCode)
-                                .queryParam(ERROR_DESC_FIELD, errorDescription)
-                                .build())
+                                         .queryParam(ERROR_FIELD, errorCode)
+                                         .queryParam(ERROR_DESC_FIELD, errorDescription)
+                                         .build())
                 .build();
 
     }

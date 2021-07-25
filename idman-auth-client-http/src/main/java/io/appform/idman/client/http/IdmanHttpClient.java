@@ -55,6 +55,11 @@ public class IdmanHttpClient extends IdManClient {
         connectionManager.setMaxTotal(clientConfig.getMaxClientConnections());
         httpClient = HttpClients.custom()
                 .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(RequestConfig.copy(RequestConfig.DEFAULT)
+                                                 .setConnectionRequestTimeout(clientConfig.getConnectionTimeoutMs())
+                                                 .setConnectTimeout(clientConfig.getConnectionTimeoutMs())
+                                                 .setSocketTimeout(clientConfig.getRequestTimeoutMs())
+                                                 .build())
                 .build();
 
     }
@@ -65,7 +70,6 @@ public class IdmanHttpClient extends IdManClient {
         return oauthTokenApiCall(tokenId, "authorization_code", "code");
     }
 
-
     @Override
     @SneakyThrows
     protected Optional<TokenInfo> validateTokenImpl(String serviceId, String token) {
@@ -73,16 +77,35 @@ public class IdmanHttpClient extends IdManClient {
     }
 
     @Override
+    @SneakyThrows
     public boolean deleteToken(String serviceId, String jwt) {
+        val url = String.format("%s/apis/oauth2/revoke", clientConfig.getAuthEndpoint());
+        log.debug("Token API URL: {}", url);
+        val params = ImmutableList.<NameValuePair>builder()
+                .add(new BasicNameValuePair("client_id", clientConfig.getServiceId()))
+                .add(new BasicNameValuePair("client_secret", clientConfig.getAuthSecret()))
+                .add(new BasicNameValuePair("token", jwt))
+                .build();
+        val post = new HttpPost(url);
+        post.setEntity(new UrlEncodedFormEntity(params));
+        log.debug("Headers: {}", Arrays.toString(post.getAllHeaders()));
+        log.debug("Entity: {}", post.getEntity());
+        log.debug("Method: {}", post.getMethod());
+        try (CloseableHttpResponse response = httpClient.execute(post)) {
+            val statusCode = response.getStatusLine().getStatusCode();
+            log.debug("Status received from {} is {}", url, statusCode);
+            return statusCode == HttpStatus.SC_OK;
+        }
+        catch (Exception e) {
+            log.error("Error calling token delete api: " + url, e);
+        }
         return false;
     }
 
-    private Optional<TokenInfo> oauthTokenApiCall(String code, String grantType, String paramName) throws UnsupportedEncodingException {
-        val requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-                .setConnectionRequestTimeout(clientConfig.getRequestTimeoutMs())
-                .setConnectTimeout(clientConfig.getConnectionTimeoutMs())
-                .build();
-
+    private Optional<TokenInfo> oauthTokenApiCall(
+            String code,
+            String grantType,
+            String paramName) throws UnsupportedEncodingException {
         val url = String.format("%s/apis/oauth2/token", clientConfig.getAuthEndpoint());
         log.debug("Token API URL: {}", url);
         val params = ImmutableList.<NameValuePair>builder()
@@ -91,8 +114,7 @@ public class IdmanHttpClient extends IdManClient {
                 .add(new BasicNameValuePair("client_secret", clientConfig.getAuthSecret()))
                 .add(new BasicNameValuePair("grant_type", grantType))
                 .build();
-        HttpPost post = new HttpPost(url);
-        post.setConfig(requestConfig);
+        val post = new HttpPost(url);
         post.setEntity(new UrlEncodedFormEntity(params));
         log.debug("Headers: {}", Arrays.toString(post.getAllHeaders()));
         log.debug("Entity: {}", post.getEntity());

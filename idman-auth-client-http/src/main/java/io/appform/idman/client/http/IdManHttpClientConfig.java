@@ -33,11 +33,11 @@ public class IdManHttpClientConfig extends IdmanClientConfig {
 
     @Min(0)
     @Max(30_000)
-    private int connectionTimeoutMs = 1_000;
+    private int connectionTimeoutMs = 3_000;
 
     @Min(0)
     @Max(30_000)
-    private int requestTimeoutMs = 1_000;
+    private int requestTimeoutMs = 3_000;
 
     @Min(5)
     @Max(128)

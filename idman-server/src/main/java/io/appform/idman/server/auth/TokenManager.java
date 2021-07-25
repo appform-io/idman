@@ -117,7 +117,7 @@ public class TokenManager {
                 .filter(service -> !service.isDeleted())
                 .flatMap(service -> parseToken(serviceId, jwt))
                 .map(parsedToken -> sessionStore.delete(parsedToken.getSessionId(), parsedToken.getType()))
-                .orElse(Boolean.FALSE);
+                .orElse(false);
     }
 
     public Optional<ParsedTokenInfo> parseToken(String serviceId, String token) {

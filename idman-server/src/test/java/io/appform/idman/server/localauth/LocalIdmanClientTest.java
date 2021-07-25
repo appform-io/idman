@@ -77,11 +77,11 @@ class LocalIdmanClientTest {
         passwordStore = new DBPasswordStore(db.getSessionFactory());
         client = new LocalIdmanClient(
                 config,
-                                          new TokenManager(userStore,
-                                                           serviceStore,
-                                                           sessionStore,
-                                                           userRoleStore,
-                                                           config.getJwt()));
+                new TokenManager(userStore,
+                                 serviceStore,
+                                 sessionStore,
+                                 userRoleStore,
+                                 config.getJwt()));
     }
 
     @Test
@@ -337,5 +337,112 @@ class LocalIdmanClientTest {
         val idmanUser = client.validateTokenImpl(service.getServiceId(), jwt).map(TokenInfo::getUser).orElse(null);
         assertNotNull(idmanUser);
         assertEquals(user.getUserId(), idmanUser.getUser().getId());
+    }
+
+    @Test
+    void testDeleteTokenSuccess() {
+        val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
+                .orElse(null));
+        assertNotNull(user);
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
+                .orElse(null);
+        assertNotNull(service);
+        val role = db.inTransaction(() -> roleStore.create(service.getServiceId(), "TestRole", "")).orElse(null);
+        assertNotNull(role);
+        db.inTransaction((Runnable) () -> userRoleStore.mapUserToRole(user.getUserId(),
+                                                                      service.getServiceId(),
+                                                                      role.getRoleId(),
+                                                                      "TEST"));
+        val authProvider = new PasswordAuthenticationProvider(config,
+                                                              () -> userStore,
+                                                              () -> passwordStore,
+                                                              () -> sessionStore);
+        val session = db.inTransaction(() -> authProvider.login(
+                new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
+                .orElse(null);
+        assertNotNull(session);
+        val tokenInfo = db.inTransaction(() -> client.accessToken(service.getServiceId(), session.getSessionId()))
+                .orElse(null);
+        assertNotNull(tokenInfo);
+        val jwt = tokenInfo.getRefreshToken();
+        assertTrue(db.inTransaction(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return client.deleteToken(service.getServiceId(), jwt);
+            }
+        }));
+    }
+
+    @Test
+    void testDeleteTokenFailWrongService() {
+        val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
+                .orElse(null));
+        assertNotNull(user);
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
+                .orElse(null);
+        assertNotNull(service);
+        val role = db.inTransaction(() -> roleStore.create(service.getServiceId(), "TestRole", "")).orElse(null);
+        assertNotNull(role);
+        db.inTransaction((Runnable) () -> userRoleStore.mapUserToRole(user.getUserId(),
+                                                                      service.getServiceId(),
+                                                                      role.getRoleId(),
+                                                                      "TEST"));
+        val authProvider = new PasswordAuthenticationProvider(config,
+                                                              () -> userStore,
+                                                              () -> passwordStore,
+                                                              () -> sessionStore);
+        val session = db.inTransaction(() -> authProvider.login(
+                new PasswordAuthInfo("u@u.t", "PASSWORD", service.getServiceId(), "CS1"), "S1"))
+                .orElse(null);
+        assertNotNull(session);
+        val tokenInfo = db.inTransaction(() -> client.accessToken(service.getServiceId(), session.getSessionId()))
+                .orElse(null);
+        assertNotNull(tokenInfo);
+        val jwt = tokenInfo.getRefreshToken();
+        assertFalse(db.inTransaction(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return client.deleteToken("X", jwt);
+            }
+        }));
+    }
+
+    @Test
+    void testDeleteTokenFailDeletedService() {
+        val user = db.inTransaction(() -> userStore.create("U1", "u@u.t", "TestUser", UserType.HUMAN, AuthMode.PASSWORD)
+                .orElse(null));
+        assertNotNull(user);
+        db.inTransaction((Runnable) () -> passwordStore.set(user.getUserId(), "PASSWORD"));
+        val service = db.inTransaction(() -> serviceStore.create("S1", "Test Service", "http://localhost:8080"))
+                .orElse(null);
+        assertNotNull(service);
+        val serviceId = service.getServiceId();
+        val role = db.inTransaction(() -> roleStore.create(serviceId, "TestRole", "")).orElse(null);
+        assertNotNull(role);
+        db.inTransaction((Runnable) () -> userRoleStore.mapUserToRole(user.getUserId(),
+                                                                      serviceId,
+                                                                      role.getRoleId(),
+                                                                      "TEST"));
+        val authProvider = new PasswordAuthenticationProvider(config,
+                                                              () -> userStore,
+                                                              () -> passwordStore,
+                                                              () -> sessionStore);
+        val session = db.inTransaction(() -> authProvider.login(
+                new PasswordAuthInfo("u@u.t", "PASSWORD", serviceId, "CS1"), "S1"))
+                .orElse(null);
+        assertNotNull(session);
+        val tokenInfo = db.inTransaction(() -> client.accessToken(serviceId, session.getSessionId()))
+                .orElse(null);
+        assertNotNull(tokenInfo);
+        val jwt = tokenInfo.getRefreshToken();
+        db.inTransaction(() -> serviceStore.delete(serviceId));
+        assertFalse(db.inTransaction(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return client.deleteToken(serviceId, jwt);
+            }
+        }));
     }
 }

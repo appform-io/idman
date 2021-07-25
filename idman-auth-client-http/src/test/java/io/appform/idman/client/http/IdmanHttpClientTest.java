@@ -49,7 +49,33 @@ class IdmanHttpClientTest {
 
     @Test
     @SneakyThrows
-    void testSuccessCall() {
+    void testAccessTokenSuccessCall() {
+        val tokenInfo = new TokenInfo("T", "T", 60, "bearer", TEST_USER.getRole(), TEST_USER);
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_OK)
+                                                   .withBody(MAPPER.writeValueAsString(tokenInfo))));
+
+        val client = new IdmanHttpClient(clientConfig(), MAPPER);
+        val r = client.accessToken("S", "T");
+        assertTrue(r.isPresent());
+        assertEquals(tokenInfo, r.get());
+    }
+
+    @Test
+    @SneakyThrows
+    void testAccessTokenFailedCall() {
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
+
+        val client = new IdmanHttpClient(clientConfig(), MAPPER);
+        assertNull(client.accessToken("S", "T").orElse(null));
+    }
+
+    @Test
+    @SneakyThrows
+    void testValidateSuccessCall() {
         val tokenInfo = new TokenInfo("T", "T", 60, "bearer", TEST_USER.getRole(), TEST_USER);
         server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
                                .willReturn(aResponse()
@@ -64,7 +90,23 @@ class IdmanHttpClientTest {
 
     @Test
     @SneakyThrows
-    void testFailure() {
+    void testValidateTimeoutFailCall() {
+        val tokenInfo = new TokenInfo("T", "T", 60, "bearer", TEST_USER.getRole(), TEST_USER);
+        server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_OK)
+                                                   .withBody(MAPPER.writeValueAsString(tokenInfo))
+                                                    .withFixedDelay(2000)));
+
+        val clientConfig = clientConfig();
+        clientConfig.setRequestTimeoutMs(100);
+        val client = new IdmanHttpClient(clientConfig, MAPPER);
+        assertNull(client.validateToken("S", "T").orElse(null));
+    }
+
+    @Test
+    @SneakyThrows
+    void testValidateFailure() {
         server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
                                .willReturn(aResponse()
                                                    .withStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR)));
@@ -76,7 +118,7 @@ class IdmanHttpClientTest {
 
     @Test
     @SneakyThrows
-    void testException() {
+    void testValidateException() {
         server.stubFor(post(urlEqualTo("/apis/oauth2/token"))
                                .willReturn(aResponse()
                                                    .withStatus(HttpStatus.SC_OK)
@@ -91,7 +133,40 @@ class IdmanHttpClientTest {
         assertNull(r);
     }
 
-    public IdManHttpClientConfig clientConfig() {
+    @Test
+    @SneakyThrows
+    void testDeleteSuccessCall() {
+        server.stubFor(post(urlEqualTo("/apis/oauth2/revoke"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_OK)));
+        val client = new IdmanHttpClient(clientConfig(), MAPPER);
+        assertTrue(client.deleteToken("S", "T"));
+    }
+
+    @Test
+    @SneakyThrows
+    void testDeleteFailureCall() {
+        server.stubFor(post(urlEqualTo("/apis/oauth2/revoke"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_SERVICE_UNAVAILABLE)));
+        val client = new IdmanHttpClient(clientConfig(), MAPPER);
+        assertFalse(client.deleteToken("S", "T"));
+    }
+
+    @Test
+    @SneakyThrows
+    void testDeleteTimeOutExceptionCall() {
+        server.stubFor(post(urlEqualTo("/apis/oauth2/revoke"))
+                               .willReturn(aResponse()
+                                                   .withStatus(HttpStatus.SC_OK)
+                                                   .withFixedDelay(2000)));
+        val clientConfig = clientConfig();
+        clientConfig.setRequestTimeoutMs(100);
+        val client = new IdmanHttpClient(clientConfig, MAPPER);
+        assertFalse(client.deleteToken("S", "T"));
+    }
+
+    private IdManHttpClientConfig clientConfig() {
         val clientConfig = new IdManHttpClientConfig();
         clientConfig.setAuthEndpoint(server.baseUrl());
         clientConfig.setResourcePrefix("/apis");

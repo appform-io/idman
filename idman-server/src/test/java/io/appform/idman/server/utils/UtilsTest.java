@@ -210,4 +210,14 @@ class UtilsTest {
         assertEquals("http://myservice.test/oauth/callback/GOOGLE_AUTH",
                      Utils.redirectionUrl(AuthMode.GOOGLE_AUTH, config));
     }
+
+    @Test
+    void createUri() {
+        assertEquals("http://localhost", Utils.createUri("http://localhost", "/"));
+        assertEquals("http://localhost", Utils.createUri("http://localhost/", "/"));
+        assertEquals("http://localhost/apis/test", Utils.createUri("http://localhost", "/apis/test"));
+        assertEquals("http://localhost/apis/test", Utils.createUri("http://localhost/", "/apis/test"));
+        assertEquals("http://localhost/apis/test", Utils.createUri("http://localhost/", "apis/test"));
+        assertEquals("http://localhost/apis/test", Utils.createUri("http://localhost", "apis/test"));
+    }
 }

@@ -59,6 +59,9 @@ class OAuth2Test {
         doReturn(Optional.of(ClientTestingUtils.tokenInfo("T", TEST_USER)))
                 .when(client)
                 .validateToken("S", "T");
+        doReturn(true)
+                .when(client)
+                .deleteToken("S", "T");
     }
 
     @AfterEach
@@ -382,6 +385,54 @@ class OAuth2Test {
                         HttpStatus.SC_BAD_REQUEST,
                         OAuth2.ErrorCodes.INVALID_GRANT,
                         "Unknown grant type");
+    }
+
+    @Test
+    void testTokenRevokeSuccess() {
+        val form = new Form()
+                .param("token", "T")
+                .param("client_id", "S")
+                .param("client_secret", "S_S");
+        val response = EXT.target("/oauth2/revoke")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.form(form));
+        assertEquals(HttpStatus.SC_OK, response.getStatus());
+    }
+
+    @Test
+    void testTokenRevokeInvalidClient() {
+        val form = new Form()
+                .param("token", "T")
+                .param("client_id", "S1")
+                .param("client_secret", "S_S");
+        val response = EXT.target("/oauth2/revoke")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.form(form));
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    void testTokenRevokeInvalidClientSecret() {
+        val form = new Form()
+                .param("token", "T")
+                .param("client_id", "S")
+                .param("client_secret", "S_S1");
+        val response = EXT.target("/oauth2/revoke")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.form(form));
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
+    }
+
+    @Test
+    void testTokenRevokeFail() {
+        val form = new Form()
+                .param("token", "T1")
+                .param("client_id", "S")
+                .param("client_secret", "S_S");
+        val response = EXT.target("/oauth2/revoke")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.form(form));
+        assertEquals(HttpStatus.SC_SERVICE_UNAVAILABLE, response.getStatus());
     }
 
     @SneakyThrows

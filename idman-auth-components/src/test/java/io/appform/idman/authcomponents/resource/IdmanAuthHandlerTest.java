@@ -84,16 +84,26 @@ class IdmanAuthHandlerTest {
 
     @BeforeEach
     void setup() {
-        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN", "ADMIN_TOKEN", 60, "bearer", TEST_ADMIN.getRole(), TEST_ADMIN)))
-                         .when(idmanClient)
-                         .accessToken(anyString(), eq("ADMIN_TOKEN"));
+        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN",
+                                           "ADMIN_TOKEN",
+                                           60,
+                                           "bearer",
+                                           TEST_ADMIN.getRole(),
+                                           TEST_ADMIN)))
+                .when(idmanClient)
+                .accessToken(anyString(), eq("ADMIN_TOKEN"));
         doReturn(Optional.of(new TokenInfo("USER_TOKEN", "USER_TOKEN", 60, "bearer", TEST_USER.getRole(), TEST_USER)))
                 .when(idmanClient)
                 .accessToken(anyString(), eq("USER_TOKEN"));
         doReturn(Optional.empty())
                 .when(idmanClient)
                 .accessToken(anyString(), eq("WRONG_TOKEN"));
-        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN", "ADMIN_TOKEN", 60, "bearer", TEST_ADMIN.getRole(), TEST_ADMIN)))
+        doReturn(Optional.of(new TokenInfo("ADMIN_TOKEN",
+                                           "ADMIN_TOKEN",
+                                           60,
+                                           "bearer",
+                                           TEST_ADMIN.getRole(),
+                                           TEST_ADMIN)))
                 .when(idmanClient)
                 .validateToken(anyString(), eq("ADMIN_TOKEN"));
         doReturn(Optional.of(new TokenInfo("USER_TOKEN", "USER_TOKEN", 60, "bearer", TEST_USER.getRole(), TEST_USER)))
@@ -102,6 +112,9 @@ class IdmanAuthHandlerTest {
         doReturn(Optional.empty())
                 .when(idmanClient)
                 .validateToken(anyString(), eq("WRONG_TOKEN"));
+        doReturn(true)
+                .when(idmanClient)
+                .deleteToken(anyString(), eq("USER_TOKEN"));
     }
 
     @AfterEach
@@ -397,6 +410,56 @@ class IdmanAuthHandlerTest {
         val cs = new BasicCookieStore();
         val ctx = new BasicHttpContext();
         ctx.setAttribute(HttpClientContext.COOKIE_STORE, cs);
+        val csId = UUID.randomUUID().toString();
+        addCookie(cs, "idman-auth-state", csId);
+        addCookie(cs, "idman-local-redirect", "/protected");
+        val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
+                .addParameter("state", csId)
+                .addParameter("code", "USER_TOKEN")
+                .build();
+        {
+            val get = new HttpGet(uri);
+            val referer = "https://mydomain.com";
+            get.setHeader(HttpHeaders.REFERER, referer);
+
+            try (val r = client.execute(get, ctx)) {
+                assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
+                val u = URI.create(r.getLastHeader(HttpHeaders.LOCATION).getValue());
+                assertEquals("/protected", u.getPath());
+                assertEquals("localhost", u.getHost());
+                assertEquals(uri.getPort(), u.getPort());
+                assertEquals("http", u.getScheme());
+
+                assertEquals("USER_TOKEN", cs.getCookies().stream().filter(c -> c.getName()
+                        .equals("idman-token-testservice")).map(
+                        Cookie::getValue).collect(Collectors.toSet()).stream().findAny().orElse(null));
+            }
+        }
+        {
+            val get = new HttpPost(EXT.target("/idman/auth/logout").getUri());
+            get.addHeader(HttpHeaders.AUTHORIZATION, "Bearer USER_TOKEN");
+
+            try (val r = client.execute(get, ctx)) {
+                assertEquals(HttpStatus.SC_SEE_OTHER, r.getStatusLine().getStatusCode());
+                assertEquals("http://localhost:3000",
+                             r.getLastHeader(HttpHeaders.LOCATION).getValue());
+            }
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void testLogoutNoToken() {
+        val cs = new BasicCookieStore();
+        val ctx = new BasicHttpContext();
+        ctx.setAttribute(HttpClientContext.COOKIE_STORE, cs);
+        val csId = UUID.randomUUID().toString();
+        addCookie(cs, "idman-auth-state", csId);
+        addCookie(cs, "idman-local-redirect", "/protected");
+        val uri = new URIBuilder(EXT.target("/idman/auth/callback").getUri())
+                .addParameter("state", csId)
+                .addParameter("code", "USER_TOKEN")
+                .build();
 
         val get = new HttpPost(EXT.target("/idman/auth/logout").getUri());
         get.addHeader(HttpHeaders.AUTHORIZATION, "Bearer USER_TOKEN");

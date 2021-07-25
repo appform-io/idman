@@ -25,9 +25,12 @@ import lombok.val;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -153,14 +156,23 @@ public class IdmanAuthHandler {
     @Path("/logout")
     @POST
     @PermitAll
-    public Response logout(@Auth final ServiceUserPrincipal principal) {
+    public Response logout(@Auth final ServiceUserPrincipal principal, @Context HttpServletRequest requestContext) {
         val sessionId = principal.getServiceUser().getSessionId();
         log.debug("Logging out session: {}", sessionId);
-//        TODO::INTRODUCE CLIENT LEVEL LOGOUT val status = sessionStore.get().delete(sessionId);
-//        log.info("Session {} deletion status for user {}: {}",
-//                 sessionId, principal.getServiceUser().getUser().getId(), status);
+        val cookieName = cookieName();
+        val token = Optional.ofNullable(requestContext.getCookies())
+                .flatMap(cookies -> Arrays.stream(cookies)
+                                    .filter(c -> c.getName().equals(cookieName))
+                                    .findAny()
+                                    .map(javax.servlet.http.Cookie::getValue))
+                .orElse(null);
+        if (!Strings.isNullOrEmpty(token)) {
+            val status = idManClient.deleteToken(config.getServiceId(), token);
+            log.info("Session {} deletion status for user {}: {}",
+                     sessionId, principal.getServiceUser().getUser().getId(), status);
+        }
         return Response.seeOther(URI.create(config.getPublicEndpoint()))
-                .cookie(new NewCookie(cookieName(),
+                .cookie(new NewCookie(cookieName,
                                       "",
                                       "/",
                                       null,
@@ -171,7 +183,6 @@ public class IdmanAuthHandler {
                                       false,
                                       true))
                 .build();
-
     }
 
     private String prefixedPath(String path) {
