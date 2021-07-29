@@ -124,7 +124,7 @@
                                                           ../user}}{{userId}}{{/with}}"
                                                   data-cnf-title="Unamp user"
                                                   data-cnf-text="Are you sure that you want to unmap user from role?">
-                                                <button class="btn btn-sm btn-outline-danger">Unmap</button>
+                                                <button class="btn btn-sm btn-danger">Unmap</button>
                                             </form>
                                         </td>
                                     {{/admin}}
@@ -173,7 +173,7 @@
                                                 {{#userTypeMatch userType "SYSTEM" }}
                                                     <form class="form-inline" method="get"
                                                           action="/tokens/{{#with session}}{{serviceId}}{{/with}}/{{#with ../user}}{{userId}}{{/with}}/{{#with session}}{{sessionId}}{{/with}}">
-                                                        <button class="btn btn-sm btn-outline-primary">View Token</button>
+                                                        <button class="btn btn-sm btn-primary">View Token</button>
                                                     </form>
                                                 {{else}}
                                                     Dynamic Session
@@ -187,7 +187,7 @@
                                                   action="/tokens/{{#with session}}{{serviceId}}/{{userId}}/{{sessionId}}/{{type}}{{/with}}/end"
                                                   data-cnf-title="End Session"
                                                   data-cnf-text="Are you sure that you want to end this session?">
-                                                <button class="btn btn-sm btn-outline-danger">End</button>
+                                                <button class="btn btn-sm btn-danger">End</button>
                                             </form>
                                         </td>
                                     {{/adminOrSelf}}

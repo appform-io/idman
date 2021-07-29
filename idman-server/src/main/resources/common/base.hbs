@@ -11,12 +11,12 @@
 
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-<!--    <link href="/open-iconic-master/font/css/open-iconic-bootstrap.css" rel="stylesheet">-->
+    <!--    <link href="/open-iconic-master/font/css/open-iconic-bootstrap.css" rel="stylesheet">-->
     <link href="/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 
-{{#block "page_css_includes"}}
+    {{#block "page_css_includes"}}
 
-{{/block}}
+    {{/block}}
     <link href="/css/idman.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
@@ -24,37 +24,41 @@
     <style>
         {{#block "page_css"}}
 
-        {{/block}}
+    {{/block}}
+
     </style>
 </head>
 <body>
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-right">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary justify-content-right">
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <a class="navbar-brand cm-icon mb-0 h1" href="/" style="font-size: x-large;">Identity Manager</a>
-            {{#with sessionUser}}
-                <small class="text-warning mt-3"><b>[<a href="/users/{{user.id}}">{{user.name}}</a>]</b></small>
-            {{/with}}
+            <a class="navbar-brand cm-icon mb-0 h1" href="/" style="font-size: x-large;"><img
+                    src="/images/idman-logo-white.png" width="60" height="45" alt=""> Identity Manager</a>
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0"></ul>
+            <span class="navbar-text pr-3">
+                {{#with sessionUser}}
+                    <a href="/users/{{user.id}}"><b>{{user.name}}</b></a>
+                {{/with}}
+            </span>
             <form class="form-inline" action="/apis/idman/auth/logout" method="post">
-                <button class="btn btn-sm btn-outline-danger cm-logout" type="submit">Logout</button>
+                <button class="btn btn-sm btn-danger cm-logout" type="submit">Logout</button>
             </form>
         </div>
 
     </nav>
 </header>
 <main role="main" class="container-fluid">
-{{#if error}}
-    <section>
-        <div class="alert alert-danger" role="alert">
-            <b>Error:</b> {{error}}
-        </div>
-    </section>
-{{/if}}
-{{#block "content"}}
+    {{#if error}}
+        <section>
+            <div class="alert alert-danger" role="alert">
+                <b>Error:</b> {{error}}
+            </div>
+        </section>
+    {{/if}}
+    {{#block "content"}}
 
-{{/block}}
+    {{/block}}
 </main>
 <script src="/js/swal.js"></script>
 <script src="/js/jquery-3.3.1.min.js"></script>
@@ -142,6 +146,7 @@ $(document).ready(function() {
 
 {{/block}}
 });
+
 
 </script>
 </body>

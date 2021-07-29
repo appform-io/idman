@@ -1,25 +1,96 @@
-{{#partial "content"}}
-  <div class="row justify-content-md-center">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="icon" href="favicon.ico">-->
 
-      <div class="col-sm-12 col-md-4">
-          <form method="post" action="/auth/login/password">
-              <div class="form-group">
-                  <label for="email">Email</label>
-                  <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" aria-describedby="emailHelp" maxlength="250" required>
-                  <small id="emailHelp">Enter your registered email id</small>
-              </div>
-              <div class="form-group">
-                  <label for="password">Password</label>
-                  <input type="password" class="form-control" maxlength="250" id="password" name="password" required>
-                  <small id="emailHelp">Enter your password</small>
-              </div>
-              <input type="hidden" name="serviceId" value="{{serviceId}}">
-              <input type="hidden" name="redirect" value="{{redirect}}">
-              <input type="hidden" name="clientSessionId" value="{{clientSessionId}}">
-              <button class="btn btn-lg btn-success" type="submit">Login</button>
-          </form>
-      </div>
-  </div>
-{{/partial}}
+    <title>Identity Manager</title>
 
-{{> common/base}}
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!--    <link href="/open-iconic-master/font/css/open-iconic-bootstrap.css" rel="stylesheet">-->
+    <link href="/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    {{#block "page_css_includes"}}
+
+    {{/block}}
+    <link href="/css/idman.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <!--<link href="album.css" rel="stylesheet">-->
+    <style>
+        {{#block "page_css"}}
+
+    {{/block}}
+
+    </style>
+</head>
+<body>
+<header>
+
+</header>
+<main role="main" class="container-fluid">
+    <section>
+        <div class="row mt-4">
+            <div class="col text-center">
+                <img src="/images/idman-logo.png" class="rounded mx-auto d-block">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <h1 class="display-4 mb-2">Identity Manager</h1>
+            </div>
+        </div>
+    </section>
+    {{#if error}}
+        <section class="container-fluid">
+            <div class="row justify-content-md-center">
+                <div class="col sol sm-12 col-md-4">
+                    <div class="alert alert-danger" role="alert">
+                        <b>Error:</b> {{error}}
+                    </div>
+                </div>
+            </div>
+        </section>
+    {{/if}}
+    <section>
+        <div class="row justify-content-md-center">
+
+            <div class="col-sm-12 col-md-4">
+                <form method="post" action="/auth/login/password">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email"
+                               aria-describedby="emailHelp" maxlength="250" required>
+                        <small id="emailHelp">Enter your registered email id</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" maxlength="250" id="password" name="password"
+                               required>
+                        <small id="emailHelp">Enter your password</small>
+                    </div>
+                    <input type="hidden" name="serviceId" value="{{serviceId}}">
+                    <input type="hidden" name="redirect" value="{{redirect}}">
+                    <input type="hidden" name="clientSessionId" value="{{clientSessionId}}">
+                    <div class="row">
+                        <div class="col text-center">
+                            <button class="btn btn-lg btn-success" type="submit">Login</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+<script src="/js/swal.js"></script>
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/popper.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.dataTables.min.js"></script>
+<script src="/js/cookies.js"></script>
+</body>
+</html>
