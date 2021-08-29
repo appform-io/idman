@@ -23,7 +23,6 @@ import io.appform.idman.server.db.model.StoredUser;
 import io.appform.idman.server.db.model.StoredUserAuthState;
 import io.dropwizard.hibernate.AbstractDAO;
 import lombok.val;
-import lombok.var;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;

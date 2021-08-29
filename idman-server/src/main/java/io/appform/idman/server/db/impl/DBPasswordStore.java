@@ -20,7 +20,6 @@ import io.appform.idman.server.db.model.StoredPassword;
 import io.dropwizard.hibernate.AbstractDAO;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;

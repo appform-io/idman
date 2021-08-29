@@ -19,7 +19,6 @@ import io.appform.idman.server.db.UserRoleStore;
 import io.appform.idman.server.db.model.StoredUserRole;
 import io.dropwizard.hibernate.AbstractDAO;
 import lombok.val;
-import lombok.var;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Inject;

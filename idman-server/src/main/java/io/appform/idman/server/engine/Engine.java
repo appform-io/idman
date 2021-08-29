@@ -31,7 +31,6 @@ import io.appform.idman.server.utils.Utils;
 import io.appform.idman.server.views.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
