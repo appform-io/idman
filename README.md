@@ -29,7 +29,17 @@ The following entities comprise of the data model in IDMan
 
 All these can be configured on the IDMan ui.
 
-## Setup
+## Deployment
+
+Docker container is available on [DockerHub](https://hub.docker.com/r/santanusinha/idman/tags?page=1&ordering=last_updated).
+
+Check [this](https://github.com/appform-io/idman/blob/master/idman-server/config/docker.yml) for environment variables that you need to pass.
+
+Config file can also be injected by a docker volume mount. The absolute path to the config file needs to be passed as `CONFIG_PATH` environment variable.
+
+
+
+## Dev Setup
 
 To setup IDMan on your local dev environment follow the following steps:
 
