@@ -7,7 +7,7 @@
     <groupId>io.appform.idman</groupId>
     <artifactId>idman</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <name>IDMan - Identity Manager</name>
     <url>https://github.com/appform-io/idman</url>
     <description>IDMan is an all in one authentication and authorisation service.</description>
