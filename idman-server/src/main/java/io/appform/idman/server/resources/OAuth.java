@@ -59,10 +59,10 @@ public class OAuth {
             log.warn("No provider found for type: {}", providerType.name());
             return Response.seeOther(URI.create(Utils.createUri(authConfig.getServer(), "/login"))).build();
         }
-        final String sessionId = UUID.randomUUID().toString();
-        final String redirectionURL = authProvider.redirectionURL(sessionId);
+        val sessionId = UUID.randomUUID().toString();
+        val redirectionURL = authProvider.redirectionURL(sessionId);
         log.debug("Redirection uri: {}", redirectionURL);
-        final String cookieReferrerUrl = null == cookieReferrer ? null : cookieReferrer.getValue();
+        val cookieReferrerUrl = null == cookieReferrer ? null : cookieReferrer.getValue();
         val source = Strings.isNullOrEmpty(cookieReferrerUrl) ? referrer : cookieReferrerUrl;
         log.debug("Call source: {} Referrer: {} Redirection: {}", source, referrer, cookieReferrerUrl);
         if(!Strings.isNullOrEmpty(source)) {
@@ -101,12 +101,6 @@ public class OAuth {
                 || !cookieState.getValue().equals(sessionId)) {
             return seeOther(cookieState);
         }
-        //val token = authProvider.login(new GoogleAuthInfo(authCode, a, clientSessionId), sessionId).orElse(null);
-//        val token = "blah";
-/*        if (null == token) {
-            log.debug("No token returned by provider login.");
-            return seeOther(cookieState);
-        }*/
         //TODO::SUBDOMAIN COOKIE
         return Response.seeOther(URI.create(authConfig.getServer()))
                 .cookie(new NewCookie("token",

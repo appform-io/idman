@@ -1,8 +1,7 @@
 package io.appform.idman.server.db;
 
-import com.google.common.collect.ImmutableMap;
-import io.appform.idman.server.db.model.ClientSession;
 import io.appform.idman.model.TokenType;
+import io.appform.idman.server.db.model.ClientSession;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -23,7 +22,7 @@ public class CompositeSessionStore implements SessionStore {
     public CompositeSessionStore(
             @Named("dynamic") final SessionStoreForType dynamicStore,
             @Named("static")  final SessionStoreForType staticStore) {
-        stores = ImmutableMap.of(TokenType.DYNAMIC, dynamicStore, TokenType.STATIC, staticStore);
+        stores = Map.of(TokenType.DYNAMIC, dynamicStore, TokenType.STATIC, staticStore);
     }
     @Override
     public Optional<ClientSession> create(

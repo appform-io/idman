@@ -1,7 +1,6 @@
 package io.appform.idman.authcomponents.resource;
 
 import com.codahale.metrics.SharedMetricRegistries;
-import com.google.common.collect.ImmutableSet;
 import io.appform.idman.authcomponents.IdmanAuthDynamicFeature;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
@@ -37,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,7 +66,7 @@ class IdmanAuthHandlerTest {
     private final IdmanClientConfig config = clientConfig();
 
     {
-        config.setAllowedPaths(ImmutableSet.of("/", "/callback"));
+        config.setAllowedPaths(Set.of("/", "/callback"));
     }
 
     static {

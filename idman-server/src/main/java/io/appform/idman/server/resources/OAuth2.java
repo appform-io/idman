@@ -1,7 +1,6 @@
 package io.appform.idman.server.resources;
 
 import com.google.api.client.util.Strings;
-import com.google.common.collect.ImmutableMap;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.model.TokenInfo;
 import io.appform.idman.server.auth.configs.AuthenticationConfig;
@@ -18,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -187,7 +187,7 @@ public class OAuth2 {
 
     private Response errorResponseRaw(Response.Status status, String errorCode, String errorDescription) {
         return Response.status(status)
-                .entity(ImmutableMap.of(ERROR_FIELD, errorCode, ERROR_DESC_FIELD, errorDescription))
+                .entity(Map.of(ERROR_FIELD, errorCode, ERROR_DESC_FIELD, errorDescription))
                 .build();
     }
 

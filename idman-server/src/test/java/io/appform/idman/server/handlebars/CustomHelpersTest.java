@@ -2,7 +2,6 @@ package io.appform.idman.server.handlebars;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.io.StringTemplateSource;
-import com.google.common.collect.ImmutableMap;
 import io.appform.idman.model.IdmanUser;
 import io.appform.idman.server.auth.IdmanRoles;
 import lombok.SneakyThrows;
@@ -10,6 +9,7 @@ import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static io.appform.idman.server.utils.ServerTestingUtils.adminUser;
 import static io.appform.idman.server.utils.ServerTestingUtils.normalUser;
@@ -46,33 +46,28 @@ class CustomHelpersTest {
         val admin = adminUser();
         val normalUser = normalUser();
         assertEquals("true",
-                     c.apply(
-                             ImmutableMap.of("user",
-                                             new IdmanUser("s", "S", toWire(admin), IdmanRoles.ADMIN),
-                                             "user2", normalUser)
+                     c.apply(Map.of("user",
+                                    new IdmanUser("s", "S", toWire(admin), IdmanRoles.ADMIN),
+                                    "user2", normalUser)
                             ));
         assertEquals("true",
-                     c.apply(
-                             ImmutableMap.of("user",
+                     c.apply(Map.of("user",
                                              new IdmanUser("s", "S", toWire(normalUser), IdmanRoles.USER),
                                              "user2", normalUser)
                             ));
         assertEquals("false",
-                     c.apply(
-                             ImmutableMap.of("user",
+                     c.apply(Map.of("user",
                                              new IdmanUser("s", "S", toWire(normalUser), IdmanRoles.USER),
                                              "user2", admin)
                             ));
         assertEquals("false",
-                     c.apply(
-                             ImmutableMap.of("user",
+                     c.apply(Map.of("user",
                                              new IdmanUser("s", "S", toWire(normalUser), IdmanRoles.USER))
                             ));
         assertEquals("false",
-                     c.apply(ImmutableMap.of("user2", normalUser)));
+                     c.apply(Map.of("user2", normalUser)));
         assertEquals("false",
-                     c.apply(
-                             ImmutableMap.of("user",
+                     c.apply(Map.of("user",
                                              new IdmanUser("s", "S", toWire(normalUser), null))
                             ));
 

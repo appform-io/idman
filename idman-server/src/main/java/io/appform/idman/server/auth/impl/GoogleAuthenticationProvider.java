@@ -15,18 +15,15 @@
 package io.appform.idman.server.auth.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import io.appform.idman.model.AuthMode;
 import io.appform.idman.server.AuthenticatorContextVisitorAdapter;
 import io.appform.idman.server.auth.*;
@@ -49,6 +46,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  *
@@ -75,8 +73,8 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
         super(AuthMode.GOOGLE_AUTH, authConfig, userInfoStore, sessionStore);
         this.authConfig = authConfig;
         this.userInfoStore = userInfoStore;
-        final NetHttpTransport.Builder transportBuilder = new NetHttpTransport.Builder();
-        Proxy proxy = Proxy.NO_PROXY;
+        val transportBuilder = new NetHttpTransport.Builder();
+        var proxy = Proxy.NO_PROXY;
         if (googleAuthConfig.getProxyType() != null) {
             switch (googleAuthConfig.getProxyType()) {
                 case DIRECT:
@@ -105,7 +103,7 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
                 new JacksonFactory(),
                 googleAuthConfig.getClientId(),
                 googleAuthConfig.getClientSecret(),
-                ImmutableSet.of("https://www.googleapis.com/auth/userinfo.email"))
+                Set.of("https://www.googleapis.com/auth/userinfo.email"))
                 .build();
         this.redirectionUrl = Utils.redirectionUrl(AuthMode.GOOGLE_AUTH, authConfig);
         this.mapper = mapper;
@@ -166,11 +164,11 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
             final GoogleTokenResponse tokenResponse = authRequest
                     .setRedirectUri(this.redirectionUrl)
                     .execute();
-            final Credential credential = authorizationCodeFlow.createAndStoreCredential(tokenResponse, null);
+            val credential = authorizationCodeFlow.createAndStoreCredential(tokenResponse, null);
             final HttpRequestFactory requestFactory = transport.createRequestFactory(credential);
             // Make an authenticated request
-            final GenericUrl url = new GenericUrl("https://www.googleapis.com/oauth2/v1/userinfo");
-            final HttpRequest request = requestFactory.buildGetRequest(url);
+            val url = new GenericUrl("https://www.googleapis.com/oauth2/v1/userinfo");
+            val request = requestFactory.buildGetRequest(url);
             request.getHeaders().setContentType("application/json");
             val identity = mapper.readTree(request.execute().parseAsString());
             log.debug("Identity: {}", identity);
@@ -192,7 +190,7 @@ public class GoogleAuthenticationProvider extends AuthenticationProvider {
     }
 
     private GoogleAuthenticatorContext toGoogCtx(final AuthenticatorContext context) {
-        return context.accept(new AuthenticatorContextVisitorAdapter<GoogleAuthenticatorContext>() {
+        return context.accept(new AuthenticatorContextVisitorAdapter<>() {
 
             @Override
             public GoogleAuthenticatorContext visit(GoogleAuthenticatorContext googleAuthenticatorContext) {

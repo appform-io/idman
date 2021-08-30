@@ -14,7 +14,6 @@
 
 package io.appform.idman.server;
 
-import com.google.common.collect.ImmutableList;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.model.*;
 import io.appform.idman.server.auth.IdmanRoles;
@@ -22,7 +21,6 @@ import io.appform.idman.server.auth.TokenManager;
 import io.appform.idman.server.db.*;
 import io.appform.idman.server.db.model.*;
 import io.appform.idman.server.engine.Engine;
-import io.appform.idman.server.engine.results.TokenOpSuccess;
 import io.appform.idman.server.engine.results.*;
 import io.appform.idman.server.utils.ServerTestingUtils;
 import io.appform.idman.server.views.PasswordChangeView;
@@ -38,6 +36,7 @@ import org.mockito.stubbing.Answer;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -186,11 +185,11 @@ class EngineTest {
 
         val testService = ServerTestingUtils.testService();
         setupServiceMock(testService);
-        doReturn(ImmutableList.of(
+        doReturn(List.of(
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN", "TEST"),
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN_1", "TEST"),
                 new StoredUserRole("blah", testService.getServiceId(), "S_ADMIN", "TEST")
-                                 ))
+                        ))
                 .when(userRoleStore).getServiceRoleMappings(testService.getServiceId());
         doReturn(Collections.singletonList(storedUser)).when(userInfoStore).list(false);
         doReturn(Collections.singletonList(adminRole()))
@@ -425,7 +424,7 @@ class EngineTest {
         val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", user, IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         doReturn(Collections.singletonList(testService)).when(serviceStore).get(anyCollection());
-        doReturn(ImmutableList.of(
+        doReturn(List.of(
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN", "TEST"),
                 new StoredUserRole(storedUser.getUserId(), "S1", "S_ADMIN", "TEST"),
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN_1", "TEST")))
@@ -433,7 +432,7 @@ class EngineTest {
                 .getUserRoles(storedUser.getUserId());
         doReturn(Collections.singletonList(new StoredRole("S_ADMIN", testService.getServiceId(), "Admin", "test")))
                 .when(roleStore).get(anyCollection());
-        doReturn(ImmutableList.of(
+        doReturn(List.of(
                 new ClientSession("S1",
                                   storedUser.getUserId(),
                                   testService.getServiceId(),
@@ -473,7 +472,7 @@ class EngineTest {
         val principal = new ServiceUserPrincipal(new IdmanUser("Ts1", "S1", user, IdmanRoles.ADMIN));
         doReturn(Optional.of(storedUser)).when(userInfoStore).get(storedUser.getUserId());
         doReturn(Collections.singletonList(testService)).when(serviceStore).get(anyCollection());
-        doReturn(ImmutableList.of(
+        doReturn(List.of(
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN", "TEST"),
                 new StoredUserRole(storedUser.getUserId(), "S1", "S_ADMIN", "TEST"),
                 new StoredUserRole(storedUser.getUserId(), testService.getServiceId(), "S_ADMIN_1", "TEST")))
@@ -481,7 +480,7 @@ class EngineTest {
                 .getUserRoles(storedUser.getUserId());
         doReturn(Collections.singletonList(new StoredRole("S_ADMIN", testService.getServiceId(), "Admin", "test")))
                 .when(roleStore).get(anyCollection());
-        doReturn(ImmutableList.of(
+        doReturn(List.of(
                 new ClientSession("S1",
                                   storedUser.getUserId(),
                                   testService.getServiceId(),

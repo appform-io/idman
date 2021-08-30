@@ -15,7 +15,6 @@
 package io.appform.idman.authcomponents.resource;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import io.appform.idman.authcomponents.security.ServiceUserPrincipal;
 import io.appform.idman.client.IdManClient;
 import io.appform.idman.client.IdmanClientConfig;
@@ -30,6 +29,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -113,7 +113,7 @@ public class IdmanAuthHandler {
             @QueryParam("error_description") final String errorDescription) {
         if (!Strings.isNullOrEmpty(errorCode)) {
             return Response.ok(
-                    ImmutableMap.of(
+                            Map.of(
                             "errorCode", errorCode,
                             "errorDescription", errorDescription))
                     .build();

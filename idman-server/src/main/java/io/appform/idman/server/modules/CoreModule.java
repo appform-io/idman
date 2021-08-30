@@ -14,8 +14,6 @@
 
 package io.appform.idman.server.modules;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -39,6 +37,7 @@ import lombok.val;
 import org.hibernate.SessionFactory;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Create Data access objects
@@ -88,7 +87,7 @@ public class CoreModule extends AbstractModule {
     public IdmanClientConfig idmanAuthenticationConfig(AppConfig appConfig) {
         val idmanConf = new IdmanClientConfig();
         idmanConf.setServiceId("IDMAN");
-        idmanConf.setAllowedPaths(ImmutableSet.of(
+        idmanConf.setAllowedPaths(Set.of(
                 "/auth/login",
                 "/js",
                 "/css",
@@ -107,7 +106,7 @@ public class CoreModule extends AbstractModule {
     @Singleton
     public Map<AuthMode, AuthenticationProvider> registry(
             PasswordAuthenticationProvider credentialAuthenticationProvider) {
-        return ImmutableMap.of(AuthMode.PASSWORD, credentialAuthenticationProvider);
+        return Map.of(AuthMode.PASSWORD, credentialAuthenticationProvider);
     }
 
     @Provides

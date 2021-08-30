@@ -67,9 +67,7 @@ public class Utils {
     }
 
     public static int weekOfYear() {
-        ZoneId zoneId = ZoneId.of("Asia/Calcutta");
-        ZonedDateTime now = ZonedDateTime.now(zoneId);
-        return now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        return ZonedDateTime.now(ZoneId.of("Asia/Calcutta")).get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
     }
 
     @SneakyThrows
@@ -128,7 +126,7 @@ public class Utils {
     }
 
     public static Duration sessionDuration(AuthenticationConfig authConfig) {
-        final Duration dynamicSessionDuration = authConfig.getSessionDuration();
+        val dynamicSessionDuration = authConfig.getSessionDuration();
         return dynamicSessionDuration != null
                ? dynamicSessionDuration
                : Duration.days(30);
@@ -143,7 +141,7 @@ public class Utils {
     }
 
     public static JwtConsumer buildConsumer(JwtConfig jwtConfig, final String serviceId) {
-        final byte[] secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
+        val secretKey = jwtConfig.getPrivateKey().getBytes(StandardCharsets.UTF_8);
         return new JwtConsumerBuilder()
                 .setRequireIssuedAt()
                 .setRequireSubject()
@@ -165,10 +163,12 @@ public class Utils {
 
     public static String createUri(String host, String path) {
         val cleanedHost = host.replaceAll("/$", "");
-        if(path.equals("/")) {
+        if (path.equals("/")) {
             return cleanedHost;
         }
-        return cleanedHost + (path.startsWith("/") ? path : "/" + path);
+        return cleanedHost + (path.startsWith("/")
+                              ? path
+                              : "/" + path);
 
     }
 
