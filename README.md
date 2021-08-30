@@ -202,7 +202,7 @@ originally.
 
 ## Static Token Authorisation
 
-Static tokens are menat to secure system to system communication. So the owner of the serivce will provide a system
+Static tokens are meant to secure system to system communication. So the owner of the serivce will provide a system
 token to the calling service/script and need to be passed in the Authorization header as follows:
 
 ```
