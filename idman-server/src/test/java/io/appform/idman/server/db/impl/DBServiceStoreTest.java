@@ -116,10 +116,9 @@ class DBServiceStoreTest {
                     .orElse(null);
             assertNotNull(fetchedService);
             assertFalse(Strings.isNullOrEmpty(fetchedService.getSecret()));
-            assertNotEquals(oldSecret, service.getSecret());
+            assertNotEquals(oldSecret, fetchedService.getSecret());
             assertFalse(database.inTransaction(() -> serviceStore.updateSecret("XX"))
                                 .isPresent());
-
         }
     }
 
